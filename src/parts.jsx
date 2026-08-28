@@ -13,7 +13,8 @@ export const won = (n) => `${Math.round(n).toLocaleString()}원`
  * 초록색으로 보이면 거짓말이 된다. 꽝은 아니지만 이득도 아니므로 '본전'이라 쓴다.
  */
 export const Delta = ({ v }) =>
-  v > 0 ? <span className="rv__delta">+{won(v)}</span> : <span className="rv__even">본전</span>
+  // 텍스트를 한 노드로 만든다. JSX가 쪼개면 DOM에 주석이 끼어 문구 매칭이 깨진다.
+  v > 0 ? <span className="rv__delta">{`+${won(v)}`}</span> : <span className="rv__even">본전</span>
 export const pct = (p, d = 2) => `${(p * 100).toFixed(d)}%`
 export const naturalFreq = (p, base = 1000) => {
   if (!p || p <= 0) return '—'
@@ -85,7 +86,7 @@ export function OddsCurve({ oddsByTeam, teamSize, customerBEP, teamMax = 10 }) {
         {customerBEP && (
           <g>
             <line x1={x(customerBEP)} y1={PT - 6} x2={x(customerBEP)} y2={H - PB} className="curve__bep" />
-            <text x={x(customerBEP) + 4} y={PT + 2} className="curve__beptext">{customerBEP}명부터 2배</text>
+            <text x={x(customerBEP) + 4} y={PT + 2} className="curve__beptext">{`${customerBEP}명부터 2배`}</text>
           </g>
         )}
         <circle cx={x(cur)} cy={y(vals[cur - 1])} r="5.5" className="curve__dot" />

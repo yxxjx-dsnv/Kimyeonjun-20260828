@@ -14,7 +14,8 @@ import { TEAM_MAX, MAX_DRAWS_PER_PERSON } from '../api/_draw.js'
 
 let fail = 0
 const check = (label, cond, extra = '') => {
-  console.log(`${cond ? '✓' : '✗ 실패'} ${label}${extra ? ' — ' + extra : ''}`)
+  // 근거는 실패했을 때만 붙인다. 통과 로그에 붙으면 실패처럼 읽힌다.
+  console.log(`${cond ? '✓' : '✗ 실패'} ${label}${!cond && extra ? ' — ' + extra : ''}`)
   if (!cond) fail++
 }
 
