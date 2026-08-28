@@ -9,7 +9,7 @@ import {
   collapseUp, tiersOf, tierMeanRetail, oddsTable, evMultiple,
   customerBEP, companyBEP, costRatio, cacRecovered, budgetOf, poolMeta,
   CR_MIN, CR_MAX, K, N0, CAC, VIRAL_MAX, CAC_CAP, MARGIN, SPLIT,
-  MIN_C_SHARE, FIXED_COST_RATIO, PRICE_RATIO,
+  MIN_C_SHARE, FIXED_COST_RATIO, PRICE_RATIO, POOL,
 } from './_draw.js'
 
 const SAMPLES = 6
@@ -68,6 +68,8 @@ export default function handler(req, res) {
   res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=86400')
   return res.status(200).json({
     boxes: buildBoxes(),
+    // 홈 탭 그리드용. 크롤 데이터가 올박스 밖에서도 화면에 쓰인다.
+    sample: POOL.items.filter((i) => i.image).slice(0, 40),
     teamMax: TEAM_MAX,
     maxDrawsPerPerson: MAX_DRAWS_PER_PERSON,
     companyBEP: companyBEP(),

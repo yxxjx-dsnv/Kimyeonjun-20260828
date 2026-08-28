@@ -1,0 +1,301 @@
+/**
+ * 화면 조각들. 로직은 App.jsx가 갖고, 여기는 그리기만 한다.
+ *
+ * 확률을 표시할 때는 언제나 자연빈도를 함께 쓴다.
+ * Gigerenzer & Hoffrage(1995) — 확률 형식은 오인되고 빈도 형식은 덜 오인된다.
+ */
+import { useState } from 'react'
+
+export const won = (n) => `${Math.round(n).toLocaleString()}원`
+
+/**
+ * 차액 표기. 하한을 정확히 맞으면 차액이 0이 되는데, 그때 '+0원'을 이득처럼
+ * 초록색으로 보이면 거짓말이 된다. 꽝은 아니지만 이득도 아니므로 '본전'이라 쓴다.
+ */
+export const Delta = ({ v }) =>
+  v > 0 ? <span className="rv__delta">+{won(v)}</span> : <span className="rv__even">본전</span>
+export const pct = (p, d = 2) => `${(p * 100).toFixed(d)}%`
+export const naturalFreq = (p, base = 1000) => {
+  if (!p || p <= 0) return '—'
+  const n = p * base
+  if (n >= 1) return `${base.toLocaleString()}명 중 약 ${Math.round(n).toLocaleString()}명`
+  return `${Math.round(1 / p).toLocaleString()}명 중 약 1명`
+}
+
+export const TIERS = ['S', 'A', 'B', 'C']
+export const TIER_LABEL = { S: '최고 등급', A: '상위 등급', B: '중간 등급', C: '기본 등급' }
+
+/* ── 아이콘 (실제 앱과 같은 아웃라인 계열) ────────────────────── */
+const I = (d, fill) => (p) =>
+  (
+    <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" {...p}>
+      <path d={d} fill={fill ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.7"
+        strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+export const IconHome = I('M3 10.5 12 3l9 7.5M5.5 9.5V20h13V9.5')
+export const IconContent = I('M4 6h11a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1ZM16 10l5-3v10l-5-3')
+export const IconHeart = I('M12 20s-7-4.4-7-9.2A4 4 0 0 1 12 8a4 4 0 0 1 7 2.8C19 15.6 12 20 12 20Z')
+export const IconUser = I('M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM4.5 20a7.5 7.5 0 0 1 15 0')
+export const IconBox = I('M12 3 3.5 7.5 12 12l8.5-4.5L12 3ZM3.5 7.5v9L12 21l8.5-4.5v-9M12 12v9')
+
+/* ── 상품 카드 (홈 탭 2열 그리드) ──────────────────────────── */
+export function ProductCard({ item, badge }) {
+  return (
+    <a className="pcard" href={item.url} target="_blank" rel="noreferrer noopener">
+      <div className="pcard__thumb">
+        {item.image ? <img src={item.image} alt="" loading="lazy" /> : <div className="pcard__ph" />}
+      </div>
+      <p className="pcard__name">{item.name}</p>
+      <p className="pcard__price">{won(item.price)}</p>
+      {badge && <span className="badge badge--sale">{badge}</span>}
+    </a>
+  )
+}
+
+/* ── 확률 상승 곡선 ──────────────────────────────────────────
+   이 화면의 주인공. 팀원이 들어올 때 점이 오른쪽으로 미끄러지고
+   최고 등급 확률이 따라 올라간다.                                 */
+export function OddsCurve({ oddsByTeam, teamSize, customerBEP, teamMax = 10 }) {
+  const W = 320, H = 132, PL = 34, PR = 12, PT = 14, PB = 26
+  const ns = Array.from({ length: teamMax }, (_, i) => i + 1)
+  const vals = ns.map((n) => oddsByTeam[n]?.S ?? 0)
+  const max = Math.max(...vals) * 1.12 || 1
+  const x = (n) => PL + ((n - 1) / (teamMax - 1)) * (W - PL - PR)
+  const y = (v) => H - PB - (v / max) * (H - PT - PB)
+
+  // 부드러운 곡선 — 카디널 스플라인
+  const pts = ns.map((n, i) => [x(n), y(vals[i])])
+  let d = `M ${pts[0][0]} ${pts[0][1]}`
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2
+    d += ` C ${p1[0] + (p2[0] - p0[0]) / 6} ${p1[1] + (p2[1] - p0[1]) / 6},` +
+         ` ${p2[0] - (p3[0] - p1[0]) / 6} ${p2[1] - (p3[1] - p1[1]) / 6},` +
+         ` ${p2[0]} ${p2[1]}`
+  }
+  const cur = Math.min(teamMax, Math.max(1, teamSize))
+
+  return (
+    <div className="curve">
+      <svg viewBox={`0 0 ${W} ${H}`} className="curve__svg" role="img"
+        aria-label={`팀 ${cur}명일 때 최고 등급 확률 ${pct(vals[cur - 1], 3)}`}>
+        <line x1={PL} y1={H - PB} x2={W - PR} y2={H - PB} className="curve__axis" />
+        <path d={`${d} L ${x(teamMax)} ${H - PB} L ${x(1)} ${H - PB} Z`} className="curve__fill" />
+        <path d={d} className="curve__line" />
+        {customerBEP && (
+          <g>
+            <line x1={x(customerBEP)} y1={PT - 6} x2={x(customerBEP)} y2={H - PB} className="curve__bep" />
+            <text x={x(customerBEP) + 4} y={PT + 2} className="curve__beptext">{customerBEP}명부터 2배</text>
+          </g>
+        )}
+        <circle cx={x(cur)} cy={y(vals[cur - 1])} r="5.5" className="curve__dot" />
+        {[1, 4, 7, 10].filter((n) => n <= teamMax).map((n) => (
+          <text key={n} x={x(n)} y={H - 8} className="curve__tick">{n}</text>
+        ))}
+        <text x={4} y={y(max * 0.92)} className="curve__tick">{pct(max, 1)}</text>
+        <text x={4} y={H - PB} className="curve__tick">0</text>
+      </svg>
+      <p className="curve__cap">가로축 참여 인원 · 세로축 최고 등급 확률</p>
+    </div>
+  )
+}
+
+/* ── 등급별 확률 막대 ──────────────────────────────────────── */
+export function OddsBars({ odds }) {
+  return (
+    <ul className="bars">
+      {TIERS.map((t) => (
+        <li key={t} className="bars__row">
+          <span className={`tier tier--${t}`}>{t}</span>
+          <span className="bars__track">
+            <span className={`bars__fill bars__fill--${t}`} style={{ width: `${odds[t] * 100}%` }} />
+          </span>
+          <span className="bars__num">{pct(odds[t], odds[t] < 0.01 ? 3 : 1)}</span>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+/* ── 더보기: 1~10명 확률과 증가분 ───────────────────────────── */
+export function OddsTable({ oddsByTeam, evByTeam, teamMax = 10, teamSize }) {
+  const [open, setOpen] = useState(false)
+  const ns = Array.from({ length: teamMax }, (_, i) => i + 1)
+  return (
+    <div className="more">
+      <button className="more__btn" onClick={() => setOpen(!open)} aria-expanded={open}>
+        확률이 어떻게 오르나요? <span className={`more__arw ${open ? 'is-open' : ''}`}>▾</span>
+      </button>
+      {open && (
+        <div className="more__body">
+          <table className="otable">
+            <thead>
+              <tr><th>인원</th><th>최고 등급</th><th>직전 대비</th><th>기대 수령</th></tr>
+            </thead>
+            <tbody>
+              {ns.map((n) => {
+                const s = oddsByTeam[n]?.S ?? 0
+                const prev = n > 1 ? oddsByTeam[n - 1].S : null
+                return (
+                  <tr key={n} className={n === teamSize ? 'is-now' : ''}>
+                    <td>{n}명</td>
+                    <td className="num">{pct(s, 3)}</td>
+                    <td className="num sub">{prev === null ? '—' : `+${((s - prev) * 100).toFixed(3)}%p`}</td>
+                    <td className="num">{evByTeam?.[n]?.toFixed(2)}배</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+          <p className="more__note">
+            기대 수령 = 받게 될 상품의 평균 시가 ÷ 참여비. 크롤한 실제 판매가로 계산합니다.
+          </p>
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* ── 등급별 상품 미리보기 ──────────────────────────────────── */
+export function TierStrip({ tier, odds }) {
+  return (
+    <section className="tstrip">
+      <header className="tstrip__head">
+        <span className={`tier tier--${tier.tier}`}>{tier.tier}</span>
+        <span className="tstrip__label">{TIER_LABEL[tier.tier]}</span>
+        <span className="tstrip__odds">
+          {pct(odds, odds < 0.01 ? 3 : 1)}
+          <em>{naturalFreq(odds)}</em>
+        </span>
+      </header>
+      <p className="tstrip__band">
+        {won(tier.band[0])} ~ {won(tier.band[1])} · 후보 {tier.count}개 · 평균 {won(tier.meanRetail)}
+      </p>
+      <ul className="tstrip__list">
+        {tier.samples.map((it) => (
+          <li key={it.id}>
+            <a href={it.url} target="_blank" rel="noreferrer noopener">
+              {it.image ? <img src={it.image} alt="" loading="lazy" /> : <span className="tstrip__ph" />}
+              <span className="tstrip__nm">{it.name}</span>
+              <span className="tstrip__pr">{won(it.price)}</span>
+              {it.kc !== 'certified' && it.group === 'trend' && (
+                <span className="kc">KC 확인 필요</span>
+              )}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+/* ── 참여자 + n/10 게이트 ──────────────────────────────────── */
+export function MemberRail({ members, teamMax, readyCount, phase }) {
+  const slots = Array.from({ length: teamMax }, (_, i) => members[i] || null)
+  return (
+    <div className="rail">
+      <div className="rail__row">
+        {slots.map((m, i) => (
+          <div key={i} className={`av ${m ? 'is-in' : ''} ${m?.ready ? 'is-ready' : ''}`}>
+            <span className="av__face">{m ? m.name.slice(0, 1) : ''}</span>
+            {m?.sim && <span className="av__sim">시뮬</span>}
+            {m?.draws > 1 && <span className="av__d">×{m.draws}</span>}
+          </div>
+        ))}
+      </div>
+      <p className="rail__count">
+        <strong>{members.length}</strong>
+        <span>/ {teamMax}명 참여</span>
+        {phase === 'ready' && (
+          <em className={readyCount === members.length ? 'is-full' : ''}>
+            뽑기 {readyCount}/{members.length}
+          </em>
+        )}
+      </p>
+    </div>
+  )
+}
+
+/* ── 개봉 결과 카드 ────────────────────────────────────────── */
+export function RevealCard({ r, entry, mine, delay }) {
+  return (
+    <li className={`rv ${mine ? 'is-mine' : ''}`} style={{ animationDelay: `${delay}ms` }}>
+      <header className="rv__head">
+        <span className="rv__who">{r.name}{mine && ' (나)'}</span>
+        {r.sim && <span className="simtag">시뮬</span>}
+        <span className={`tier tier--${r.best}`}>{r.best}</span>
+      </header>
+      <ul className="rv__items">
+        {r.picks.map((p, i) => (
+          <li key={i}>
+            {p.item.image ? <img src={p.item.image} alt="" loading="lazy" /> : <span className="tstrip__ph" />}
+            <span className="rv__nm">{p.item.name}</span>
+            <span className="rv__pr">{won(p.item.price)}</span>
+          </li>
+        ))}
+      </ul>
+      <p className="rv__settle">
+        낸 돈 {won(r.settle.paid)} · 받은 시가 <b>{won(r.settle.retailValue)}</b>
+        <Delta v={r.settle.delta} />
+      </p>
+    </li>
+  )
+}
+
+/* ── 정직성 시트 ───────────────────────────────────────────── */
+export function HonestySheet({ formula, pool, companyBEP, onClose }) {
+  const f = formula
+  return (
+    <div className="sheet" role="dialog" aria-label="확률이 어떻게 정해지나요">
+      <div className="sheet__bar" />
+      <h3>확률이 어떻게 정해지나요</h3>
+
+      <p className="sheet__lead">
+        확률표를 사람이 적지 않습니다. 아래 두 곡선이 계산한 값을 화면과 추첨이 같이 씁니다.
+      </p>
+
+      <dl className="sheet__grid">
+        <dt>① 매입 원가율</dt>
+        <dd>
+          팀이 커지면 도매 단가가 열립니다. 계단식 수량할인을 곡선으로 편 값입니다.<br />
+          <code>{f.costRatio.CR_MAX} → {f.costRatio.CR_MIN}</code> · {f.costRatio.note}
+        </dd>
+        <dt>② 고객 획득비 회수</dt>
+        <dd>
+          두세 명은 대개 가족이라 새 고객이 아닙니다. 지인 밖으로 나가야 회수가 시작됩니다.<br />
+          <code>CAC {won(f.cac.CAC)} × 최대 {pct(f.cac.VIRAL_MAX, 0)}</code> · {f.cac.note}
+        </dd>
+        <dt>③ 상품 예산</dt>
+        <dd>
+          <code>참여비 × {(1 - f.budget.MARGIN).toFixed(2)} + 회수액</code><br />
+          남는 예산을 상위 등급에 {pct(f.budget.SPLIT.S, 0)}·{pct(f.budget.SPLIT.A, 0)}·{pct(f.budget.SPLIT.B, 0)}로 나눕니다.
+          기본 등급 비중은 {pct(f.budget.MIN_C_SHARE, 0)} 아래로 내리지 않습니다.
+        </dd>
+        <dt>④ 회사 손익분기</dt>
+        <dd>
+          회차 고정비 {pct(f.economics.FIXED_COST_RATIO, 0)} · 마진 {pct(f.budget.MARGIN, 0)} →{' '}
+          <b>{companyBEP}명</b>부터 회차가 흑자입니다.
+        </dd>
+      </dl>
+
+      <h4>꽝이 없는 이유</h4>
+      <ol className="sheet__ol">
+        <li>수집 단계에서 참여비보다 싼 상품을 아예 제외합니다.</li>
+        <li>기본 등급의 하한이 참여비의 1.0배입니다.</li>
+        <li>등급이 비면 위 등급으로만 올립니다. 아래로는 내려가지 않습니다.</li>
+      </ol>
+
+      <h4>밝혀둘 것</h4>
+      <ul className="sheet__ul">
+        {f.assumptions.map((a, i) => <li key={i}>{a}</li>)}
+        <li>
+          상품과 가격은 {new Date(pool.crawledAt).toLocaleString('ko-KR')} 다나와에서 수집한{' '}
+          {pool.size.toLocaleString()}건입니다. 시세는 변합니다.
+        </li>
+        <li>완구의 KC 안전확인은 상품명에 표기된 것만 인정합니다. 나머지는 &lsquo;확인 필요&rsquo;로 둡니다.</li>
+      </ul>
+
+      <button className="btn btn--ghost" onClick={onClose}>닫기</button>
+    </div>
+  )
+}

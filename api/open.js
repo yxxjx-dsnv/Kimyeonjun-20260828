@@ -7,7 +7,9 @@
  *
  * 전원이 준비되지 않았으면 409. 이 판정이 제품의 핵심이라 서버에만 둔다.
  */
-import { getBox, collapseUp, tiersOf, oddsOf, drawOne, TIERS } from './_draw.js'
+import {
+  getBox, collapseUp, tiersOf, oddsOf, drawOne, TIERS, TEAM_MAX, MAX_DRAWS_PER_PERSON,
+} from './_draw.js'
 import { readRoom, mutateRoom } from './_room.js'
 import { teamSizeOf, teamDrawsOf, readyCountOf, allReady, publicState } from './room.js'
 
@@ -52,10 +54,43 @@ export function resolve(state) {
   }
 }
 
+/**
+ * 시뮬레이션 개봉 — KV가 없는 배포본에서 심사자가 혼자 체험할 때 쓴다.
+ * 방 상태만 클라이언트가 들고 있고, 추첨·티어·가격은 여전히 서버가 계산한다.
+ * 클라이언트가 보낸 값 중 살아남는 것은 방ID·박스ID·참여자ID·이름·뽑기 수뿐이다.
+ */
+function simState(body) {
+  const box = getBox(body.boxId)
+  if (!box) return null
+  const members = (Array.isArray(body.members) ? body.members : [])
+    .slice(0, TEAM_MAX)
+    .map((m, i) => ({
+      id: String(m?.id ?? `sim${i}`).slice(0, 16),
+      name: String(m?.name ?? `팀원${i + 1}`).replace(/\s+/g, ' ').trim().slice(0, 12) || `팀원${i + 1}`,
+      sim: i !== 0,
+      draws: Math.min(MAX_DRAWS_PER_PERSON, Math.max(1, Math.floor(Number(m?.draws) || 1))),
+      ready: true,
+    }))
+  if (!members.length) return null
+  return {
+    roomId: String(body.roomId || 'sim').slice(0, 24),
+    boxId: box.id,
+    phase: 'opened',
+    rev: 1,
+    members,
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST만 허용합니다.' })
-  const { roomId } = req.body || {}
+  const { roomId, sim } = req.body || {}
   if (!roomId) return res.status(400).json({ error: 'roomId가 필요합니다.' })
+
+  if (sim) {
+    const state = simState(req.body)
+    if (!state) return res.status(400).json({ error: '시뮬레이션 입력이 올바르지 않습니다.' })
+    return res.status(200).json({ ...resolve(state), simulated: true })
+  }
 
   try {
     let state = await readRoom(roomId)
