@@ -292,18 +292,18 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
 .rv__even { color: var(--muted); font-weight: 700; margin-left: 6px; }
 .simtag { font-size: 10px; font-weight: 700; color: var(--muted); background: var(--band); padding: 1px 5px; border-radius: 4px; }
 
-.rvlist { display: grid; gap: 9px; }
+.rvlist { display: grid; grid-template-columns: minmax(0, 1fr); gap: 9px; }
 .rv { border: 1px solid var(--hair); border-radius: var(--r); padding: 11px 13px; animation: rise 0.4s both cubic-bezier(.22,1,.36,1); }
 .rv.is-mine { border-color: var(--brand); }
 @keyframes rise { from { transform: translateY(10px); opacity: 0; } to { transform: none; opacity: 1; } }
 .rv__head { display: flex; align-items: center; gap: 6px; }
 .rv__who { font-weight: 700; font-size: 15px; }
 .rv__head .tier { margin-left: auto; }
-.rv__items { display: grid; gap: 6px; margin-top: 8px; }
-.rv__items li { display: flex; align-items: center; gap: 8px; }
-.rv__items img, .rv__items .tstrip__ph { width: 34px; height: 34px; border-radius: 7px; }
-.rv__nm { flex: 1; font-size: 13px; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.rv__pr { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.rv__items { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; margin-top: 8px; }
+.rv__items li { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.rv__items img, .rv__items .tstrip__ph { flex: none; width: 34px; height: 34px; border-radius: 7px; }
+.rv__nm { flex: 1; min-width: 0; font-size: 13px; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rv__pr { flex: none; font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
 .rv__settle { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--hair); font-size: 13px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
 .seed { margin-top: 16px; font-size: 12px; color: var(--muted); line-height: 1.6; }
 
@@ -404,6 +404,7 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
 .paytag { margin-left: auto; font-size: 13px; font-weight: 700; color: var(--ink-2); font-variant-numeric: tabular-nums; }
 .rv.is-free { border-color: var(--brand); background: var(--brand-weak); }
 .lead2 { font-size: 19px; font-weight: 800; margin-top: 26px; letter-spacing: -.02em; }
+.hero + .lead2 { margin-top: 12px; }  /* 첫 형식은 히어로 바로 아래에 붙인다 */
 .lead2__s { font-size: 14px; color: var(--ink-2); line-height: 1.6; margin: 4px 0 12px; }
 
 /* ── 뽑기 통 ───────────────────────────────────────────────── */

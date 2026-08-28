@@ -79,6 +79,17 @@ check('정산 표기 10건', deltas.length === 10, deltas.slice(0, 3).join(' '))
 check('음수 차액 없음', deltas.every((d) => !d.includes('-')), deltas.join(' '))
 check('재추첨 불가 안내', (await page.textContent('.seed')).includes('같은 방'))
 
+// 가로 넘침 — 결과 카드가 뷰포트를 넘어 시가가 잘렸던 적이 있다(grid item의 min-width:auto).
+// 눈으로만 잡히는 결함이라 검사로 못 박는다.
+const spill = await page.evaluate(() => {
+  const W = window.innerWidth
+  return [...document.querySelectorAll('body *')]
+    .filter((e) => Math.round(e.getBoundingClientRect().right) > W + 1)
+    .slice(0, 4)
+    .map((e) => `${e.tagName}.${String(e.className).slice(0, 30)}`)
+})
+check('가로 넘침 없음', spill.length === 0, spill.join(' | '))
+
 // 8. 공동구매형 — 상품 확정, 확률은 '얼마를 내는가'에만
 {
   const gb = meta.groupbuys[0]
