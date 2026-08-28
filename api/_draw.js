@@ -219,9 +219,15 @@ export function drawOne(box, P, tiers, seed) {
     }
   }
   let pool = tiers[tier]
-  // 방어: 확률이 0이 아닌데 티어가 비어 있으면 아래가 아니라 위로 올린다.
+  // 방어: 뽑힌 티어가 비어 있으면 **아래로** 내려간다.
+  // 위로 올리면 싼 등급을 뽑은 사람에게 비싼 상품을 주게 되어 단위경제가 무너진다
+  // (큐레이션이 기저 등급을 비웠을 때 실제로 그런 상자가 만들어졌다).
   if (!pool.length) {
-    for (const t of TIERS) if (tiers[t].length) { tier = t; pool = tiers[t]; break }
+    const i = TIERS.indexOf(tier)
+    for (let j = i + 1; j < TIERS.length && !pool.length; j++)
+      if (tiers[TIERS[j]].length) { tier = TIERS[j]; pool = tiers[tier] }
+    for (let j = i - 1; j >= 0 && !pool.length; j--)
+      if (tiers[TIERS[j]].length) { tier = TIERS[j]; pool = tiers[tier] }
   }
   const item = pool[Math.floor(rnd() * pool.length)]
   return { tier, item }
