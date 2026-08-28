@@ -105,7 +105,25 @@ for (const id of BOXES.map((b) => b.id)) {
   check('투표 집계 노출', Object.keys(res.body.votes).length === 4)
 }
 
-// ── ⑥ E2E 셀렉터 실존 (직전 과제 부채 상환) ────────────────
+// ── ⑥ 디자인 토큰 — 스케일 밖으로 새는 것을 막는다 ──────────
+// 이전엔 font-size가 120개 선언에 18종이었고 9~20px가 1px씩 연속이라
+// 인접 단계가 육안으로 구분되지 않았다. 스케일을 다시 흐트러뜨리면 여기서 걸린다.
+{
+  const css = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
+  const defs = [...css.matchAll(/--fs-([a-z]+):\s*(\d+)px/g)]
+  check(`타이포 스케일 ${defs.length}단계 정의`, defs.length >= 6 && defs.length <= 8, `${defs.length}단계`)
+
+  // 정의부(--fs-*: 34px) 자체는 리터럴이 맞으므로 제외하고, 사용처만 본다.
+  const literals = [...css.matchAll(/(^|[;{]\s*)font-size:\s*(\d+)px/gm)].map((m) => m[2])
+  check('토큰 밖 리터럴 font-size 없음', literals.length === 0, `${literals.length}건: ${[...new Set(literals)].join(',')}`)
+
+  // 가짜 배지 금지 — 데이터가 아니라 인덱스로 배지를 붙이면 정직성 주장과 충돌한다.
+  const jsx = readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8') +
+              readFileSync(new URL('../src/parts.jsx', import.meta.url), 'utf8')
+  check('인덱스 기반 가짜 배지 없음', !/badge=\{[^}]*%\s*\d/.test(jsx))
+}
+
+// ── ⑦ E2E 셀렉터 실존 (직전 과제 부채 상환) ────────────────
 {
   const src = readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8') +
               readFileSync(new URL('../src/parts.jsx', import.meta.url), 'utf8')

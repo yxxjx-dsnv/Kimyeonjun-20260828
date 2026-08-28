@@ -33,8 +33,8 @@ function HomeTab({ pool }) {
         상품과 가격은 실제 수집 데이터이고, 담기·결제는 구현하지 않았습니다.
       </div>
       <div className="grid">
-        {items.map((it, i) => (
-          <ProductCard key={it.id} item={it} badge={i % 5 === 0 ? '올세일' : null} />
+        {items.map((it) => (
+          <ProductCard key={it.id} item={it} badge={it.auth === 'official' ? '정품 표기' : null} />
         ))}
       </div>
     </>
