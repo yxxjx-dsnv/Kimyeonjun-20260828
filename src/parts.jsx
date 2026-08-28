@@ -193,20 +193,24 @@ export function TierStrip({ tier, odds }) {
 /* ── 참여자 + n/10 게이트 ──────────────────────────────────── */
 export function MemberRail({ members, teamMax, readyCount, phase }) {
   const slots = Array.from({ length: teamMax }, (_, i) => members[i] || null)
+  const sims = members.filter((m) => m.sim).length
   return (
     <div className="rail">
       <div className="rail__row">
         {slots.map((m, i) => (
-          <div key={i} className={`av ${m ? 'is-in' : ''} ${m?.ready ? 'is-ready' : ''}`}>
+          // 시뮬 표시를 아바타마다 붙였더니 글자를 가려 읽히지 않았다.
+          // 아바타는 점선 테두리로만 구분하고, 문구는 아래 한 줄에서 한 번만 밝힌다.
+          <div key={i} className={`av ${m ? 'is-in' : ''} ${m?.sim ? 'is-sim' : ''} ${m?.ready ? 'is-ready' : ''}`}
+            title={m ? `${m.name}${m.sim ? ' (체험용)' : ''}` : '빈 자리'}>
             <span className="av__face">{m ? m.name.slice(0, 1) : ''}</span>
-            {m?.sim && <span className="av__sim">시뮬</span>}
-            {m?.draws > 1 && <span className="av__d">×{m.draws}</span>}
+            {m?.draws > 1 && <span className="av__d">{`×${m.draws}`}</span>}
           </div>
         ))}
       </div>
       <p className="rail__count">
         <strong>{members.length}</strong>
-        <span>/ {teamMax}명 참여</span>
+        <span>{`/ ${teamMax}명 참여`}</span>
+        {sims > 0 && <span className="rail__sim">{`${sims}명은 체험용`}</span>}
         {phase === 'ready' && (
           <em className={readyCount === members.length ? 'is-full' : ''}>
             뽑기 {readyCount}/{members.length}
