@@ -341,3 +341,23 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }
+
+/* ── 취향 대화 ─────────────────────────────────────────────── */
+.taste { border: 1px solid var(--hair); border-radius: var(--r); padding: 14px; margin: 14px 0 4px; background: var(--paper); }
+.taste__h { display: flex; align-items: center; gap: 7px; }
+.taste__h h3 { font-size: 16px; font-weight: 800; }
+.taste__axis { margin-left: auto; font-size: 12px; font-weight: 700; color: var(--brand); background: var(--brand-weak); padding: 3px 8px; border-radius: 999px; }
+.taste__sub { font-size: 13px; color: var(--muted); margin-top: 4px; line-height: 1.55; }
+.taste__chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.taste__in { display: flex; gap: 6px; margin-top: 10px; }
+.taste__in input {
+  flex: 1; min-width: 0; font: inherit; font-size: 15px; padding: 9px 11px;
+  border: 1px solid var(--hair); border-radius: 9px; background: var(--paper); color: var(--ink);
+}
+.taste__in input:focus { outline: none; border-color: var(--brand); }
+.taste__err { font-size: 13px; color: var(--brand); margin-top: 8px; }
+.bub { font-size: 14px; line-height: 1.55; padding: 9px 12px; border-radius: 12px; margin-top: 8px; max-width: 90%; }
+.bub--user { background: var(--brand-weak); color: var(--ink); margin-left: auto; border-bottom-right-radius: 4px; }
+.bub--assistant { background: var(--band); color: var(--ink-2); border-bottom-left-radius: 4px; }
+.bub.is-busy { color: var(--muted); }
+.tiers__note { font-size: 13px; color: var(--ink-2); background: var(--band); border-radius: 9px; padding: 9px 11px; line-height: 1.55; }

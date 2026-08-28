@@ -11,7 +11,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   won, pct, naturalFreq, Delta, ProductCard, OddsCurve, OddsBars, OddsTable,
-  TierStrip, MemberRail, RevealCard, HonestySheet,
+  TierStrip, MemberRail, RevealCard, HonestySheet, TasteChat,
   IconHome, IconContent, IconHeart, IconUser, IconBox,
 } from './parts.jsx'
 
@@ -99,6 +99,7 @@ export default function App() {
   const [phase, setPhase] = useState('list') // list|detail|gather|ready|count|result
   const [count, setCount] = useState(3)
   const [result, setResult] = useState(null)
+  const [curated, setCurated] = useState(null) // 취향 대화 결과 (확률표까지 함께 바뀐다)
   const [sheet, setSheet] = useState(false)
   const [busy, setBusy] = useState(false)
   const timers = useRef([])
@@ -119,11 +120,16 @@ export default function App() {
   const members = room?.members ?? []
   const teamSize = members.length
   const readyCount = members.filter((m) => m.ready).length
-  const odds = box ? box.oddsByTeam[Math.min(teamMax, Math.max(1, teamSize || 1))] : null
+  // 취향을 좁히면 티어 평균 시가가 바뀌므로 확률도 바뀐다. 곡선·막대·표가 모두
+  // 같은 출처를 보도록 큐레이션 결과가 있으면 그쪽을 쓴다.
+  const oddsByTeam = curated?.oddsByTeam ?? box?.oddsByTeam
+  const evByTeam = curated?.evByTeam ?? box?.evByTeam
+  const tierList = curated?.tiers ?? box?.tiers
+  const odds = box ? oddsByTeam[Math.min(teamMax, Math.max(1, teamSize || 1))] : null
 
   /* 방 만들기 — 서버 방을 먼저 시도하고, 안 되면 시뮬레이션으로 내려앉는다. */
   const openBox = useCallback(async (id) => {
-    setBoxId(id); setResult(null); setPhase('detail')
+    setBoxId(id); setResult(null); setCurated(null); setPhase('detail')
     let live = false, roomId = rid(), memberId = 'me'
     try {
       const r = await fetch('/api/room', {
@@ -183,6 +189,7 @@ export default function App() {
             sim: true, roomId: snapshot.roomId, boxId,
             members: snapshot.members.map(({ id, name, draws }) => ({ id, name, draws })),
           }
+      if (curated?.pickedIds?.length) body.pickedIds = curated.pickedIds
       const r = await fetch('/api/open', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
       })
@@ -192,7 +199,7 @@ export default function App() {
     } catch (e) {
       setErr(e.message); setPhase('ready')
     } finally { setBusy(false) }
-  }, [boxId])
+  }, [boxId, curated])
 
   /* 뽑기! — 내가 먼저 누르면 나머지가 하나씩 따라 누른다. 마지막 한 명이 관건이다. */
   const pressDraw = () => {
@@ -212,7 +219,7 @@ export default function App() {
   }
 
   const reset = () => { clearTimers(); setResult(null); setPhase('detail'); openBox(boxId) }
-  const backToList = () => { clearTimers(); setPhase('list'); setBoxId(null); setRoom(null); setResult(null) }
+  const backToList = () => { clearTimers(); setPhase('list'); setBoxId(null); setRoom(null); setResult(null); setCurated(null) }
 
   /* ── 렌더 ───────────────────────────────────────────────── */
   if (err && !data) return <Shell tab={tab} setTab={setTab}><div className="empty"><h2>불러오지 못했습니다</h2><p>{err}</p></div></Shell>
@@ -264,7 +271,10 @@ export default function App() {
           <p>{won(box.entry)} · 최고 등급 {box.topLabel}</p>
         </header>
 
-        <OddsCurve oddsByTeam={box.oddsByTeam} teamSize={teamSize || 1}
+        <TasteChat boxId={box.id} teamSize={teamSize || 1} axis={curated?.axis}
+          onCurated={setCurated} disabled={phase === 'ready' || phase === 'count'} />
+
+        <OddsCurve oddsByTeam={oddsByTeam} teamSize={teamSize || 1}
           customerBEP={box.customerBEP} teamMax={teamMax} />
 
         <div className="now">
@@ -273,7 +283,7 @@ export default function App() {
           <em className="now__nf">{naturalFreq(odds.S)}</em>
         </div>
         <OddsBars odds={odds} />
-        <OddsTable oddsByTeam={box.oddsByTeam} evByTeam={box.evByTeam} teamMax={teamMax} teamSize={teamSize} />
+        <OddsTable oddsByTeam={oddsByTeam} evByTeam={evByTeam} teamMax={teamMax} teamSize={teamSize} />
 
         <MemberRail members={members} teamMax={teamMax} readyCount={readyCount}
           phase={phase === 'ready' || phase === 'count' ? 'ready' : 'gather'} />
@@ -318,7 +328,14 @@ export default function App() {
         )}
 
         <div className="tiers">
-          {box.tiers.map((t) => <TierStrip key={t.tier} tier={t} odds={odds[t.tier]} />)}
+          {curated && (
+            <p className="tiers__note">
+              취향에 맞춰 후보를 {curated.pickedCount}개로 좁혔습니다.
+              {curated.usedFallback && ' (후보가 모자라 기본 구성으로 담았습니다)'}
+              {!curated.aiEnabled && ' (AI 키 없이 규칙 기반으로 구성했습니다)'}
+            </p>
+          )}
+          {tierList.map((t) => <TierStrip key={t.tier} tier={t} odds={odds[t.tier]} />)}
         </div>
       </>
     )

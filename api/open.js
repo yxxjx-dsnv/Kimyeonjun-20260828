@@ -8,15 +8,26 @@
  * 전원이 준비되지 않았으면 409. 이 판정이 제품의 핵심이라 서버에만 둔다.
  */
 import {
-  getBox, collapseUp, tiersOf, oddsOf, drawOne, TIERS, TEAM_MAX, MAX_DRAWS_PER_PERSON,
+  getBox, collapseUp, tiersOf, oddsOf, drawOne, TIERS, TEAM_MAX, MAX_DRAWS_PER_PERSON, byId,
 } from './_draw.js'
+
 import { readRoom, mutateRoom } from './_room.js'
 import { teamSizeOf, teamDrawsOf, readyCountOf, allReady, publicState } from './room.js'
 
-/** 방 상태 → 전원의 추첨 결과. 순수 함수라 테스트에서 직접 부른다. */
-export function resolve(state) {
+// 큐레이션 구성으로 뽑으려면 최소 이만큼은 남아 있어야 한다. 모자라면 전체 풀로 되돌린다.
+const MIN_PICKED = 12
+
+/**
+ * 방 상태 → 전원의 추첨 결과. 순수 함수라 테스트에서 직접 부른다.
+ * pickedIds가 오면 그 구성으로 뽑는다. 클라이언트가 보낸 id는 그대로 믿지 않고
+ * 풀과 다시 조인하며, 살아남은 게 모자라면 전체 풀로 되돌린다.
+ */
+export function resolve(state, pickedIds = null) {
   const box = getBox(state.boxId)
-  const tiers = collapseUp(tiersOf(box))
+  const ids = Array.isArray(pickedIds)
+    ? pickedIds.map(String).filter((id) => byId.has(id))
+    : null
+  const tiers = collapseUp(tiersOf(box, ids && ids.length >= MIN_PICKED ? ids : null))
   const P = oddsOf(box, teamSizeOf(state), teamDrawsOf(state), tiers)
 
   const results = state.members.map((m, idx) => {
@@ -89,7 +100,7 @@ export default async function handler(req, res) {
   if (sim) {
     const state = simState(req.body)
     if (!state) return res.status(400).json({ error: '시뮬레이션 입력이 올바르지 않습니다.' })
-    return res.status(200).json({ ...resolve(state), simulated: true })
+    return res.status(200).json({ ...resolve(state, req.body.pickedIds), simulated: true })
   }
 
   try {
@@ -114,7 +125,7 @@ export default async function handler(req, res) {
       })) || state
     }
 
-    return res.status(200).json({ ...resolve(state), state: publicState(state) })
+    return res.status(200).json({ ...resolve(state, req.body.pickedIds), state: publicState(state) })
   } catch (e) {
     return res.status(500).json({ error: `개봉 실패: ${e.message}` })
   }

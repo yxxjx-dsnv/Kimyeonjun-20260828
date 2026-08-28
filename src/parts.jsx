@@ -242,6 +242,90 @@ export function RevealCard({ r, entry, mine, delay }) {
   )
 }
 
+/* ── 취향 대화 (ChatGPT) ───────────────────────────────────
+   확률형 구매의 가장 큰 약점은 안 쓸 물건이 오는 것이다. 무작위를 쓰되
+   취향 밖으로는 안 나가게 한다. 대화가 정하는 것은 '무엇이 상자에 들어가는가'
+   까지이고, '무엇이 뽑히는가'는 서버가 정한다.                            */
+const CHIPS = ['주방 살림 위주로', '손주 줄 것도 넣어서', '내가 쓸 것 위주로', '먹거리 위주로']
+
+export function TasteChat({ boxId, teamSize, onCurated, axis, disabled }) {
+  const [msgs, setMsgs] = useState([])
+  const [text, setText] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState(null)
+  const [ask, setAsk] = useState(null)
+
+  const send = async (content) => {
+    const body = String(content ?? text).trim()
+    if (!body || busy) return
+    const next = [...msgs, { role: 'user', content: body }]
+    setMsgs(next); setText(''); setBusy(true); setErr(null); setAsk(null)
+    try {
+      const r = await fetch('/api/curate', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: next, boxId, teamSize }),
+      })
+      const j = await r.json()
+      if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`)
+      setMsgs([...next, { role: 'assistant', content: j.reply }])
+      setAsk(j.question ? { q: j.question, options: j.options } : null)
+      onCurated(j)
+    } catch (e) {
+      setErr(e.message)
+    } finally { setBusy(false) }
+  }
+
+  return (
+    <section className="taste">
+      <header className="taste__h">
+        <h3>이 상자에 뭘 담을까요?</h3>
+        {axis && <span className="taste__axis">{axis}</span>}
+      </header>
+      <p className="taste__sub">
+        무작위는 <b>무엇이 뽑히는지</b>만 정합니다. <b>무엇이 들어갈지</b>는 취향으로 좁힙니다.
+      </p>
+
+      {msgs.map((m, i) => (
+        <p key={i} className={`bub bub--${m.role}`}>{m.content}</p>
+      ))}
+      {busy && <p className="bub bub--assistant is-busy">담는 중…</p>}
+      {err && <p className="taste__err">{err}</p>}
+
+      {ask ? (
+        <>
+          <p className="bub bub--assistant">{ask.q}</p>
+          <div className="taste__chips">
+            {ask.options.map((o) => (
+              <button key={o} className="chip" onClick={() => send(o)} disabled={disabled || busy}>{o}</button>
+            ))}
+          </div>
+        </>
+      ) : msgs.length === 0 ? (
+        <div className="taste__chips">
+          {CHIPS.map((c) => (
+            <button key={c} className="chip" onClick={() => send(c)} disabled={disabled || busy}>{c}</button>
+          ))}
+        </div>
+      ) : null}
+
+      <div className="taste__in">
+        <input
+          value={text} onChange={(e) => setText(e.target.value)}
+          onKeyDown={(e) => {
+            // 한글 IME 조합 중 Enter는 확정이지 전송이 아니다.
+            if (e.key === 'Enter' && !e.nativeEvent.isComposing) send()
+          }}
+          placeholder="직접 적어도 됩니다" disabled={disabled || busy} maxLength={60}
+          aria-label="원하는 상자 구성"
+        />
+        <button className="btn btn--ghost" onClick={() => send()} disabled={disabled || busy || !text.trim()}>
+          보내기
+        </button>
+      </div>
+    </section>
+  )
+}
+
 /* ── 정직성 시트 ───────────────────────────────────────────── */
 export function HonestySheet({ formula, pool, companyBEP, onClose }) {
   const f = formula
