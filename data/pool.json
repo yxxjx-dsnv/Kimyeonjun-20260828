@@ -1,5 +1,5 @@
 {
-  "crawledAt": "2026-08-28T09:33:05.771Z",
+  "crawledAt": "2026-08-28T09:38:24.747Z",
   "source": "danawa",
   "minPrice": 2000,
   "queries": [
@@ -259,6 +259,17 @@
       "kc": "unknown"
     },
     {
+      "id": "d21388238",
+      "name": "레인보우 무지개 푸쉬팝 팝잇 피젯토이",
+      "price": 2970,
+      "image": "https://img.danuri.io/catalog-image/238/388/021/85bd15f9ce3d42589f6092bbaeaa1cd1.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=21388238",
+      "seller": "다나와 최저가",
+      "query": "피젯토이",
+      "group": "trend",
+      "kc": "unknown"
+    },
+    {
       "id": "d122720813",
       "name": "바삭 치즈 크런치 슬랑이 말랑이",
       "price": 3000,
@@ -288,17 +299,6 @@
       "url": "https://prod.danawa.com/info/?pcode=106704161",
       "seller": "다나와 최저가",
       "query": "캡슐토이",
-      "group": "trend",
-      "kc": "unknown"
-    },
-    {
-      "id": "d25359782",
-      "name": "창작용 빛 혼합 LED 자이로 스피너 만들기",
-      "price": 3300,
-      "image": "https://img.danuri.io/catalog-image/782/359/025/1d753ae86e1e40fc978cfc5b082e2e7d.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=25359782",
-      "seller": "다나와 최저가",
-      "query": "피젯토이",
       "group": "trend",
       "kc": "unknown"
     },
@@ -424,17 +424,6 @@
       "kc": "unknown"
     },
     {
-      "id": "d21412388",
-      "name": "한들 산리오 캐릭터 종이스퀴시 만들기세트",
-      "price": 4280,
-      "image": "https://img.danuri.io/catalog-image/388/412/021/cc74ef167f4f43378f6e17a2abd61c39.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=21412388",
-      "seller": "다나와 최저가",
-      "query": "스퀴시",
-      "group": "trend",
-      "kc": "unknown"
-    },
-    {
       "id": "d122719177",
       "name": "왕메론빵 슬랑이 말랑이",
       "price": 4300,
@@ -519,6 +508,17 @@
       "url": "https://prod.danawa.com/info/?pcode=122721073",
       "seller": "다나와 최저가",
       "query": "슬랑이",
+      "group": "trend",
+      "kc": "unknown"
+    },
+    {
+      "id": "d68913197",
+      "name": "일정문구 레이지스타 스퀴시 미니 다이어리",
+      "price": 5480,
+      "image": "https://img.danuri.io/catalog-image/197/913/068/5c5841fd87284793ab80a832b63e0cb5.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=68913197",
+      "seller": "다나와 최저가",
+      "query": "스퀴시",
       "group": "trend",
       "kc": "unknown"
     },
@@ -622,17 +622,6 @@
       "kc": "unknown"
     },
     {
-      "id": "d49177748",
-      "name": "크록스 스퀴시 과일 지비츠 5개 세트_10012181",
-      "price": 6710,
-      "image": "https://img.danuri.io/catalog-image/748/177/049/d46cafc4b99647d6b1467e8786c0354d.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=49177748",
-      "seller": "다나와 최저가",
-      "query": "스퀴시",
-      "group": "trend",
-      "kc": "unknown"
-    },
-    {
       "id": "d122718595",
       "name": "모닝빵 크런치 슬랑이 말랑이",
       "price": 6740,
@@ -663,6 +652,17 @@
       "seller": "다나와 최저가",
       "query": "참기름",
       "group": "daily",
+      "kc": "unknown"
+    },
+    {
+      "id": "d51565118",
+      "name": "이젠 일정 15000 레이지스타반전스퀴시피규어 스퀴시 피젯 토이 스트레스해소 동물인형 말랑말랑 스퀴시인",
+      "price": 6870,
+      "image": "https://img.danuri.io/catalog-image/118/565/051/c2ead99d4a10445c99cc3efc578646ff.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=51565118",
+      "seller": "다나와 최저가",
+      "query": "스퀴시",
+      "group": "trend",
       "kc": "unknown"
     },
     {
@@ -707,17 +707,6 @@
       "seller": "다나와 최저가",
       "query": "화장지",
       "group": "daily",
-      "kc": "unknown"
-    },
-    {
-      "id": "d74257103",
-      "name": "뽀로로 캐릭터 종이스퀴시 만들기 2p세트 랜덤 장난감 491663 1개",
-      "price": 7800,
-      "image": "https://img.danuri.io/catalog-image/103/257/074/e95bcbeb24744c42abd981472d9b8d73.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=74257103",
-      "seller": "다나와 최저가",
-      "query": "스퀴시",
-      "group": "trend",
       "kc": "unknown"
     },
     {
@@ -776,28 +765,6 @@
       "kc": "unknown"
     },
     {
-      "id": "d56514155",
-      "name": "크록스 UV 스퀴시 지비츠 5개 세트_10013250",
-      "price": 8160,
-      "image": "https://img.danuri.io/catalog-image/155/514/056/2d1f1b3462684dcdac9912902f83bf8a.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=56514155",
-      "seller": "다나와 최저가",
-      "query": "스퀴시",
-      "group": "trend",
-      "kc": "unknown"
-    },
-    {
-      "id": "d21387947",
-      "name": "흰색 에그 캡슐 계란한판 이벤트 소형 10개",
-      "price": 8210,
-      "image": "https://img.danuri.io/catalog-image/947/387/021/0e9baf3fa2bc458fb5a01d493598d607.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=21387947",
-      "seller": "다나와 최저가",
-      "query": "캡슐토이",
-      "group": "trend",
-      "kc": "unknown"
-    },
-    {
       "id": "d68689544",
       "name": "센소다인 컴플리트 프로텍션 플러스 치약 100g",
       "price": 8210,
@@ -828,6 +795,17 @@
       "seller": "다나와 최저가",
       "query": "즉석밥",
       "group": "daily",
+      "kc": "unknown"
+    },
+    {
+      "id": "d21386300",
+      "name": "DIY 자이로 피젯 스피너 조이트로프",
+      "price": 8380,
+      "image": "https://img.danuri.io/catalog-image/300/386/021/131d4d7221fd4a24bfcf37e721326066.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=21386300",
+      "seller": "다나와 최저가",
+      "query": "피젯토이",
+      "group": "trend",
       "kc": "unknown"
     },
     {
@@ -971,6 +949,17 @@
       "seller": "다나와 최저가",
       "query": "샴푸",
       "group": "daily",
+      "kc": "unknown"
+    },
+    {
+      "id": "d76466438",
+      "name": "손오공 스퀴시멜로우 7.5인치 B타입",
+      "price": 9900,
+      "image": "https://img.danuri.io/catalog-image/438/466/076/6633b53f0e0c4ee38f037ed6806a31f2.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=76466438",
+      "seller": "다나와 최저가",
+      "query": "스퀴시",
+      "group": "trend",
       "kc": "unknown"
     },
     {
@@ -1150,6 +1139,17 @@
       "kc": "unknown"
     },
     {
+      "id": "d25089743",
+      "name": "영실업 디즈니 100주년 서프라이즈 시리즈1 캡슐토이 14종 1개",
+      "price": 11280,
+      "image": "https://img.danuri.io/catalog-image/743/089/025/83218e3124594f31b72ab9cc5c802737.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=25089743",
+      "seller": "다나와 최저가",
+      "query": "캡슐토이",
+      "group": "trend",
+      "kc": "unknown"
+    },
+    {
       "id": "d6522022",
       "name": "CJ제일제당 햇반 매일 잡곡밥 210g",
       "price": 11940,
@@ -1205,6 +1205,28 @@
       "kc": "unknown"
     },
     {
+      "id": "d21425297",
+      "name": "아이코닉스 데코데코 말캉말캉 종이 스퀴시 문구점",
+      "price": 12410,
+      "image": "https://img.danuri.io/catalog-image/297/425/021/0d1c2eed82034d91a92f38a955dc2883.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=21425297",
+      "seller": "다나와 최저가",
+      "query": "스퀴시",
+      "group": "trend",
+      "kc": "unknown"
+    },
+    {
+      "id": "d105184136",
+      "name": "아이코닉스 데코데코 말캉말캉 디저트 스퀴시북",
+      "price": 12420,
+      "image": "https://img.danuri.io/catalog-image/136/184/105/fffb667149b84123a1a89c39177eb6d6.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=105184136",
+      "seller": "다나와 최저가",
+      "query": "스퀴시",
+      "group": "trend",
+      "kc": "unknown"
+    },
+    {
       "id": "d2101328",
       "name": "트리오 항균 주방세제 14kg (13.6L)",
       "price": 12600,
@@ -1216,6 +1238,17 @@
       "kc": "unknown"
     },
     {
+      "id": "d48402773",
+      "name": "영실업 시크릿아트 문구사장 챌린지 포용계 상점키트",
+      "price": 12816,
+      "image": "https://img.danuri.io/catalog-image/773/402/048/7c82c450629f469cb9ef2d6d20e5e4c8.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=48402773",
+      "seller": "다나와 최저가",
+      "query": "스퀴시",
+      "group": "trend",
+      "kc": "unknown"
+    },
+    {
       "id": "d74331716",
       "name": "크리넥스 마이비데 퓨어 화장실용 물티슈 캡형 40매",
       "price": 12880,
@@ -1224,17 +1257,6 @@
       "seller": "다나와 최저가",
       "query": "물티슈",
       "group": "daily",
-      "kc": "unknown"
-    },
-    {
-      "id": "d25321910",
-      "name": "크리스탈 피젯 스피너 만들기",
-      "price": 12900,
-      "image": "https://img.danuri.io/catalog-image/910/321/025/ad4a0af9969240b5817df80d0b2c1be6.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=25321910",
-      "seller": "다나와 최저가",
-      "query": "피젯토이",
-      "group": "trend",
       "kc": "unknown"
     },
     {
@@ -1268,17 +1290,6 @@
       "seller": "다나와 최저가",
       "query": "고무장갑",
       "group": "daily",
-      "kc": "unknown"
-    },
-    {
-      "id": "d21411662",
-      "name": "미미월드 메이킹 스퀴시 리필 편의점",
-      "price": 13180,
-      "image": "https://img.danuri.io/catalog-image/662/411/021/43d8c02ebbc348ddab04369fdea2e561.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=21411662",
-      "seller": "다나와 최저가",
-      "query": "스퀴시",
-      "group": "trend",
       "kc": "unknown"
     },
     {
@@ -1381,11 +1392,11 @@
       "kc": "unknown"
     },
     {
-      "id": "d21424919",
-      "name": "미미월드 메이킹 스퀴시 리필 뷰티스토어",
-      "price": 15210,
-      "image": "https://img.danuri.io/catalog-image/919/424/021/6cbd9628581a454e959bc6111f0adc4d.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=21424919",
+      "id": "d74050775",
+      "name": "아트박스 산리오 스퀴시노트 헬로키티 레드(H80730)",
+      "price": 15200,
+      "image": "https://img.danuri.io/catalog-image/775/050/074/d9e1016f9c9645c5882222c9e4b608d5.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=74050775",
       "seller": "다나와 최저가",
       "query": "스퀴시",
       "group": "trend",
@@ -1653,17 +1664,6 @@
       "seller": "다나와 최저가",
       "query": "건조나물",
       "group": "daily",
-      "kc": "unknown"
-    },
-    {
-      "id": "d21424082",
-      "name": "미미월드 메이킹 스퀴시 산리오 캐릭터즈 리필 해피마켓",
-      "price": 19550,
-      "image": "https://img.danuri.io/catalog-image/082/424/021/4547573cd24b48888d0f38670b453ec5.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=21424082",
-      "seller": "다나와 최저가",
-      "query": "스퀴시",
-      "group": "trend",
       "kc": "unknown"
     },
     {
@@ -2569,6 +2569,17 @@
       "kc": "unknown"
     },
     {
+      "id": "d123682936",
+      "name": "쿠쿠전자 CRP-DHPNL0615FGG",
+      "price": 248280,
+      "image": "https://img.danuri.io/catalog-image/936/682/123/18a3d595f3074ce88b2c422799d5f17f.jpeg",
+      "url": "https://prod.danawa.com/info/?pcode=123682936",
+      "seller": "다나와 최저가",
+      "query": "전기밥솥",
+      "group": "home",
+      "kc": "unknown"
+    },
+    {
       "id": "d15463106",
       "name": "조지루시 EE-DCH35K",
       "price": 248360,
@@ -2596,17 +2607,6 @@
       "price": 252350,
       "image": "https://img.danuri.io/catalog-image/086/280/007/f39b8b249a854986865abf425278b220.jpeg",
       "url": "https://prod.danawa.com/info/?pcode=7280086",
-      "seller": "다나와 최저가",
-      "query": "전기밥솥",
-      "group": "home",
-      "kc": "unknown"
-    },
-    {
-      "id": "d123682936",
-      "name": "쿠쿠전자 CRP-DHPNL0615FGG",
-      "price": 255750,
-      "image": "https://img.danuri.io/catalog-image/936/682/123/18a3d595f3074ce88b2c422799d5f17f.jpeg",
-      "url": "https://prod.danawa.com/info/?pcode=123682936",
       "seller": "다나와 최저가",
       "query": "전기밥솥",
       "group": "home",
@@ -3022,7 +3022,7 @@
     {
       "id": "d122715333",
       "name": "다이슨 V10 옵틱",
-      "price": 629340,
+      "price": 629660,
       "image": "https://img.danuri.io/catalog-image/333/715/122/4d359fffc57d4b05af7f0bd7aab54756.jpeg",
       "url": "https://prod.danawa.com/info/?pcode=122715333",
       "seller": "다나와 최저가",
@@ -3110,7 +3110,7 @@
     {
       "id": "d89603426",
       "name": "다이슨 에어랩 코안다2x 멀티 스타일러 앤 드라이어",
-      "price": 731180,
+      "price": 731200,
       "image": "https://img.danuri.io/catalog-image/426/603/089/b95acdc471e742c582085276d6b11676.jpg",
       "url": "https://prod.danawa.com/info/?pcode=89603426",
       "seller": "다나와 최저가",

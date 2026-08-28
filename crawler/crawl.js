@@ -70,7 +70,7 @@ for (const { q, group, min, max, per } of QUERIES) {
     if (seen.has(r.id)) continue
     if (r.price < Math.max(MIN_PRICE, min) || r.price > max) continue
     const flat = flatten(r.rawTitle)
-    if (isJunk(flat)) continue
+    if (isJunk(flat, group)) continue
     seen.add(r.id)
     kept++
     items.push({

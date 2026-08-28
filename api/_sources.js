@@ -19,7 +19,14 @@ const EXCLUDE = [
   '스티커', '리폼', '수선', '부자재', '공병', '전용케이스', '보호필름',
   '거치대', '충전기만', '샘플', '증정품', '체험분', '리퍼', '중고',
 ]
-export const isJunk = (flat) => EXCLUDE.some((k) => flat.includes(k))
+
+// 완구에만 적용하는 추가 차단. '리필'을 전역으로 막으면 세제·샴푸 리필처럼
+// 그 자체가 정상 상품인 생필품까지 사라진다. 그래서 그룹을 받는다.
+const TOY_EXCLUDE = ['만들기', '리필', '지비츠', '에그캡슐', '빈캡슐', '재료', '공예']
+
+export const isJunk = (flat, group) =>
+  EXCLUDE.some((k) => flat.includes(k)) ||
+  (group === 'trend' && TOY_EXCLUDE.some((k) => flat.includes(k)))
 
 // KC 안전확인은 '확인된 것만' 표기한다. 없으면 인증되었다고 주장하지 않는다.
 const KC_MARKS = ['KC', '안전확인', '적합확인', '안전인증', 'KC인증']
