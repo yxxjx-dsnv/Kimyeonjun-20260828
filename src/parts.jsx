@@ -39,17 +39,63 @@ export const IconContent = I('M4 6h11a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1
 export const IconHeart = I('M12 20s-7-4.4-7-9.2A4 4 0 0 1 12 8a4 4 0 0 1 7 2.8C19 15.6 12 20 12 20Z')
 export const IconUser = I('M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM4.5 20a7.5 7.5 0 0 1 15 0')
 export const IconBox = I('M12 3 3.5 7.5 12 12l8.5-4.5L12 3ZM3.5 7.5v9L12 21l8.5-4.5v-9M12 12v9')
+export const IconCart = I('M4 5h2l2.2 9.4a1.5 1.5 0 0 0 1.5 1.1h7.5a1.5 1.5 0 0 0 1.45-1.1L20.5 8H7M10 19.5h.01M17 19.5h.01')
+export const IconSearch = I('M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14ZM20 20l-4-4')
+
+/* 홈 퀵메뉴 타일 안에 들어가는 글리프. 일러스트 에셋을 받을 수 없으므로
+   각 카테고리를 알아볼 수 있는 최소 도형으로 그린다. */
+export const QUICK_ICON = {
+  olbox: 'M12 3 3.5 7.5 12 12l8.5-4.5L12 3ZM3.5 7.5v9L12 21l8.5-4.5v-9M12 12v9',
+  deal: 'M20.5 12.5 12.5 20.5a2 2 0 0 1-2.8 0l-6.2-6.2a2 2 0 0 1-.5-1.9l1.4-5.6a2 2 0 0 1 1.5-1.5l5.6-1.4a2 2 0 0 1 1.9.5l6.2 6.2a2 2 0 0 1 0 2.8ZM8.5 8.5h.01',
+  card: 'M6 4h9l3 3v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1ZM9 11h6M9 15h4',
+  uniform: 'M9 4 5 6v5h2v9h10v-9h2V6l-4-2M9 4a3 3 0 0 0 6 0',
+  home: 'M7 3h10v6H7zM5 9h14v11a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V9ZM10 14h4',
+  prize: 'M12 15a5 5 0 1 0 0-10 5 5 0 0 0 0 10ZM9 14.5 8 21l4-2 4 2-1-6.5',
+}
 
 /* ── 상품 카드 (홈 탭 2열 그리드) ──────────────────────────── */
+/**
+ * 상품 카드 — 실제 올웨이즈 카드 anatomy를 따른다.
+ *   이미지 / 떠 있는 버튼 / 스펙 칩 / 판매처 / 제목 / 가격 / 배지 / 별점
+ *
+ * 실제 앱에서 가장 큰 요소는 "빨간 할인율 + 최종가"인데 다나와는 원가를
+ * 내려주지 않는다. **지어내지 않는다.** 대신 그 자리에 사실인 라벨(최저가)만
+ * 두고, 없는 값은 슬롯째 생략한다 — 별점이 없는 상품은 별점 줄이 아예 없다.
+ */
 export function ProductCard({ item, badge }) {
   return (
     <a className="pcard" href={item.url} target="_blank" rel="noreferrer noopener">
       <div className="pcard__thumb">
         {item.image ? <img src={item.image} alt="" loading="lazy" /> : <div className="pcard__ph" />}
+        {/* 실제 앱은 여기가 장바구니 버튼이다. 담기를 구현하지 않았으므로
+            같은 자리에 '판매처에서 보기'를 둔다 — 슬롯은 채우되 거짓말은 안 한다. */}
+        <span className="pcard__go" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor"
+            strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M9 6l6 6-6 6" />
+          </svg>
+        </span>
       </div>
+      {item.spec?.length > 0 && (
+        <span className="pcard__chips">
+          {item.spec.slice(0, 2).map((c, i) => (
+            <span key={i} className="chip2">{c.length > 12 ? c.slice(0, 12) + '…' : c}</span>
+          ))}
+        </span>
+      )}
+      <p className="pcard__seller">{item.seller} <span aria-hidden="true">›</span></p>
       <p className="pcard__name">{item.name}</p>
-      <p className="pcard__price">{won(item.price)}</p>
+      <p className="pcard__price"><em>최저가</em>{won(item.price)}</p>
       {badge && <span className="badge badge--sale">{badge}</span>}
+      {item.rating != null && (
+        <p className="pcard__rate">
+          <span className="pcard__star" aria-hidden="true">★</span>{item.rating}
+          {item.reviews != null && (
+            /* 다나와는 리뷰수를 999에서 끊는다. 그 이상은 999+로 적는다. */
+            <span className="pcard__rv">(리뷰 {item.reviews >= 999 ? '999+' : item.reviews.toLocaleString()})</span>
+          )}
+        </p>
+      )}
     </a>
   )
 }

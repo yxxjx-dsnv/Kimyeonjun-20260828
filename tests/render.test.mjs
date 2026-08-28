@@ -31,7 +31,7 @@ const { default: App } = await vite.ssrLoadModule('/src/App.jsx')
 // ── ① 앱 셸 ────────────────────────────────────────────────
 {
   const html = renderToString(React.createElement(App))
-  check('앱 셸 렌더', html.includes('올웨이즈'))
+  check('앱 셸 렌더', html.includes('Alwayz'))
   for (const t of ['홈', '콘텐츠', '올박스', '관심상품', '내 정보'])
     check(`탭 '${t}' 존재`, html.includes(t))
   check('중앙 플로팅 자리에 올박스', html.includes('is-center'))

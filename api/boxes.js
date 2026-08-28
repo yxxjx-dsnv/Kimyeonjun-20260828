@@ -125,6 +125,15 @@ export const formula = () => ({
   ],
 })
 
+/** 그룹별 등간격 추출 — curate.js가 티어 후보를 고를 때 쓰는 방식과 같다. */
+export function homeSample(per = 24) {
+  return ['daily', 'home', 'card', 'prize', 'uniform'].flatMap((g) => {
+    const xs = POOL.items.filter((i) => i.image && i.group === g)
+    const step = Math.max(1, Math.ceil(xs.length / per))
+    return xs.filter((_, k) => k % step === 0)
+  })
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'GET만 허용합니다.' })
   // s-maxage=3600을 걸었다가 배포해도 화면이 한 시간 동안 안 바뀌었다
@@ -140,7 +149,11 @@ export default async function handler(req, res) {
     votes: await readVotes(),
     voteLabel: VOTE_LABEL,
     // 홈 탭 그리드용. 크롤 데이터가 올박스 밖에서도 화면에 쓰인다.
-    sample: POOL.items.filter((i) => i.image).slice(0, 40),
+    //
+    // 앞의 slice(0,40)은 풀이 가격 오름차순이라 40건 중 39건이 daily였고
+    // 가격대가 2,020~8,280원에 갇혔다. 홈이 '최저가 생필품 가게'로 보인 원인.
+    // 그룹별로 등간격 추출해 다섯 카테고리가 전부 실제 데이터로 채워지게 한다.
+    sample: homeSample(),
     teamMax: TEAM_MAX,
     maxDrawsPerPerson: MAX_DRAWS_PER_PERSON,
     companyBEP: companyBEP(),

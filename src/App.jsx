@@ -14,29 +14,128 @@ import {
   TierStrip, MemberRail, RevealCard, HonestySheet, TasteChat,
   GroupCurve, GroupTable, GroupResult,
   StockBin, PityBar, DailyCard, DailyEconomics, VoteCard,
-  IconHome, IconContent, IconHeart, IconUser, IconBox,
+  IconHome, IconContent, IconHeart, IconUser, IconBox, IconCart, IconSearch, QUICK_ICON,
 } from './parts.jsx'
 
 const SIM_NAMES = ['정희', '순자', '영미', '경숙', '미숙', '현주', '은영', '보라', '수진']
 const rid = () => Math.random().toString(36).slice(2, 8)
 
 /* ─────────────────────────── 홈 (껍데기) ─────────────────────────── */
-function HomeTab({ pool }) {
-  const items = useMemo(
-    () => pool.filter((i) => i.image).slice(0, 24),
-    [pool]
+/* 홈 — 실제 올웨이즈 홈 구조를 그대로 따른다.
+   검색·카테고리·퀵메뉴는 장식이 아니라 전부 동작한다. 눌러도 아무 일이
+   없는 컨트롤은 만들지 않는다(그게 '껍데기처럼 보이는' 가장 큰 원인이다). */
+const CATS = [
+  { id: 'all', label: '추천' },
+  { id: 'daily', label: '생필품' },
+  { id: 'home', label: '주방·가전' },
+  { id: 'card', label: '포켓몬 카드' },
+  { id: 'uniform', label: '스포츠' },
+  { id: 'prize', label: '건강식품' },
+]
+const CAT_LABEL = Object.fromEntries(CATS.map((c) => [c.id, c.label]))
+
+function SectionHead({ title, onMore }) {
+  return (
+    <div className="shead">
+      <h2>{title}</h2>
+      {onMore && <button className="shead__more" onClick={onMore}>더보기 ›</button>}
+    </div>
   )
+}
+
+function HomeTab({ pool, onGoOlbox }) {
+  const [q, setQ] = useState('')
+  const [cat, setCat] = useState('all')
+  const withImg = useMemo(() => pool.filter((i) => i.image), [pool])
+
+  const query = q.trim()
+  const hits = useMemo(
+    () => (query ? withImg.filter((i) => i.name.includes(query)) : null),
+    [withImg, query]
+  )
+  const byCat = useMemo(
+    () => (cat === 'all' ? null : withImg.filter((i) => i.group === cat)),
+    [withImg, cat]
+  )
+  // 추천 탭은 카테고리별 섹션으로 나눈다. 예전엔 가격 오름차순 24개라
+  // 화면이 2,020~4,930원 생필품으로만 채워졌다.
+  const sections = useMemo(
+    () => CATS.slice(1).map((c) => [c, withImg.filter((i) => i.group === c.id).slice(0, 6)]),
+    [withImg]
+  )
+
+  const quick = [
+    { k: 'olbox', label: '올박스', tag: 'NEW', on: onGoOlbox },
+    { k: 'deal', label: '특가', on: () => { setCat('daily'); setQ('') } },
+    { k: 'card', label: '카드', on: () => { setCat('card'); setQ('') } },
+    { k: 'uniform', label: '유니폼', on: () => { setCat('uniform'); setQ('') } },
+    { k: 'home', label: '가전', on: () => { setCat('home'); setQ('') } },
+    { k: 'prize', label: '건강', on: () => { setCat('prize'); setQ('') } },
+  ]
+
+  const list = hits || byCat
   return (
     <>
-      <div className="stub">
-        홈·콘텐츠·관심상품·내 정보는 <b>올박스가 어디에 붙는지</b> 보여주기 위한 껍데기입니다.
-        상품과 가격은 실제 수집 데이터이고, 담기·결제는 구현하지 않았습니다.
+      <div className="hsearch">
+        <IconSearch />
+        <input
+          type="search" value={q} onChange={(e) => setQ(e.target.value)}
+          placeholder="올웨이즈에서 상품 검색하기" aria-label="상품 검색"
+        />
       </div>
-      <div className="grid">
-        {items.map((it) => (
-          <ProductCard key={it.id} item={it} badge={it.auth === 'official' ? '정품 표기' : null} />
+
+      <nav className="cats" aria-label="카테고리">
+        {CATS.map((c) => (
+          <button key={c.id} className={`cats__b ${cat === c.id && !query ? 'is-on' : ''}`}
+            onClick={() => { setCat(c.id); setQ('') }}>{c.label}</button>
         ))}
-      </div>
+      </nav>
+
+      <ul className="quick">
+        {quick.map((t) => (
+          <li key={t.k}>
+            <button className={`quick__t quick__t--${t.k}`} onClick={t.on}>
+              <span className="quick__ico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"
+                  strokeLinecap="round" strokeLinejoin="round"><path d={QUICK_ICON[t.k]} /></svg>
+              </span>
+              {t.tag && <span className="quick__tag">{t.tag}</span>}
+              <span className="quick__lb">{t.label}</span>
+            </button>
+          </li>
+        ))}
+      </ul>
+
+      {list ? (
+        <>
+          <SectionHead title={query ? `‘${query}’ 검색 결과 ${list.length}건` : CAT_LABEL[cat]} />
+          {list.length === 0 ? (
+            <p className="hnone">검색 결과가 없습니다. 수집한 {withImg.length}건 안에서만 찾습니다.</p>
+          ) : (
+            <div className="grid">
+              {list.map((it) => (
+                <ProductCard key={it.id} item={it} badge={it.auth === 'official' ? '정품 표기' : null} />
+              ))}
+            </div>
+          )}
+        </>
+      ) : (
+        sections.map(([c, items]) => (
+          <section key={c.id} className="hsec">
+            <SectionHead title={c.label} onMore={() => setCat(c.id)} />
+            <div className="grid">
+              {items.map((it) => (
+                <ProductCard key={it.id} item={it} badge={it.auth === 'official' ? '정품 표기' : null} />
+              ))}
+            </div>
+          </section>
+        ))
+      )}
+
+      <p className="hfoot">
+        상품·가격·별점은 다나와에서 직접 수집한 실제 데이터입니다.
+        담기·결제는 이 과제의 범위가 아니라 구현하지 않았고, 카드를 누르면 판매처로 이동합니다.
+      </p>
     </>
   )
 }
@@ -348,7 +447,7 @@ export default function App() {
   const inviteUrl = room ? `${location.origin}/?room=${room.roomId}&box=${boxId}` : ''
 
   let body = null
-  if (tab === 'home') body = <HomeTab pool={data.sample || []} />
+  if (tab === 'home') body = <HomeTab pool={data.sample || []} onGoOlbox={() => setTab('olbox')} />
   else if (tab === 'content') body = <StubTab title="콘텐츠" body="영상·기획전 탭입니다." />
   else if (tab === 'wish') body = <StubTab title="관심상품" body="찜한 상품 탭입니다." />
   else if (tab === 'me') body = <StubTab title="내 정보" body="주문내역·올팜·설정 탭입니다." />
@@ -609,11 +708,12 @@ function Shell({ tab, setTab, children, onSheet, live, guide }) {
       {guide && <GuideRail side="left" {...guide} />}
       <div className="phone">
         <header className="top">
-          <span className="top__logo">올웨이즈</span>
+          <span className="top__logo">Alwayz</span>
           {live !== null && (
             <span className={`top__live ${live ? 'is-live' : ''}`}>{live ? '실시간 방' : '시뮬레이션'}</span>
           )}
           {onSheet && <button className="top__q" onClick={onSheet}>확률 근거</button>}
+          <span className="top__cart" aria-hidden="true"><IconCart /></span>
         </header>
         <main className="body">{children}</main>
         <nav className="tabbar">

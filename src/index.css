@@ -101,13 +101,16 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
   background: var(--paper);
   border-bottom: 1px solid var(--hair);
 }
-.top__logo { font-weight: 800; font-size: var(--fs-strong); color: var(--brand); letter-spacing: -0.02em; }
+.top__logo { font-weight: 800; font-size: var(--fs-title); color: var(--brand); letter-spacing: -0.03em; }
+.top__cart { color: var(--ink); display: grid; place-items: center; }
+.top__cart svg { width: 24px; height: 24px; }
 .top__live {
   margin-left: auto; font-size: var(--fs-label); padding: 3px 8px; border-radius: 999px;
   background: var(--band); color: var(--muted); font-weight: 600;
 }
 .top__live.is-live { background: #e6f5ec; color: var(--good); }
 .top__q {
+  margin-left: auto;
   font-size: var(--fs-label); font-weight: 600; color: var(--ink-2);
   border: 1px solid var(--hair); border-radius: 999px; padding: 5px 10px;
 }
@@ -141,25 +144,118 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
 .tabbar__b.is-center.is-on span { color: var(--brand); }
 .tabbar__b.is-center.is-on svg { background: var(--brand-dk); }
 
-/* ── 홈 (껍데기) ───────────────────────────────────────────── */
-.stub {
-  background: var(--band); border-radius: var(--r); padding: 12px 14px;
-  font-size: var(--fs-body); color: var(--ink-2); line-height: 1.55; margin-bottom: 14px;
+/* ── 홈 — 실제 올웨이즈 홈 구조 ────────────────────────────── */
+/* 검색바. 실제 앱은 헤더 바로 아래 전폭 회색 pill이다. */
+.hsearch {
+  display: flex; align-items: center; gap: var(--s2);
+  background: var(--band); border-radius: var(--r2);
+  padding: var(--s3) var(--s4); margin-bottom: var(--s4);
 }
-.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 10px; }
-.pcard { display: block; position: relative; }
+.hsearch svg { width: 20px; height: 20px; color: var(--muted); flex: none; order: 2; }
+.hsearch input {
+  order: 1; flex: 1; min-width: 0; border: 0; background: none; outline: none;
+  font: inherit; font-size: var(--fs-body); color: var(--ink);
+}
+.hsearch input::placeholder { color: var(--muted); }
+.hsearch input::-webkit-search-cancel-button { appearance: none; }
+
+/* 카테고리 스트립 — 활성 탭은 빨간 글자 + 빨간 밑줄. */
+.cats {
+  display: flex; gap: var(--s4); overflow-x: auto; scrollbar-width: none;
+  border-bottom: 1px solid var(--hair); margin: 0 calc(-1 * var(--s4)) var(--s4);
+  padding: 0 var(--s4);
+}
+.cats::-webkit-scrollbar { display: none; }
+.cats__b {
+  flex: none; padding: var(--s2) 0 var(--s3); font-size: var(--fs-body);
+  font-weight: 700; color: var(--muted); white-space: nowrap;
+}
+.cats__b.is-on { color: var(--brand); box-shadow: inset 0 -2px 0 var(--brand); }
+
+/* 퀵메뉴 타일 — 실제 앱은 라운드 사각 타일 + 라벨 + 작은 배지. */
+.quick {
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--s2);
+  margin-bottom: var(--s5);
+}
+.quick__t { display: grid; justify-items: center; gap: var(--s1); width: 100%; position: relative; }
+.quick__ico {
+  width: 100%; aspect-ratio: 1; border-radius: var(--r2);
+  background: var(--band); box-shadow: var(--e1);
+  display: grid; place-items: center; color: var(--ink-2);
+}
+.quick__ico svg { width: 56%; height: 56%; }
+.quick__t--olbox .quick__ico { background: var(--brand-weak); color: var(--brand); }
+.quick__t--deal .quick__ico { background: #fff0e4; }
+.quick__t--card .quick__ico { background: #eaf1fa; }
+.quick__t--uniform .quick__ico { background: #e6f5ec; }
+.quick__t--home .quick__ico { background: var(--sale-bg); }
+.quick__t--prize .quick__ico { background: #fdf0f0; }
+.quick__tag {
+  position: absolute; top: -4px; right: -2px;
+  font-size: var(--fs-micro); font-weight: 800; letter-spacing: 0.02em;
+  background: var(--brand); color: #fff; padding: 1px 4px; border-radius: var(--r1);
+}
+.quick__lb { font-size: var(--fs-micro); color: var(--ink-2); font-weight: 600; white-space: nowrap; }
+
+/* 섹션 헤더 — 굵은 제목 + 우측 '더보기' pill. */
+.shead { display: flex; align-items: center; gap: var(--s2); margin-bottom: var(--s3); }
+.shead h2 { font-size: var(--fs-strong); font-weight: 800; letter-spacing: -0.02em; }
+.shead__more {
+  margin-left: auto; flex: none; font-size: var(--fs-label); color: var(--ink-2);
+  border: 1px solid var(--hair); border-radius: var(--rp); padding: var(--s1) var(--s3);
+}
+.shead__more:hover { border-color: var(--brand); color: var(--brand); }
+.hsec { margin-bottom: var(--s6); }
+.hnone { color: var(--muted); font-size: var(--fs-body); padding: var(--s5) 0; text-align: center; }
+.hfoot {
+  margin-top: var(--s5); padding-top: var(--s4); border-top: 1px solid var(--hair);
+  font-size: var(--fs-label); color: var(--muted); line-height: 1.6;
+}
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s5) var(--s3); }
+.pcard { display: block; position: relative; min-width: 0; }
 .pcard__thumb {
-  aspect-ratio: 1; border-radius: 10px; overflow: hidden;
+  position: relative;
+  aspect-ratio: 1; border-radius: var(--r2); overflow: hidden;
   background: var(--band); border: 1px solid var(--hair);
 }
 .pcard__thumb img { width: 100%; height: 100%; object-fit: cover; }
 .pcard__ph { width: 100%; height: 100%; background: var(--band); }
+/* 실제 앱은 이 자리에 장바구니 버튼이 떠 있다. 같은 위치·같은 무게. */
+.pcard__go {
+  position: absolute; right: var(--s2); bottom: var(--s2);
+  width: 28px; height: 28px; border-radius: var(--rp);
+  display: grid; place-items: center;
+  background: rgba(26, 26, 30, 0.62); color: #fff; box-shadow: var(--e2);
+}
+.pcard__chips { display: flex; flex-wrap: wrap; gap: var(--s1); margin-top: var(--s2); }
+.chip2 {
+  font-size: var(--fs-micro); color: var(--ink-2); background: var(--band);
+  padding: 2px var(--s2); border-radius: var(--rp); white-space: nowrap;
+}
+.pcard__seller {
+  margin-top: var(--s2); font-size: var(--fs-micro); font-weight: 600; color: var(--muted);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
 .pcard__name {
-  font-size: var(--fs-body); line-height: 1.4; margin-top: 7px; color: var(--ink);
+  font-size: var(--fs-body); line-height: 1.4; margin-top: var(--s1); color: var(--ink);
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
-.pcard__price { font-size: var(--fs-lead); font-weight: 800; margin-top: 3px; font-variant-numeric: tabular-nums; }
-.badge { display: inline-block; font-size: var(--fs-micro); font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-top: 4px; }
+.pcard__price {
+  font-size: var(--fs-strong); font-weight: 800; margin-top: var(--s1);
+  font-variant-numeric: tabular-nums; letter-spacing: -0.02em;
+}
+/* 원가·할인율이 없으므로 실제 앱의 '쿠폰할인가' 자리에는 사실인 라벨만 둔다. */
+.pcard__price em {
+  font-style: normal; font-size: var(--fs-micro); font-weight: 700;
+  color: var(--brand); margin-right: var(--s1); letter-spacing: 0;
+}
+.pcard__rate {
+  margin-top: var(--s1); font-size: var(--fs-label); color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+.pcard__star { color: var(--star); margin-right: 3px; }
+.pcard__rv { color: var(--muted); margin-left: var(--s1); }
+.badge { display: inline-block; font-size: var(--fs-micro); font-weight: 700; padding: 2px var(--s2); border-radius: var(--r1); margin-top: var(--s2); }
 .badge--sale { background: var(--sale-bg); color: var(--sale-ink); }
 
 .empty { padding: 56px 12px; text-align: center; color: var(--muted); }
