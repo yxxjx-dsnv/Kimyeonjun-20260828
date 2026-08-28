@@ -105,14 +105,56 @@ check('재추첨 불가 안내', (await page.textContent('.seed')).includes('같
   check('공동구매도 손해 없음', gd.length === all && gd.every((d) => !d.includes('-')))
 }
 
-// 9. 정직성 시트
-await page.goto(BASE, { waitUntil: 'networkidle' })
+// 9. 데일리 100원 — 꽝 있는 포맷, 확률 전부 공개
+{
+  const d = meta.dailies[0]
+  await page.goto(BASE, { waitUntil: 'domcontentloaded' })
+  await page.waitForSelector('.dcard', { timeout: 20000 })
+  check(`데일리 ${meta.dailies.length}종 노출`, (await page.$$('.dcard')).length === meta.dailies.length)
+  await page.click('.dcard')
+  await page.waitForSelector('.gbnow', { timeout: 10000 })
+  const stat = await page.$$eval('.gbnow b', (e) => e.map((x) => x.textContent))
+  check('당첨 확률 공개', stat[0].includes(String(d.winOdds)))
+  check('꽝 확률도 공개', stat[1].includes(String(d.blankOdds)))
+  check('확률 계산 근거 4단계', (await page.$$('.deco__ol li')).length === 4)
+  await page.click('.btn--go')
+  await page.waitForSelector('.dres', { timeout: 20000 })
+  const t = (await page.textContent('.dres b')).trim()
+  check('당첨 또는 꽝이 나온다', ['당첨!', '꽝'].includes(t), t)
+  check('투표 카드 등장', await page.isVisible('.vote'))
+}
+
+// 10. 뽑기 통과 천장
+{
+  // networkidle을 쓰지 않는다 — 데일리 화면을 거친 뒤로는 앱이 주기적으로
+  // 상태를 확인해 idle이 오지 않는다. 필요한 요소가 뜨는 것으로 판단한다.
+  await page.goto(BASE, { waitUntil: 'domcontentloaded' })
+  await page.waitForSelector('.blist li:nth-child(2) .bcard', { timeout: 20000 })
+  await page.click('.blist li:nth-child(2) .bcard')
+  await page.waitForSelector('.bin', { timeout: 10000 })
+  check('뽑기 통 4등급', (await page.$$('.bin__row')).length === 4)
+  const tot = await page.textContent('.bin__tot')
+  check('총 구좌 표기', /[\d,]+구좌/.test(tot), tot)
+  check('천장 바 존재', await page.isVisible('.pity'))
+  await page.focus('.pity__sim input')
+  for (let i = 0; i < 12; i++) await page.keyboard.press('ArrowRight')
+  await page.waitForTimeout(300)
+  check('천장 도달 시 안내 변경', (await page.textContent('.pity__note')).includes('올라갑니다'))
+}
+
+// 11. 정직성 시트
+await page.goto(BASE, { waitUntil: 'domcontentloaded' })
+await page.waitForSelector('.top__q', { timeout: 20000 })
 await page.click('.top__q')
 await page.waitForSelector('.sheet', { timeout: 5000 })
 const sheet = await page.textContent('.sheet')
 check('수식 공개', sheet.includes('매입 원가율') && sheet.includes('고객 획득비 회수'))
 check('가정 명시', sheet.includes('모델 가정'))
-check('꽝 없는 이유 3층', sheet.includes('수집 단계에서'))
+check('포맷별 정직성 설명', sheet.includes('일부 형식의 속성'))
+check('꽝 없는 형식의 3층 구조', sheet.includes('수집 단계에서'))
+check('꽝 있는 형식도 명시', sheet.includes('이 형식에는 꽝이 있습니다'))
+check('확률 출처 3가지', sheet.includes('재고 비율') && sheet.includes('손익분기') && sheet.includes('할인 여력'))
+check('천장은 공시 대상', sheet.includes('보장형 시스템'))
 
 check('콘솔 에러 없음', errors.length === 0, errors.slice(0, 2).join(' | '))
 await browser.close()
