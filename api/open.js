@@ -10,7 +10,7 @@
 import {
   getBox, collapseUp, tiersOf, oddsOf, drawOne, TIERS, TEAM_MAX, MAX_DRAWS_PER_PERSON, byId,
   getGroupbuy, gbItem, gbPayRatio, gbDiscount, gbFreeOdds, gbFreeCount, gbDraw,
-  getDaily, dailyItem, dailyDraw, dailyWinOdds, dailyBlankOdds, baseOdds, teamBoost, pityLeft,
+  getDaily, dailyDraw, dailyWinOdds, dailyBlankOdds, baseOdds, teamBoost,
 } from './_draw.js'
 
 import { readRoom, mutateRoom, counter, todayKey } from './_room.js'

@@ -36,7 +36,7 @@ await page.waitForTimeout(500)
 await shot(page, 'ob2_curve', 700)                    // ② 확률 곡선 (혼자)
 
 await page.click('text=손주 줄 것도 넣어서')
-await page.waitForSelector('.tiers__note', { timeout: 40000 })
+await page.waitForSelector('.taste__done', { timeout: 40000 })
 await page.waitForTimeout(400)
 await shot(page, 'ob3_taste', 640)                    // ③ 취향 대화
 

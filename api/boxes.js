@@ -7,14 +7,15 @@
 import {
   BOXES, TEAM_MAX, MAX_DRAWS_PER_PERSON, TIERS, BANDS,
   collapseUp, tiersOf, tierMeanRetail, oddsTable, evMultiple,
-  customerBEP, companyBEP, costRatio, cacRecovered, budgetOf, poolMeta,
+  customerBEP, companyBEP, poolMeta,
   CR_MIN, CR_MAX, K, N0, CAC, VIRAL_MAX, CAC_CAP, MARGIN, SPLIT,
   MIN_C_SHARE, FIXED_COST_RATIO, PRICE_RATIO, POOL,
   GROUPBUYS, FREE_SHARE, gbItem, gbCostRatio, gbDiscount, gbPayRatio, gbFreeOdds, gbFreeCount,
   DAILIES, dailyItem, dailyCost, dailyNetPerPlay, dailyBreakEvenPlays, dailyWinOdds,
-  dailyBlankOdds, dailyPlaysToExhaust, baseOdds, teamBoost, stockTotal, pityLeft,
+  dailyBlankOdds, dailyPlaysToExhaust, baseOdds, teamBoost, stockTotal,
 } from './_draw.js'
 import { readVotes, VOTE_LABEL } from './room.js'
+import { counter } from './_room.js'
 
 const SAMPLES = 6
 
@@ -88,10 +89,14 @@ export function buildGroupbuys() {
  * ② 데일리 100원 — 꽝 확률까지 그대로 내려보낸다.
  * 이 포맷은 무손실이 아니라 **완전 공개**로 정직성을 지킨다.
  */
-export function buildDailies() {
-  return DAILIES.map((d) => {
+export async function buildDailies() {
+  return Promise.all(DAILIES.map(async (d) => {
     const item = dailyItem(d)
+    // 실시간 잔여를 함께 내려보낸다 — 이게 없으면 목록의 재고 바가
+    // 영원히 안 움직이는 죽은 UI가 된다(실측으로 확인된 결함).
+    const used = await counter(`olbox:daily:${d.id}:used`)
     return {
+      remaining: Math.max(0, d.totalStock - used),
       id: d.id, name: d.name, blurb: d.blurb,
       entry: d.entry, dailyLimit: d.dailyLimit, blank: d.blank,
       item, itemPrice: item.price, totalStock: d.totalStock,
@@ -105,7 +110,7 @@ export function buildDailies() {
         playsToExhaust: dailyPlaysToExhaust(d),
       },
     }
-  })
+  }))
 }
 
 /** 화면의 '정직성 시트'가 그대로 렌더하는 수식 파라미터. 숨기지 않는다. */
@@ -114,10 +119,6 @@ export const formula = () => ({
   cac: { CAC, VIRAL_MAX, CAC_CAP, K, N0, note: 'Bass(1969) 확산모형의 모방 항' },
   budget: { MARGIN, SPLIT, MIN_C_SHARE, note: '예산 = 참여비×(1−마진) + CAC회수' },
   economics: { FIXED_COST_RATIO, companyBEP: companyBEP() },
-  curve: Array.from({ length: TEAM_MAX }, (_, i) => ({
-    n: i + 1,
-    costRatio: +costRatio(i + 1).toFixed(4),
-  })),
   assumptions: [
     'CR_MIN·CR_MAX·N0·K·CAC는 모델 가정입니다. 실제 매입 단가표와 코호트 데이터로 바꾸면 확률표가 확정됩니다.',
     'Metcalfe의 n²는 쓰지 않았습니다 — Briscoe·Odlyzko·Tilly(2006)가 반증했기 때문입니다. 다만 그 반증도 Netnomics(2014)에서 재반박됐고, 저희는 확률이 더 낮게 나오는 보수적인 쪽을 택했습니다.',
@@ -145,7 +146,7 @@ export default async function handler(req, res) {
   return res.status(200).json({
     boxes: buildBoxes(),
     groupbuys: buildGroupbuys(),
-    dailies: buildDailies(),
+    dailies: await buildDailies(),
     votes: await readVotes(),
     voteLabel: VOTE_LABEL,
     // 홈 탭 그리드용. 크롤 데이터가 올박스 밖에서도 화면에 쓰인다.

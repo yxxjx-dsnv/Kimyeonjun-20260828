@@ -109,9 +109,6 @@ export function assertFloor(box, tiers) {
  * 후보가 모자라면 폴백으로 대체하고 **문장도 함께 다시 쓴다**.
  * 화면에 없는 것을 문장이 주장하면 안 되기 때문이다.
  */
-export const CURATED_TIERS = ['C', 'B'] // 취향이 정하는 등급
-export const FIXED_TIERS = ['S', 'A'] // 상자가 정하는 등급
-
 export function composeBox(box, picked, reply) {
   const base = tiersOf(box) // 전체 풀 기준
   /**
@@ -125,15 +122,24 @@ export function composeBox(box, picked, reply) {
    */
   const build = (items) => {
     const cur = tiersOf(box, items.map((i) => i.id))
-    return collapseUp({
-      S: base.S, A: base.A,
-      B: cur.B.length >= MIN_TIER_ITEMS ? cur.B : base.B,
-      C: cur.C,
-    })
+    const useB = cur.B.length >= MIN_TIER_ITEMS
+    // C도 B와 같은 폴백을 준다. C만 무보호라 후보가 얇은 취향(칩으로 앱이
+    // 직접 제시한 것 포함)이 전면 폴백으로 떨어져 "짤 수 없다"고 거절됐다.
+    const useC = cur.C.length >= MIN_TIER_ITEMS
+    return {
+      tiers: collapseUp({
+        S: base.S, A: base.A,
+        B: useB ? cur.B : base.B,
+        C: useC ? cur.C : base.C,
+      }),
+      // 취향이 실제로 반영된 등급 수. 0이면 개인화가 없었다는 뜻이므로
+      // "좁혔다"고 주장하면 안 된다 — 전면 폴백으로 처리한다.
+      personalized: (useB ? 1 : 0) + (useC ? 1 : 0),
+    }
   }
   const fallback = (why) => {
     const items = fallbackPick(box)
-    const tiers = build(items)
+    const { tiers } = build(items)
     assertFloor(box, tiers) // 폴백마저 깨지면 그건 데이터 문제다. 숨기지 않는다.
     return {
       tiers, items, usedFallback: true, why,
@@ -143,7 +149,8 @@ export function composeBox(box, picked, reply) {
 
   if (picked.length < MIN_BOX_ITEMS) return fallback(`후보 ${picked.length}개`)
 
-  const tiers = build(picked)
+  const { tiers, personalized } = build(picked)
+  if (personalized === 0) return fallback('취향 후보가 기저 등급 밴드에 없음')
   try {
     assertFloor(box, tiers)
   } catch (e) {
@@ -273,9 +280,14 @@ export default async function handler(req, res) {
       question,
       options: question ? salvaged.options.slice(0, 4).map((s) => String(s).slice(0, 14)) : [],
       rescuedIds: salvaged.rescued,
-      axis: String(out.axis || '').slice(0, 16),
+      axis: String(out.axis || '').slice(0, 12),
       // 개봉 때 이 구성 그대로 뽑도록 id를 돌려준다. 서버는 받은 id를 다시 조인한다.
-      pickedIds: composed.items.map((i) => i.id),
+      //
+      // 반드시 **화면에 그린 4개 등급 전체**를 보낸다. 처음엔 LLM 픽(C·B)만
+      // 보냈는데, open이 그 id로 재조인하면 S·A가 비어 화면은 0.280%를
+      // 보여주면서 실제 추첨은 S 후보 0개에서 뽑았다 — 이 제품이 가장
+      // 피해야 할 종류의 어긋남이다.
+      pickedIds: TIERS.flatMap((t) => composed.tiers[t].map((i) => i.id)),
       pickedCount: composed.items.length,
       llmPicked: picked.length,
       usedFallback: composed.usedFallback,
@@ -339,6 +351,21 @@ if (process.argv[1]?.endsWith('curate.js')) {
   ok('폴백 시 문장도 교체', collapsed.reply !== 'AI 문장')
   ok('폴백 결과는 기저 등급을 갖는다', collapsed.tiers.C.length >= MIN_TIER_ITEMS)
   assert.throws(() => assertFloor(box, { S: pricey, A: [], B: [], C: [] }), /기저 등급/)
+
+  // ⑧ 화면 ↔ 추첨 왕복 불변식 (실측에서 나온 결함)
+  // 응답의 pickedIds를 open.js처럼 재조인하면 화면에 그린 구성과 같아야 한다.
+  // 예전엔 LLM 픽(C·B)만 보내서, 화면은 S 0.280%를 보여주며 실제 추첨은
+  // S 후보 0개에서 뽑았다.
+  {
+    const { tiersOf: reJoin } = await import('./_draw.js')
+    const roundIds = TIERS.flatMap((t) => wide.tiers[t].map((i) => i.id))
+    const re = reJoin(box, roundIds)
+    ok('왕복: 최고 등급이 비지 않는다', re.S.length > 0, `S ${re.S.length}개`)
+    ok('왕복: 기저 등급 하한 유지', re.C.length >= MIN_TIER_ITEMS, `C ${re.C.length}개`)
+    for (const t of TIERS)
+      ok(`왕복: ${t} 구성 일치`, re[t].length === wide.tiers[t].length,
+        `${re[t].length} ≠ ${wide.tiers[t].length}`)
+  }
   ok('기저 등급 없음은 throw', true)
 
   // ⑧ 빈 티어를 뽑으면 아래로 내려간다 (위로 올리면 단위경제가 무너진다)

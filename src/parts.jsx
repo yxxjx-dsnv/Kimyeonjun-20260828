@@ -143,8 +143,8 @@ export function OddsCurve({ oddsByTeam, teamSize, customerBEP, teamMax = 10 }) {
         {[1, 4, 7, 10].filter((n) => n <= teamMax).map((n) => (
           <text key={n} x={x(n)} y={H - 8} className="curve__tick">{n}</text>
         ))}
-        <text x={4} y={y(max * 0.92)} className="curve__tick">{pct(max, 1)}</text>
-        <text x={4} y={H - PB} className="curve__tick">0</text>
+        <text x={4} y={y(max * 0.92)} textAnchor="start" className="curve__tick">{pct(max, 1)}</text>
+        <text x={4} y={H - PB} textAnchor="start" className="curve__tick">0</text>
       </svg>
       <p className="curve__cap">가로축 참여 인원 · 세로축 최고 등급 확률</p>
     </div>
@@ -229,8 +229,10 @@ export function TierStrip({ tier, odds }) {
               {it.image ? <img src={it.image} alt="" loading="lazy" /> : <span className="tstrip__ph" />}
               <span className="tstrip__nm">{it.name}</span>
               <span className="tstrip__pr">{won(it.price)}</span>
-              {it.kc !== 'certified' && it.group === 'trend' && (
-                <span className="kc">KC 확인 필요</span>
+              {/* 카드 시장의 실제 쟁점은 짝퉁·재포장이다. 상품명에서 정품
+                  표기가 확인 안 된 카드에만 배지를 단다 — 크롤 데이터의 auth 축. */}
+              {it.group === 'card' && it.auth !== 'official' && (
+                <span className="kc">정품 미확인</span>
               )}
             </a>
           </li>
@@ -271,8 +273,40 @@ export function MemberRail({ members, teamMax, readyCount, phase }) {
   )
 }
 
+/* ── 개봉 장면 — 이 제품의 유일한 극장 ─────────────────────────
+   평소 화면은 올웨이즈 문법을 따르고, 대담함은 여기에만 쓴다.
+   등급색 광선 + 카드 플립. S/A만 색종이가 떨어진다.
+   prefers-reduced-motion이면 전역 규칙이 모든 animation을 끈다. */
+export function RevealScene({ mine, onDone }) {
+  const it = mine.picks[0].item
+  const big = mine.best === 'S' || mine.best === 'A'
+  return (
+    <div className={`scene scene--${mine.best}`} onClick={onDone}
+      role="button" tabIndex={0} aria-label="결과 확인 — 눌러서 전체 결과 보기"
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onDone() }}>
+      <span className="scene__rays" aria-hidden="true" />
+      {big && (
+        <span className="scene__confetti" aria-hidden="true">
+          {Array.from({ length: 14 }, (_, i) => <i key={i} />)}
+        </span>
+      )}
+      <div className="scene__card">
+        <span className={`tier tier--${mine.best} scene__tier`}>{mine.best}</span>
+        <p className="scene__grade">{TIER_LABEL[mine.best]} 당첨</p>
+        {it.image ? <img src={it.image} alt="" /> : <span className="scene__ph" />}
+        <p className="scene__nm">{it.name}</p>
+        <p className="scene__pr">
+          낸 돈 {won(mine.settle.paid)} → 시가 <b>{won(mine.settle.retailValue)}</b>
+          <Delta v={mine.settle.delta} />
+        </p>
+      </div>
+      <p className="scene__hint">눌러서 팀 전체 결과 보기</p>
+    </div>
+  )
+}
+
 /* ── 개봉 결과 카드 ────────────────────────────────────────── */
-export function RevealCard({ r, entry, mine, delay }) {
+export function RevealCard({ r, mine, delay }) {
   return (
     <li className={`rv ${mine ? 'is-mine' : ''}`} style={{ animationDelay: `${delay}ms` }}>
       <header className="rv__head">
@@ -303,7 +337,7 @@ export function RevealCard({ r, entry, mine, delay }) {
    까지이고, '무엇이 뽑히는가'는 서버가 정한다.                            */
 const CHIPS = ['주방 살림 위주로', '손주 줄 것도 넣어서', '내가 쓸 것 위주로', '먹거리 위주로']
 
-export function TasteChat({ boxId, teamSize, onCurated, axis, disabled }) {
+export function TasteChat({ boxId, teamSize, onCurated, note, disabled }) {
   const [msgs, setMsgs] = useState([])
   const [text, setText] = useState('')
   const [busy, setBusy] = useState(false)
@@ -334,7 +368,6 @@ export function TasteChat({ boxId, teamSize, onCurated, axis, disabled }) {
     <section className="taste">
       <header className="taste__h">
         <h3>이 상자에 뭘 담을까요?</h3>
-        {axis && <span className="taste__axis">{axis}</span>}
       </header>
       <p className="taste__sub">
         무작위는 <b>무엇이 뽑히는지</b>만 정합니다. <b>무엇이 들어갈지</b>는 취향으로 좁힙니다.
@@ -346,22 +379,17 @@ export function TasteChat({ boxId, teamSize, onCurated, axis, disabled }) {
       {busy && <p className="bub bub--assistant is-busy">담는 중…</p>}
       {err && <p className="taste__err">{err}</p>}
 
-      {ask ? (
-        <>
-          <p className="bub bub--assistant">{ask.q}</p>
-          <div className="taste__chips">
-            {ask.options.map((o) => (
-              <button key={o} className="chip" onClick={() => send(o)} disabled={disabled || busy}>{o}</button>
-            ))}
-          </div>
-        </>
-      ) : msgs.length === 0 ? (
-        <div className="taste__chips">
-          {CHIPS.map((c) => (
-            <button key={c} className="chip" onClick={() => send(c)} disabled={disabled || busy}>{c}</button>
-          ))}
-        </div>
-      ) : null}
+      {ask && <p className="bub bub--assistant">{ask.q}</p>}
+      {/* 대화가 실제로 무엇을 바꿨는지 그 자리에서 말한다 — 결과 문장이
+          화면 한참 아래에만 있으면 이 기능의 목적 자체가 안 읽힌다. */}
+      {note && !busy && !ask && <p className="taste__done">{note}</p>}
+      {/* 칩은 항상 떠 있다. 되묻기가 오면 그 보기로 바뀔 뿐이다 —
+          어떤 상태에서도 타이핑을 강요하는 막다른 골목을 만들지 않는다. */}
+      <div className="taste__chips">
+        {(ask?.options?.length ? ask.options : CHIPS).map((o) => (
+          <button key={o} className="chip" onClick={() => send(o)} disabled={disabled || busy}>{o}</button>
+        ))}
+      </div>
 
       <div className="taste__in">
         <input
@@ -481,7 +509,7 @@ export function HonestySheet({ formula, pool, companyBEP, onClose, live }) {
           상품과 가격은 {new Date(pool.crawledAt).toLocaleString('ko-KR')} 다나와에서 수집한{' '}
           {pool.size.toLocaleString()}건입니다. 시세는 변합니다.
         </li>
-        <li>완구의 KC 안전확인은 상품명에 표기된 것만 인정합니다. 나머지는 &lsquo;확인 필요&rsquo;로 둡니다.</li>
+        <li>카드류는 상품명·판매처에서 정품 표기가 확인된 것만 &lsquo;정품 표기&rsquo;로 배지합니다. 확인 안 되면 &lsquo;정품 미확인&rsquo;으로 둡니다 — 없는 보증을 만들지 않습니다.</li>
       </ul>
 
       <button className="btn btn--ghost" onClick={onClose}>닫기</button>
@@ -498,10 +526,11 @@ export function GroupCurve({ steps, teamSize }) {
   const W = 320, H = 128, PL = 34, PR = 34, PT = 14, PB = 26
   const n0 = steps[0].n, n1 = steps.at(-1).n
   const x = (n) => PL + ((n - n0) / (n1 - n0)) * (W - PL - PR)
-  const maxD = Math.max(...steps.map((s) => s.discount)) * 1.1
-  const maxF = Math.max(...steps.map((s) => s.freeOdds)) * 1.1
-  const yD = (v) => H - PB - (v / maxD) * (H - PT - PB)
-  const yF = (v) => H - PB - (v / maxF) * (H - PT - PB)
+  // 두 시리즈는 같은 단위(%)다. 각자 최댓값으로 정규화하면 둘 다 단조증가라
+  // 끝점이 데이터와 무관하게 항상 같은 높이에 겹친다 — 실제로는 3배 차이.
+  const maxV = Math.max(...steps.map((st) => Math.max(st.discount, st.freeOdds))) * 1.1
+  const yD = (v) => H - PB - (v / maxV) * (H - PT - PB)
+  const yF = yD
   const path = (fy, key) => steps.map((s, i) => `${i ? 'L' : 'M'} ${x(s.n)} ${fy(s[key])}`).join(' ')
   const cur = steps.find((s) => s.n === teamSize) || steps[0]
 
@@ -645,7 +674,6 @@ export function PityBar({ pity, miss, onChange }) {
 
 /* ── 데일리 100원 ───────────────────────────────────────── */
 export function DailyCard({ d, onPick }) {
-  const sold = d.totalStock - (d.remaining ?? d.totalStock)
   return (
     <button className="dcard" onClick={() => onPick(d.id)}>
       <span className="dcard__row">
@@ -661,7 +689,9 @@ export function DailyCard({ d, onPick }) {
       </span>
       <span className="dcard__stock">
         <span className="dcard__bar">
-          <span className="dcard__fill" style={{ width: `${(sold / d.totalStock) * 100}%` }} />
+          {/* 캡션이 '남은 경품'이므로 바도 잔여 기준으로 채운다 — 반대로 채우면
+              재고 100%가 '다 팔림'으로 읽힌다. remaining은 서버가 실시간으로 내려준다. */}
+          <span className="dcard__fill" style={{ width: `${((d.remaining ?? d.totalStock) / d.totalStock) * 100}%` }} />
         </span>
         <em>{`남은 경품 ${(d.remaining ?? d.totalStock)}/${d.totalStock}개`}</em>
       </span>

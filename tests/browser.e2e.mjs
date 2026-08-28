@@ -95,8 +95,18 @@ await page.waitForSelector('.sheet', { state: 'detached', timeout: 5000 })
 
 // 4. 취향 대화 (ChatGPT) — 키가 없으면 규칙 기반으로 내려앉는다
 await page.click('text=손주 줄 것도 넣어서')
-await page.waitForSelector('.tiers__note', { timeout: 40000 })
-check('취향 구성 반영', (await page.textContent('.tiers__note')).includes('좁혔습니다'))
+// AI가 되물을 수 있다. 그 경우에도 칩은 항상 떠 있어야 하고(막다른 골목 금지),
+// 한 번 더 고르면 결과 문장이 대화 안(.taste__done)에 떠야 한다.
+for (let turn = 0; turn < 2; turn++) {
+  try { await page.waitForSelector('.taste__done', { timeout: 40000 }); break } catch {
+    const chip = await page.$('.taste__chips .chip')
+    check('되묻기 상태에서도 칩이 떠 있다', Boolean(chip))
+    if (!chip) break
+    await chip.click()
+  }
+}
+const done = await page.textContent('.taste__done')
+check('취향 구성 반영이 대화 안에 뜬다', /좁혔|기본 구성/.test(done), done)
 // 등급 스트립이 664px로 그려져 화면 밖으로 나갔던 자리다.
 check('가로 넘침 없음 — 등급 스트립', (await spill(page)).length === 0, (await spill(page)).join(' | '))
 
@@ -116,6 +126,11 @@ check('게이트 안내 문구', await page.isVisible('.gatenote'))
 
 // 7. 개봉과 정산
 await page.waitForSelector('.rvlist', { timeout: 60000 })
+// 개봉은 전폭 장면으로 먼저 나온다. 탭하면 걷히고 팀 전체 결과가 드러난다.
+check('개봉 장면 노출', await page.isVisible('.scene'))
+check('장면에 등급과 정산', /낸 돈.*시가/s.test(await page.textContent('.scene__card')))
+await page.click('.scene')
+await page.waitForSelector('.scene', { state: 'detached', timeout: 5000 })
 check('참여자 수만큼 결과', (await page.$$('.rv')).length === 10)
 // '내가 받은 것' 요약 카드에도 정산이 있으므로 참여자 카드 안으로 한정한다.
 const deltas = await page.$$eval('.rv .rv__delta, .rv .rv__even', (els) => els.map((e) => e.textContent))
@@ -144,6 +159,11 @@ check('가로 넘침 없음 — 개봉 결과', (await spill(page)).length === 0
 
   await page.click('.btn--go')
   await page.waitForSelector('.rvlist', { timeout: 30000 })
+  // 60명 결과를 전부 늘어놓지 않는다 — 당첨자와 나만 먼저, 나머지는 한 줄
+  const collapsed = (await page.$$('.rv')).length
+  const moreBtn = await page.$('.rv__more')
+  check('결과가 접혀서 나온다', Boolean(moreBtn) && collapsed <= 12, `${collapsed}행`)
+  if (moreBtn) { await moreBtn.click(); await page.waitForTimeout(200) }
   const free = (await page.$$('.freetag')).length
   const all = (await page.$$('.rv')).length
   check('발주 결과에 무료 당첨자', free >= 1 && free < all, `${free}/${all}명`)

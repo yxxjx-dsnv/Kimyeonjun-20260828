@@ -10,10 +10,10 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
-  won, pct, naturalFreq, Delta, TIERS, ProductCard, OddsCurve, OddsBars, OddsTable,
-  TierStrip, MemberRail, RevealCard, HonestySheet, TasteChat,
+  won, pct, naturalFreq, Delta, TIERS, ProductCard, OddsBars,
+  TierStrip, MemberRail, RevealCard, RevealScene, HonestySheet, TasteChat,
   GroupCurve, GroupTable, GroupResult,
-  StockBin, PityBar, DailyCard, DailyEconomics, VoteCard,
+  DailyCard, DailyEconomics, VoteCard,
   IconHome, IconContent, IconHeart, IconUser, IconBox, IconCart, IconSearch, QUICK_ICON,
 } from './parts.jsx'
 
@@ -46,7 +46,8 @@ function SectionHead({ title, onMore }) {
 function HomeTab({ pool, onGoOlbox }) {
   const [q, setQ] = useState('')
   const [cat, setCat] = useState('all')
-  const withImg = useMemo(() => pool.filter((i) => i.image), [pool])
+  // 서버(homeSample)가 이미 이미지 있는 것만 보낸다 — 여기서 또 거를 것 없다.
+  const withImg = pool
 
   const query = q.trim()
   const hits = useMemo(
@@ -80,7 +81,7 @@ function HomeTab({ pool, onGoOlbox }) {
         <IconSearch />
         <input
           type="search" value={q} onChange={(e) => setQ(e.target.value)}
-          placeholder="올웨이즈에서 상품 검색하기" aria-label="상품 검색"
+          placeholder="올웨이즈에서 상품 검색하기" aria-label="상품 검색" maxLength={40}
         />
       </div>
 
@@ -110,7 +111,7 @@ function HomeTab({ pool, onGoOlbox }) {
         <>
           <SectionHead title={query ? `‘${query}’ 검색 결과 ${list.length}건` : CAT_LABEL[cat]} />
           {list.length === 0 ? (
-            <p className="hnone">검색 결과가 없습니다. 수집한 {withImg.length}건 안에서만 찾습니다.</p>
+            <p className="hnone">검색 결과가 없습니다. 홈에 올린 상품 {withImg.length}건 안에서만 찾습니다.</p>
           ) : (
             <div className="grid">
               {list.map((it) => (
@@ -177,30 +178,34 @@ function BoxList({ boxes, groupbuys, dailies, onPick, onPickGroup, onPickDaily, 
         사람이 모일수록 상위 등급 확률이 오르고, <b>전원이 뽑기를 눌러야만</b> 열립니다.
       </p>
       <ul className="blist">
-        {boxes.map((b) => (
+        {boxes.map((b) => {
+          // 배너의 주인공은 최고 등급 상품 실물이다. S 샘플은 비싼 순으로 온다.
+          const prize = b.tiers[0]?.samples?.find((x) => x.image)
+          return (
           <li key={b.id}>
             <button className="bcard" onClick={() => onPick(b.id)}>
-              <span className="bcard__top">
+              <span className="bcard__glow" aria-hidden="true" />
+              {prize && <img className="bcard__prize" src={prize.image} alt="" loading="lazy" />}
+              <span className="bcard__shine" aria-hidden="true" />
+              <span className="bcard__body">
                 <span className="bcard__name">{b.name}</span>
-                <span className="bcard__entry">{won(b.entry)}</span>
+                <span className="bcard__blurb">{b.blurb}</span>
+                <span className="bcard__odds">
+                  최고 <b>{b.topLabel}</b> · 시가 {won(b.topRetail)}
+                  <em>혼자 {pct(b.oddsByTeam[1].S, 3)} → 10명 {pct(b.oddsByTeam[10].S, 3)}</em>
+                </span>
+                <span className="bcard__gems">
+                  {TIERS.map((t) => (
+                    <span key={t} className={`gem gem--${t}`}>{t} {b.stock[t]}</span>
+                  ))}
+                  {b.pity && <span className="gem gem--pity">천장 {b.pity.window}회 → {pct(b.pity.boostTo, 0)}</span>}
+                </span>
               </span>
-              <span className="bcard__blurb">{b.blurb}</span>
-              <span className="bcard__odds">
-                최고 등급 <b>{b.topLabel}</b>
-                <em>
-                  혼자 {pct(b.oddsByTeam[1].S, 3)} → 10명 {pct(b.oddsByTeam[10].S, 3)}
-                </em>
-              </span>
-              <span className="bcard__stock">
-                뽑기 통 {TIERS.map((t) => `${t} ${b.stock[t]}개`).join(' · ')} = {b.stockTotal.toLocaleString()}구좌
-              </span>
-              <span className="bcard__ratio">
-                참여비는 최고 상품가({won(b.topRetail)})의 200분의 1
-                {b.pity && ` · ${b.pity.window}회 연속 미당첨이면 다음 회차 ${pct(b.pity.boostTo, 0)}`}
-              </span>
+              <span className="bcard__entry">{won(b.entry)}</span>
             </button>
           </li>
-        ))}
+          )
+        })}
       </ul>
       <h2 className="lead2">② 하루 한 번, 100원</h2>
       <p className="lead2__s">
@@ -258,6 +263,7 @@ export default function App() {
   const [gbId, setGbId] = useState(null) // 공동구매형
   const [gbTeam, setGbTeam] = useState(20)
   const [gbResult, setGbResult] = useState(null)
+  const [gbAll, setGbAll] = useState(false)
   const [dailyId, setDailyId] = useState(null) // 데일리 100원
   const [dailyResult, setDailyResult] = useState(null)
   const [pityMiss, setPityMiss] = useState(0) // 천장 체험용 (내 연속 미당첨)
@@ -270,6 +276,7 @@ export default function App() {
 
   const clearTimers = () => { timers.current.forEach(clearTimeout); timers.current = [] }
   const later = (fn, ms) => timers.current.push(setTimeout(fn, ms))
+  const [scene, setScene] = useState(false)
   useEffect(() => clearTimers, [])
 
   useEffect(() => {
@@ -347,12 +354,13 @@ export default function App() {
   const doOpen = useCallback(async (snapshot) => {
     setBusy(true)
     try {
-      const body = snapshot.live
-        ? { roomId: snapshot.roomId }
-        : {
-            sim: true, roomId: snapshot.roomId, boxId,
-            members: snapshot.members.map(({ id, name, draws }) => ({ id, name, draws })),
-          }
+      // 팀원 합류·준비는 프론트가 시뮬레이션하므로 서버 방 상태와 동기화되지
+      // 않는다. live 분기({roomId}만 전송)는 그래서 항상 409였다 — 서버 방
+      // 로직 자체는 tests/room.test.mjs가 API로 직접 검증한다.
+      const body = {
+        sim: true, roomId: snapshot.roomId, boxId,
+        members: snapshot.members.map(({ id, name, draws }) => ({ id, name, draws })),
+      }
       if (curated?.pickedIds?.length) body.pickedIds = curated.pickedIds
       if (pityMiss > 0) body.pityMiss = { [snapshot.memberId]: pityMiss }
       const r = await fetch('/api/open', {
@@ -360,7 +368,12 @@ export default function App() {
       })
       const j = await r.json()
       if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`)
+      setErr(null)
       setResult(j); setPhase('result')
+      // 개봉은 이 제품에서 가장 중요한 순간인데 카드 목록으로 밋밋하게 끝났다.
+      // 내 결과 하나를 전폭 장면으로 먼저 보여주고, 걷히면 팀 전체가 아래에 있다.
+      setScene(true)
+      later(() => setScene(false), 3600)
     } catch (e) {
       setErr(e.message); setPhase('ready')
     } finally { setBusy(false) }
@@ -383,9 +396,9 @@ export default function App() {
     }, t + 500)
   }
 
-  const reset = () => { clearTimers(); setResult(null); setPhase('detail'); openBox(boxId) }
+  const reset = () => { clearTimers(); setScene(false); setResult(null); setPhase('detail'); openBox(boxId) }
   const backToList = () => {
-    clearTimers(); setPhase('list'); setBoxId(null); setRoom(null); setResult(null); setCurated(null)
+    clearTimers(); setScene(false); setPhase('list'); setBoxId(null); setRoom(null); setResult(null); setCurated(null)
     setGbId(null); setGbResult(null); setDailyId(null); setDailyResult(null)
   }
 
@@ -395,7 +408,7 @@ export default function App() {
   }
   /** 데일리 뽑기 — 서버가 일일 한도와 재고를 소유한다. */
   const playDaily = async () => {
-    setBusy(true)
+    setBusy(true); setErr(null)
     try {
       const r = await fetch('/api/open', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -425,7 +438,7 @@ export default function App() {
   }
   /** 발주 — 인원이 최소 수량을 넘어야 서버가 200을 준다. */
   const placeOrder = async () => {
-    setBusy(true)
+    setBusy(true); setErr(null)
     try {
       const r = await fetch('/api/open', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -512,15 +525,25 @@ export default function App() {
           <h2>{`${gbResult.gbName} 발주 완료`}</h2>
           <p>{`${gbResult.teamSize}명 · 정가 ${won(gbResult.listPrice)} → ${won(gbResult.pay)} (${gbResult.discountPct}% 할인) · 무료 당첨 ${gbResult.freeCount}명`}</p>
         </header>
+        {/* 60명이면 결과가 7화면 넘게 이어지는데 문구는 두 종류뿐이다.
+            당첨자와 나만 먼저 보여주고 나머지는 한 줄로 접는다. */}
         <ul className="rvlist">
-          {gbResult.results.map((r) => (
+          {(gbAll
+            ? gbResult.results
+            : gbResult.results.filter((r) => r.free || r.memberId === 'g0')
+          ).map((r) => (
             <GroupResult key={r.memberId} r={r} mine={r.memberId === 'g0'} />
           ))}
         </ul>
+        {!gbAll && gbResult.results.some((r) => !r.free && r.memberId !== 'g0') && (
+          <button className="rv__more" onClick={() => setGbAll(true)}>
+            {`나머지 ${gbResult.results.filter((r) => !r.free && r.memberId !== 'g0').length}명은 모두 ${won(gbResult.pay)}를 냈습니다 — 전체 보기`}
+          </button>
+        )}
         <p className="seed">{gbResult.seedProof.note}<br /><code>{gbResult.seedProof.pattern}</code></p>
         <div className="row">
           <button className="btn btn--ghost" onClick={backToList}>목록으로</button>
-          <button className="btn" onClick={() => setGbResult(null)}>인원 바꿔보기</button>
+          <button className="btn" onClick={() => { setGbResult(null); setGbAll(false) }}>인원 바꿔보기</button>
         </div>
       </>
     ) : (
@@ -568,6 +591,7 @@ export default function App() {
     const mine = result.results.find((r) => r.memberId === room.memberId) || result.results[0]
     body = (
       <>
+        {scene && <RevealScene mine={mine} onDone={() => setScene(false)} />}
         <header className="rhead">
           <h2>{result.boxName} 개봉</h2>
           <p>{result.teamSize}명이 함께 열었습니다 · 총 {result.teamDraws}회</p>
@@ -583,7 +607,7 @@ export default function App() {
         </div>
         <ul className="rvlist">
           {result.results.map((r, i) => (
-            <RevealCard key={r.memberId} r={r} entry={result.entry} mine={r.memberId === mine.memberId} delay={i * 90} />
+            <RevealCard key={r.memberId} r={r} mine={r.memberId === mine.memberId} delay={i * 90} />
           ))}
         </ul>
         <p className="seed">{result.seedProof.note}<br /><code>{result.seedProof.pattern}</code></p>
@@ -603,7 +627,26 @@ export default function App() {
           <p>{won(box.entry)} · 최고 등급 {box.topLabel}</p>
         </header>
 
-        <TasteChat boxId={box.id} teamSize={teamSize || 1} axis={curated?.axis}
+        {(() => {
+          // 이 상자에서 나올 수 있는 최고의 것을 먼저 보여준다 — 배너와 같은 무대.
+          const prize = box.tiers[0]?.samples?.find((x) => x.image)
+          return prize ? (
+            <div className="phero">
+              <span className="phero__glow" aria-hidden="true" />
+              <img src={prize.image} alt="" loading="lazy" />
+              <span className="phero__t">
+                <em>최고 등급 {box.topLabel}</em>
+                <b>{prize.name}</b>
+                <span>{won(prize.price)} 상당 · {won(box.entry)}으로 도전</span>
+              </span>
+            </div>
+          ) : null
+        })()}
+
+        <TasteChat boxId={box.id} teamSize={teamSize || 1}
+          note={curated ? (curated.usedFallback
+            ? '말씀하신 쪽으로는 상자가 성립하지 않아 기본 구성 그대로 담았어요.'
+            : `${curated.axis ? `[${curated.axis}] ` : ''}기본 등급 후보를 ${curated.pickedCount}개로 좁혔어요 — 아래 등급표에 반영됐고, 최고 등급과 확률은 그대로예요.`) : null}
           onCurated={setCurated} disabled={phase === 'ready' || phase === 'count'} />
 
         {/* 확률은 한 카드로 모은다. 곡선·표·뽑기통·천장은 '확률 근거'
@@ -624,6 +667,8 @@ export default function App() {
           </button>
         </section>
 
+        {/* 레일과 모으기 버튼은 하나의 일('팀 만들기')이다 — 한 섹션으로 묶는다. */}
+        <section className="team">
         <MemberRail members={members} teamMax={teamMax} readyCount={readyCount}
           phase={phase === 'ready' || phase === 'count' ? 'ready' : 'gather'} />
 
@@ -640,14 +685,11 @@ export default function App() {
             </button>
           </div>
         )}
+        </section>
 
         <div className="tiers">
-          {curated && (
-            <p className="tiers__note">
-              취향에 맞춰 후보를 {curated.pickedCount}개로 좁혔습니다.
-              {curated.usedFallback && ' (후보가 모자라 기본 구성으로 담았습니다)'}
-              {!curated.aiEnabled && ' (AI 키 없이 규칙 기반으로 구성했습니다)'}
-            </p>
+          {curated && !curated.aiEnabled && (
+            <p className="tiers__note">AI 키 없이 규칙 기반으로 구성했습니다.</p>
           )}
           {tierList.map((t) => <TierStrip key={t.tier} tier={t} odds={odds[t.tier]} />)}
         </div>
@@ -684,7 +726,10 @@ export default function App() {
 
   return (
     <Shell tab={tab} setTab={setTab} onSheet={() => setSheet(true)}
-      live={room ? room.live : null} guide={{ phase, box, data, teamSize }}>
+      live={room ? room.live : null} guide={{ box, data, teamSize }}>
+      {/* 초기 로드 이후의 실패(개봉·데일리·발주)가 조용히 삼켜지던 문제.
+          성공 경로가 setErr(null)로 지우므로 여기 남아 있으면 진짜 실패다. */}
+      {err && data && <p className="errbar" role="alert">{err}</p>}
       {body}
       {sheet && (
         <>
@@ -742,7 +787,7 @@ function Shell({ tab, setTab, children, onSheet, live, guide }) {
 }
 
 /* 데스크톱 여백에 설계 근거를 붙인다 — 심사자가 화면과 이유를 같이 보게. */
-function GuideRail({ side, phase, box, data, teamSize }) {
+function GuideRail({ side, box, data, teamSize }) {
   const left = [
     ['컬처 시그널', '포켓몬 카드 열풍, 그중 오리파(카드숍이 내용물을 직접 구성해 파는 뽑기). KREAM 트레이딩 카드 거래액 전년 대비 5,600%↑.'],
     ['왜 지금인가', '시세가 생겨 재테크가 됐고, 무작위 보상이 반복을 만들고, 실물 판매라 확률형 규제 밖이라 지출에 상한이 없다.'],
