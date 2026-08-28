@@ -6,9 +6,18 @@
  * 그 판정을 프론트에 두지 않는다.
  */
 import { getBox, oddsOf, evMultiple, TEAM_MAX, MAX_DRAWS_PER_PERSON } from './_draw.js'
-import { readRoom, writeRoom, mutateRoom, newId, kvEnabled } from './_room.js'
+import { readRoom, writeRoom, mutateRoom, newId, kvEnabled, counter } from './_room.js'
 
 const NAME_MAX = 12
+
+/** 다음에 열 포맷 후보. 크롤 풀의 group 필드를 그대로 쓴다. */
+export const VOTE_CHOICES = ['card', 'uniform', 'prize', 'daily']
+export const VOTE_LABEL = { card: '포켓몬 카드', uniform: '유니폼', prize: '건강식품', daily: '생필품' }
+export async function readVotes() {
+  const out = {}
+  for (const c of VOTE_CHOICES) out[c] = await counter(`olbox:vote:${c}`)
+  return out
+}
 const clean = (s, fallback) => {
   const t = String(s ?? '').replace(/\s+/g, ' ').trim().slice(0, NAME_MAX)
   return t || fallback
@@ -117,6 +126,20 @@ export default async function handler(req, res) {
       })
       if (!next) return res.status(404).json({ error: '방 또는 참여자를 찾을 수 없습니다.' })
       return res.status(200).json({ state: publicState(next) })
+    }
+
+    /**
+     * 다음 회차에 어떤 포맷을 열지 고객이 정한다.
+     * 올박스는 매주 포맷이 바뀌므로, 그 결정을 고객에게 넘기는 것이
+     * "함께 문제를 해결한다"의 가장 작은 구현이다.
+     * INCR은 원자적이라 방 상태처럼 read-modify-write 재시도가 필요 없다.
+     */
+    if (action === 'vote') {
+      const choice = String(req.body?.choice || '').slice(0, 16)
+      if (!VOTE_CHOICES.includes(choice))
+        return res.status(400).json({ error: '없는 선택지입니다.' })
+      await counter(`olbox:vote:${choice}`, 1)
+      return res.status(200).json({ votes: await readVotes() })
     }
 
     return res.status(400).json({ error: `알 수 없는 action: ${action}` })

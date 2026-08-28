@@ -15,7 +15,7 @@ import { createServer } from 'vite'
 import { renderToString } from 'react-dom/server'
 import React from 'react'
 import boxesHandler from '../api/boxes.js'
-import { getBox, oddsOf, evMultiple, customerBEP, TIERS, TEAM_MAX, BOXES } from '../api/_draw.js'
+import { getBox, oddsOf, evMultiple, customerBEP, TIERS, TEAM_MAX, BOXES, DAILIES } from '../api/_draw.js'
 
 let fail = 0
 const check = (label, cond, extra = '') => {
@@ -92,11 +92,17 @@ for (const id of BOXES.map((b) => b.id)) {
 // ── ⑤ API 핸들러 직접 호출 ─────────────────────────────────
 {
   const res = { code: 0, body: null, status(c) { this.code = c; return this }, setHeader() { return this }, json(b) { this.body = b; return this } }
-  boxesHandler({ method: 'GET' }, res)
+  await boxesHandler({ method: 'GET' }, res)
   check('GET /api/boxes 200', res.code === 200)
   check(`박스 ${BOXES.length}종`, res.body.boxes.length === BOXES.length)
   check('수식 파라미터 노출', Boolean(res.body.formula.assumptions.length))
   check('홈 탭용 샘플 포함', res.body.sample.length > 0)
+  check(`데일리 ${DAILIES.length}종`, res.body.dailies.length === DAILIES.length)
+  check('데일리는 꽝 확률까지 공개', res.body.dailies[0].blankOdds > 0)
+  check('데일리 확률 계산근거 노출', Boolean(res.body.dailies[0].economics.breakEvenPlays))
+  check('박스에 재고 노출', res.body.boxes.every((b) => b.stockTotal > 0))
+  check('박스에 천장 규칙 노출', res.body.boxes.every((b) => b.pity?.window > 0))
+  check('투표 집계 노출', Object.keys(res.body.votes).length === 4)
 }
 
 // ── ⑥ E2E 셀렉터 실존 (직전 과제 부채 상환) ────────────────

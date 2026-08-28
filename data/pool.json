@@ -1,5 +1,5 @@
 {
-  "crawledAt": "2026-08-28T15:36:28.141Z",
+  "crawledAt": "2026-08-28T17:59:13.424Z",
   "source": "danawa",
   "minPrice": 2000,
   "queries": [
@@ -31,6 +31,9 @@
     "수세미",
     "커피믹스",
     "건조나물",
+    "홍삼정",
+    "홍삼스틱",
+    "흑마늘즙",
     "전기포트",
     "에어프라이어",
     "가습기",
@@ -169,17 +172,6 @@
       "auth": "unknown"
     },
     {
-      "id": "d18525104",
-      "name": "센소다인 오리지날 플러스 치약 100g",
-      "price": 3720,
-      "image": "https://img.danuri.io/catalog-image/104/525/018/fe847b747d1b47959910c844e62d789b.webp",
-      "url": "https://prod.danawa.com/info/?pcode=18525104",
-      "seller": "다나와 최저가",
-      "query": "치약",
-      "group": "daily",
-      "auth": "unknown"
-    },
-    {
       "id": "d2354455",
       "name": "모카C&T 프리모카페 커피믹스 900g",
       "price": 3790,
@@ -196,6 +188,17 @@
       "price": 3830,
       "image": "https://img.danuri.io/catalog-image/666/191/003/4ce2973e28ef458994b2597843efb4da.jpg",
       "url": "https://prod.danawa.com/info/?pcode=3191666",
+      "seller": "다나와 최저가",
+      "query": "치약",
+      "group": "daily",
+      "auth": "unknown"
+    },
+    {
+      "id": "d18525104",
+      "name": "센소다인 오리지날 플러스 치약 100g",
+      "price": 3900,
+      "image": "https://img.danuri.io/catalog-image/104/525/018/fe847b747d1b47959910c844e62d789b.webp",
+      "url": "https://prod.danawa.com/info/?pcode=18525104",
       "seller": "다나와 최저가",
       "query": "치약",
       "group": "daily",
@@ -1207,7 +1210,7 @@
       "name": "핫 360개입 영어 포켓몬 TCG 소드 쉴드 에볼빙 스카이즈 부스터 박스 트레이딩 카드 36팩 즉시 배송 가능",
       "price": 19840,
       "image": "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/pd/v2/3/7/1/4/2/5/RHTuh/9582371425_B.webp",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=224989&cate_c4=225460&cmpny_c=TH201&link_prod_c=9582371425&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+%EB%B6%80%EC%8A%A4%ED%84%B0%EB%B0%95%EC%8A%A4&r=17879313027080&cate=1921074",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=224989&cate_c4=225460&cmpny_c=TH201&link_prod_c=9582371425&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+%EB%B6%80%EC%8A%A4%ED%84%B0%EB%B0%95%EC%8A%A4&r=17879398223363&cate=1921074",
       "seller": "다나와 중개",
       "query": "포켓몬 카드 부스터박스",
       "group": "card",
@@ -1236,6 +1239,17 @@
       "auth": "unknown"
     },
     {
+      "id": "d13206944",
+      "name": "헬스프랜드 명품 흑마늘 80ml 30포",
+      "price": 20550,
+      "image": "https://img.danuri.io/catalog-image/944/206/013/4a9832706e5444cd94eb165739b1279c.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=13206944",
+      "seller": "다나와 최저가",
+      "query": "흑마늘즙",
+      "group": "prize",
+      "auth": "unknown"
+    },
+    {
       "id": "d5775683",
       "name": "아트릭스 스트롱 프로텍션 크림 75ml",
       "price": 20780,
@@ -1258,6 +1272,17 @@
       "auth": "unknown"
     },
     {
+      "id": "d10777437",
+      "name": "정관장 홍삼진고 데일리스틱 10g 20포",
+      "price": 20980,
+      "image": "https://img.danuri.io/catalog-image/437/777/010/c3d9a09736a3495ca654029b0ba421a2.webp",
+      "url": "https://prod.danawa.com/info/?pcode=10777437",
+      "seller": "다나와 최저가",
+      "query": "홍삼스틱",
+      "group": "prize",
+      "auth": "unknown"
+    },
+    {
       "id": "d49107488",
       "name": "자이시스 깔창 30개 2P + 수면 양말5 31596688",
       "price": 21068,
@@ -1273,10 +1298,21 @@
       "name": "재미있는 360장 포켓몬 카드 TCG 스칼렛 바이올렛 프리즘 에볼루션 151 36팩 부스터 박스 수집용 트레이딩",
       "price": 21150,
       "image": "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/pd/v2/3/3/5/7/9/7/IQJNm/9582335797_B.webp",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=224989&cate_c4=225460&cmpny_c=TH201&link_prod_c=9582335797&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+%EB%B6%80%EC%8A%A4%ED%84%B0%EB%B0%95%EC%8A%A4&r=17879313028354&cate=1921074",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=224989&cate_c4=225460&cmpny_c=TH201&link_prod_c=9582335797&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+%EB%B6%80%EC%8A%A4%ED%84%B0%EB%B0%95%EC%8A%A4&r=17879398223015&cate=1921074",
       "seller": "다나와 중개",
       "query": "포켓몬 카드 부스터박스",
       "group": "card",
+      "auth": "unknown"
+    },
+    {
+      "id": "d18164771",
+      "name": "풍년보감 6년근 고려홍삼정 밸런스타임 10g 100포",
+      "price": 21550,
+      "image": "https://img.danuri.io/catalog-image/771/164/018/8e4b89f6cbe6479dbed83e0404f55cdb.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=18164771",
+      "seller": "다나와 최저가",
+      "query": "홍삼정",
+      "group": "prize",
       "auth": "unknown"
     },
     {
@@ -1288,6 +1324,17 @@
       "seller": "다나와 최저가",
       "query": "핸드크림",
       "group": "daily",
+      "auth": "unknown"
+    },
+    {
+      "id": "d13196003",
+      "name": "GNM자연의품격 품격있는 의성흑마늘 80ml 30포",
+      "price": 21670,
+      "image": "https://img.danuri.io/catalog-image/003/196/013/9320cca773774f5bb6265f90c661291c.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=13196003",
+      "seller": "다나와 최저가",
+      "query": "흑마늘즙",
+      "group": "prize",
       "auth": "unknown"
     },
     {
@@ -1370,7 +1417,7 @@
     {
       "id": "d93387356",
       "name": "트리코닉스 트리코엑스 탈모완화 볼륨 샴푸 500ml",
-      "price": 23000,
+      "price": 23040,
       "image": "https://img.danuri.io/catalog-image/356/387/093/072c5303bfb04e9f92fc9e652f74724c.jpg",
       "url": "https://prod.danawa.com/info/?pcode=93387356",
       "seller": "다나와 최저가",
@@ -1434,17 +1481,6 @@
       "auth": "unknown"
     },
     {
-      "id": "x9582469499",
-      "name": "[해외] 대한민국 축구유니폼 2022카타르 월드컵 손흥민 황희찬 이강인 상하의세트 주니어 아동 유",
-      "price": 24090,
-      "image": "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/pd/v2/4/6/9/4/9/9/CiqQa/9582469499_B.jpg",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=1822&cate_c2=228091&cate_c3=228550&cate_c4=0&cmpny_c=TH201&link_prod_c=9582469499&keyword=%EC%86%90%ED%9D%A5%EB%AF%BC+%EC%9C%A0%EB%8B%88%ED%8F%BC&r=17879313792410",
-      "seller": "다나와 중개",
-      "query": "손흥민 유니폼",
-      "group": "uniform",
-      "auth": "unknown"
-    },
-    {
       "id": "d78355046",
       "name": "실리만 이지웨이 실리콘 찜기 멀티",
       "price": 24150,
@@ -1500,6 +1536,17 @@
       "auth": "unknown"
     },
     {
+      "id": "xV95751993752",
+      "name": "[해외] 25-26시즌 홈구장 토트넘 유니폼 운동복 트레이닝 상하셋트+양말 손흥민 호환상품 7번 손흥민 L",
+      "price": 24900,
+      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/2152/c7f863832002fc159619deec7263ffa8420cd79116d8e56510820edb3a15.jpg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=1825&cate_c2=221566&cate_c3=0&cate_c4=0&cmpny_c=TP40F&link_prod_c=V95751993752&keyword=%EC%86%90%ED%9D%A5%EB%AF%BC+%EC%9C%A0%EB%8B%88%ED%8F%BC&r=17879399451316",
+      "seller": "다나와 중개",
+      "query": "손흥민 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
+    },
+    {
       "id": "d4704581",
       "name": "아스토레 ASTR15UT01 게임 저지 축구 유니폼",
       "price": 25050,
@@ -1546,7 +1593,7 @@
     {
       "id": "d4230059",
       "name": "동서식품 맥심 모카골드 마일드 커피믹스 스틱 210개입",
-      "price": 27350,
+      "price": 26930,
       "image": "https://img.danuri.io/catalog-image/059/230/004/7063e626b71946c189f03448abd3d6e6.jpg",
       "url": "https://prod.danawa.com/info/?pcode=4230059",
       "seller": "다나와 최저가",
@@ -1566,25 +1613,25 @@
       "auth": "unknown"
     },
     {
-      "id": "xF648311590",
-      "name": "토트넘 축구복 손흥민 케인 축구 유니폼 풋살 트레이닝복 팀복",
-      "price": 27600,
-      "image": "https://image.auction.co.kr/origin/59/67/16/59671627c6.jpg",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=1825&cate_c2=221566&cate_c3=221578&cate_c4=221614&cmpny_c=EE715&link_prod_c=F648311590&keyword=%EC%86%90%ED%9D%A5%EB%AF%BC+%EC%9C%A0%EB%8B%88%ED%8F%BC&r=17879313791811&cate=13341785",
-      "seller": "다나와 중개",
-      "query": "손흥민 유니폼",
-      "group": "uniform",
+      "id": "d16203854",
+      "name": "정관장 홍삼진고 데일리스틱 10g 30포",
+      "price": 27470,
+      "image": "https://img.danuri.io/catalog-image/854/203/016/7a4e5812685746a7a7bc14b255943567.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=16203854",
+      "seller": "다나와 최저가",
+      "query": "홍삼스틱",
+      "group": "prize",
       "auth": "unknown"
     },
     {
-      "id": "xV95911684074",
-      "name": "[해외] (7일이내항공배송) 2526 AT마드리드 이강인 축구 유니폼 상하의 세트 호환상품 노마킹 28(160)",
-      "price": 27900,
-      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/362d/d5e36c5b693aad19122fa522f8e8337122bf4020ef5a8ae589e41213df99.jpg",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=0&cate_c2=0&cate_c3=0&cate_c4=0&cmpny_c=TP40F&link_prod_c=V95911684074&keyword=%EC%9C%A0%EB%8B%88%ED%8F%BC+%EB%A7%88%ED%82%B9&r=17879313869968",
-      "seller": "다나와 중개",
-      "query": "유니폼 마킹",
-      "group": "uniform",
+      "id": "d5490866",
+      "name": "정관장 홍삼정마일드 센스 10ml 30포",
+      "price": 27880,
+      "image": "https://img.danuri.io/catalog-image/866/490/005/4b717ae3afa744de850d9251de3b902e.webp",
+      "url": "https://prod.danawa.com/info/?pcode=5490866",
+      "seller": "다나와 최저가",
+      "query": "홍삼정",
+      "group": "prize",
       "auth": "unknown"
     },
     {
@@ -1625,7 +1672,7 @@
       "name": "[해외] 포켓몬 카드 게임 스칼렛 바이올렛 배틀 마스터 덱 파오젠ex 1개 24년5월17일",
       "price": 29570,
       "image": "https://img1a.coupangcdn.com/image/vendor_inventory/b6f8/18d441b36dd69f2bbc0321f1ba5570ed2e8d8d4ec284ef98be19bc3b0de6.jpg",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95528567699&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EB%B0%B0%ED%8B%80%EB%8D%B1&r=17879313041738&cate=16349280",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95528567699&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EB%B0%B0%ED%8B%80%EB%8D%B1&r=17879398251381&cate=16349280",
       "seller": "다나와 중개",
       "query": "포켓몬카드 배틀덱",
       "group": "card",
@@ -1665,6 +1712,17 @@
       "auth": "unknown"
     },
     {
+      "id": "d10434138",
+      "name": "서울약사신협 6년근 투데이 홍삼정 플러스 스틱 10g 60포",
+      "price": 30810,
+      "image": "https://img.danuri.io/catalog-image/138/434/010/15822315c8db448db520c36c21510384.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=10434138",
+      "seller": "다나와 최저가",
+      "query": "홍삼스틱",
+      "group": "prize",
+      "auth": "unknown"
+    },
+    {
       "id": "d122898849",
       "name": "아가방 미.키야구유니폼티셔츠 79T321102_CJ",
       "price": 31290,
@@ -1673,6 +1731,17 @@
       "seller": "다나와 최저가",
       "query": "야구 유니폼",
       "group": "uniform",
+      "auth": "unknown"
+    },
+    {
+      "id": "d6518318",
+      "name": "케이에프한국자연농산 네이처드림 맛있는 흑마늘즙 80ml 100포",
+      "price": 31760,
+      "image": "https://img.danuri.io/catalog-image/318/518/006/639ad12fe15d44efa30cf77323b53f52.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=6518318",
+      "seller": "다나와 최저가",
+      "query": "흑마늘즙",
+      "group": "prize",
       "auth": "unknown"
     },
     {
@@ -1687,6 +1756,28 @@
       "auth": "unknown"
     },
     {
+      "id": "d16774688",
+      "name": "서울약사신협 프리미엄 홍삼정 천명스틱 골드 10ml 30포",
+      "price": 31950,
+      "image": "https://img.danuri.io/catalog-image/688/774/016/b2e5652bfe064344958bc44e67e3d847.webp",
+      "url": "https://prod.danawa.com/info/?pcode=16774688",
+      "seller": "다나와 최저가",
+      "query": "홍삼스틱",
+      "group": "prize",
+      "auth": "unknown"
+    },
+    {
+      "id": "d945371",
+      "name": "종근당건강 흑마늘 골드 80ml 60포",
+      "price": 32100,
+      "image": "https://img.danuri.io/catalog-image/371/945/000/2a43fb7158044c4faa3d046ee6f2e37a.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=945371",
+      "seller": "다나와 최저가",
+      "query": "흑마늘즙",
+      "group": "prize",
+      "auth": "unknown"
+    },
+    {
       "id": "d4841663",
       "name": "퍼실 프로페셔널 9L",
       "price": 32110,
@@ -1695,17 +1786,6 @@
       "seller": "다나와 최저가",
       "query": "세탁세제",
       "group": "daily",
-      "auth": "unknown"
-    },
-    {
-      "id": "x9582486127",
-      "name": "[해외] 2526 토트넘 손흥민유니폼 완장 마킹 홈 어웨이 키즈 축구 유소년 성인 선수 저지 세트",
-      "price": 32430,
-      "image": "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/pd/v2/4/8/6/1/2/7/rFBdi/9582486127_B.jpg",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=1822&cate_c2=228091&cate_c3=228550&cate_c4=0&cmpny_c=TH201&link_prod_c=9582486127&keyword=%EC%86%90%ED%9D%A5%EB%AF%BC+%EC%9C%A0%EB%8B%88%ED%8F%BC&r=17879313798183",
-      "seller": "다나와 중개",
-      "query": "손흥민 유니폼",
-      "group": "uniform",
       "auth": "unknown"
     },
     {
@@ -1720,11 +1800,22 @@
       "auth": "unknown"
     },
     {
+      "id": "x9528540472",
+      "name": "[해외] Pokemon 4521329345949 포켓몬 카드 게임 스칼렛 바이올렛 EX 스타터 덱 배틀 코라이돈",
+      "price": 32830,
+      "image": "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/product/9528540472/B.webp?82170542",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=22591&cate_c2=0&cate_c3=0&cate_c4=0&cmpny_c=TH201&link_prod_c=9528540472&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EB%B0%B0%ED%8B%80%EB%8D%B1&r=17879398258822",
+      "seller": "다나와 중개",
+      "query": "포켓몬카드 배틀덱",
+      "group": "card",
+      "auth": "unknown"
+    },
+    {
       "id": "x9582372267",
       "name": "오리지널 포켓몬 트레이딩 카드 PTCG 일본어 버전 M2 메가 부스터 박스 생일 선물",
       "price": 32890,
       "image": "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/pd/v2/3/7/2/2/6/7/QvjlB/9582372267_B.webp",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=224989&cate_c4=225460&cmpny_c=TH201&link_prod_c=9582372267&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+%EB%B6%80%EC%8A%A4%ED%84%B0%EB%B0%95%EC%8A%A4&r=17879313021881&cate=1921074",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=224989&cate_c4=225460&cmpny_c=TH201&link_prod_c=9582372267&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+%EB%B6%80%EC%8A%A4%ED%84%B0%EB%B0%95%EC%8A%A4&r=17879398225510&cate=1921074",
       "seller": "다나와 중개",
       "query": "포켓몬 카드 부스터박스",
       "group": "card",
@@ -1739,6 +1830,17 @@
       "seller": "다나와 최저가",
       "query": "전기포트",
       "group": "home",
+      "auth": "unknown"
+    },
+    {
+      "id": "d28082642",
+      "name": "풍년보감 고려홍삼정 올데이굿타임 골드 10g 100포",
+      "price": 34100,
+      "image": "https://img.danuri.io/catalog-image/642/082/028/0f997c2c4ed743f8a4216acedf3d5898.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=28082642",
+      "seller": "다나와 최저가",
+      "query": "홍삼정",
+      "group": "prize",
       "auth": "unknown"
     },
     {
@@ -1768,7 +1870,7 @@
       "name": "[해외] BINEL LAFC손흥민유니폼 커스텀마킹 저지 원정 24 25 은하 로스앤젤레스 원정 XL",
       "price": 34600,
       "image": "https://img1a.coupangcdn.com/image/vendor_inventory/266a/99e8ded548cb858788123bd6ae6a7b9bf6767406578a78fe2148247addaa.jpg",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=1825&cate_c2=221566&cate_c3=0&cate_c4=0&cmpny_c=TP40F&link_prod_c=V93404117140&keyword=%EC%86%90%ED%9D%A5%EB%AF%BC+%EC%9C%A0%EB%8B%88%ED%8F%BC&r=17879313798598",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=1825&cate_c2=221566&cate_c3=0&cate_c4=0&cmpny_c=TP40F&link_prod_c=V93404117140&keyword=%EC%86%90%ED%9D%A5%EB%AF%BC+%EC%9C%A0%EB%8B%88%ED%8F%BC&r=17879399451953",
       "seller": "다나와 중개",
       "query": "손흥민 유니폼",
       "group": "uniform",
@@ -1779,21 +1881,10 @@
       "name": "[해외] 포켓몬 카드 게임 TCG 메가 스타트 덱 100 배틀 컬렉션 박스 (일어판) 1개 단일",
       "price": 34800,
       "image": "https://img1a.coupangcdn.com/image/vendor_inventory/4d3b/e97d297b90ad2701bd550dd2ccda09eb7ac679f2c68ab92201974a86a7cb.jpg",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=I29052746920&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EB%B0%B0%ED%8B%80%EB%8D%B1&r=17879313044941&cate=16349280",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=I29052746920&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EB%B0%B0%ED%8B%80%EB%8D%B1&r=17879398255230&cate=16349280",
       "seller": "다나와 중개",
       "query": "포켓몬카드 배틀덱",
       "group": "card",
-      "auth": "unknown"
-    },
-    {
-      "id": "d98230421",
-      "name": "대호플러스 더안 프리볼트 탄소 전기요 YNC",
-      "price": 34800,
-      "image": "https://img.danuri.io/catalog-image/421/230/098/4984dddab3d34c55b63de068ba15009a.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=98230421",
-      "seller": "다나와 최저가",
-      "query": "전기요",
-      "group": "home",
       "auth": "unknown"
     },
     {
@@ -1823,7 +1914,7 @@
       "name": "[당일출고] 26-28 대한민국 국가대표 어웨이 away 월드컵 유니폼 축구 유니폼 손흥민 이강인 어린이 키즈 유니폼 상하의 ",
       "price": 35500,
       "image": "https://img1a.coupangcdn.com/image/vendor_inventory/6cde/a8a554ce0a937d1328568eb4105a4c681f2909a52ee067c74ee12799dffd.png",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=1825&cate_c2=221566&cate_c3=0&cate_c4=0&cmpny_c=TP40F&link_prod_c=V95840147446&keyword=%EC%86%90%ED%9D%A5%EB%AF%BC+%EC%9C%A0%EB%8B%88%ED%8F%BC&r=17879313798824",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=1825&cate_c2=221566&cate_c3=0&cate_c4=0&cmpny_c=TP40F&link_prod_c=V95840147446&keyword=%EC%86%90%ED%9D%A5%EB%AF%BC+%EC%9C%A0%EB%8B%88%ED%8F%BC&r=17879399454611",
       "seller": "다나와 중개",
       "query": "손흥민 유니폼",
       "group": "uniform",
@@ -1834,18 +1925,18 @@
       "name": "[당일출고] 26-28 대한민국 국가대표 어웨이 away 월드컵 유니폼 축구 유니폼 손흥민 이강인 어린이 키즈 유니폼 상하의 ",
       "price": 35500,
       "image": "https://img1a.coupangcdn.com/image/vendor_inventory/6cde/a8a554ce0a937d1328568eb4105a4c681f2909a52ee067c74ee12799dffd.png",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=1825&cate_c2=221566&cate_c3=0&cate_c4=0&cmpny_c=TP40F&link_prod_c=V95806532737&keyword=%EC%86%90%ED%9D%A5%EB%AF%BC+%EC%9C%A0%EB%8B%88%ED%8F%BC&r=17879313793803",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=1825&cate_c2=221566&cate_c3=0&cate_c4=0&cmpny_c=TP40F&link_prod_c=V95806532737&keyword=%EC%86%90%ED%9D%A5%EB%AF%BC+%EC%9C%A0%EB%8B%88%ED%8F%BC&r=17879399453913",
       "seller": "다나와 중개",
       "query": "손흥민 유니폼",
       "group": "uniform",
       "auth": "unknown"
     },
     {
-      "id": "x9582522634",
-      "name": "[해외] 이강인 2022 카타르 월드컵 대한민국 축구 유니폼 SET 국가대표 이강인 손흥민 황희찬",
-      "price": 35600,
-      "image": "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/pd/v2/5/2/2/6/3/4/fhyhx/9582522634_B.jpg",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=1822&cate_c2=228091&cate_c3=228550&cate_c4=0&cmpny_c=TH201&link_prod_c=9582522634&keyword=%EC%86%90%ED%9D%A5%EB%AF%BC+%EC%9C%A0%EB%8B%88%ED%8F%BC&r=17879313792767",
+      "id": "xV93511648128",
+      "name": "[해외] 손흥민st 축구 긴팔 운동복세트 유니폼 세트 축구반티 7번 반팔 스포츠 축구복 축구유니폼 축구트레이닝복(호환상품)월드",
+      "price": 35700,
+      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/a3c0/16ae28fd6749a21f924ca64801378fe5e2f3f4919cb0c38878bdb393f3ec.jpg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=1825&cate_c2=221566&cate_c3=0&cate_c4=0&cmpny_c=TP40F&link_prod_c=V93511648128&keyword=%EC%86%90%ED%9D%A5%EB%AF%BC+%EC%9C%A0%EB%8B%88%ED%8F%BC&r=17879399459414",
       "seller": "다나와 중개",
       "query": "손흥민 유니폼",
       "group": "uniform",
@@ -1882,6 +1973,17 @@
       "seller": "다나와 최저가",
       "query": "전기포트",
       "group": "home",
+      "auth": "unknown"
+    },
+    {
+      "id": "d122282437",
+      "name": "한국인삼공사 굿베이스 홍삼담은 흑마늘 50ml 30포",
+      "price": 39240,
+      "image": "https://img.danuri.io/catalog-image/437/282/122/305a7a7988a0489585e381107fe36fd0.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=122282437",
+      "seller": "다나와 최저가",
+      "query": "흑마늘즙",
+      "group": "prize",
       "auth": "unknown"
     },
     {
@@ -1955,10 +2057,21 @@
       "name": "포켓몬카드 하이클래스팩 샤이니스타 V 1팩 1개 샤이니스타V (1팩)",
       "price": 39900,
       "image": "https://img1a.coupangcdn.com/image/vendor_inventory/3ed5/b3982720517fd26fdf003e60c2d037de0d3e059ebc057e501d1c51ba3680.png",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95828985922&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%ED%95%98%EC%9D%B4%ED%81%B4%EB%9E%98%EC%8A%A4&r=17879313009755&cate=16349280",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95828985922&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%ED%95%98%EC%9D%B4%ED%81%B4%EB%9E%98%EC%8A%A4&r=17879398198050&cate=16349280",
       "seller": "다나와 중개",
       "query": "포켓몬카드 하이클래스",
       "group": "card",
+      "auth": "unknown"
+    },
+    {
+      "id": "d98230421",
+      "name": "대호플러스 더안 프리볼트 탄소 전기요 YNC",
+      "price": 40250,
+      "image": "https://img.danuri.io/catalog-image/421/230/098/4984dddab3d34c55b63de068ba15009a.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=98230421",
+      "seller": "다나와 최저가",
+      "query": "전기요",
+      "group": "home",
       "auth": "unknown"
     },
     {
@@ -1973,17 +2086,6 @@
       "auth": "unknown"
     },
     {
-      "id": "xI29056686664",
-      "name": "포켓몬카드 TCG [국내발송] [미개봉] 스타트 덱 100 배틀 컬렉션 일본판 60장 1박스 일본판 스타트덱",
-      "price": 42000,
-      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/9174/3bf2a4d4de9ace30409a1792ea69e1bf32714588f02b58b2cebe8527d616.png",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=I29056686664&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EB%B0%B0%ED%8B%80%EB%8D%B1&r=17879313045239&cate=16349280",
-      "seller": "다나와 중개",
-      "query": "포켓몬카드 배틀덱",
-      "group": "card",
-      "auth": "unknown"
-    },
-    {
       "id": "d3715364",
       "name": "그이름 정준호 양심기름 참기름 300ml+생들기름 300ml 세트 수입산",
       "price": 42130,
@@ -1995,11 +2097,22 @@
       "auth": "unknown"
     },
     {
+      "id": "d5903292",
+      "name": "참앤들황토농원 맛있는 흑마늘진액 70ml 100포",
+      "price": 42130,
+      "image": "https://img.danuri.io/catalog-image/292/903/005/36deaeab86be4e988816c1e458f84fea.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=5903292",
+      "seller": "다나와 최저가",
+      "query": "흑마늘즙",
+      "group": "prize",
+      "auth": "unknown"
+    },
+    {
       "id": "xLO2727521349",
       "name": "[해외] 알파 포켓몬스터 카드 오리파 SAR 확정 랜덤팩",
       "price": 43640,
       "image": "https://contents.lotteon.com/itemimage/20260719234957/LO/27/27/52/13/49/_2/72/75/21/35/0/LO2727521349_2727521350_1.jpg",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=57906&cate_c2=59497&cate_c3=60292&cate_c4=0&cmpny_c=EE309&link_prod_c=LO2727521349&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17879312933486&cate=14326814",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=57906&cate_c2=59497&cate_c3=60292&cate_c4=0&cmpny_c=EE309&link_prod_c=LO2727521349&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17879398118855&cate=14326814",
       "seller": "다나와 중개",
       "query": "포켓몬카드 오리파",
       "group": "card",
@@ -2008,7 +2121,7 @@
     {
       "id": "d123437180",
       "name": "포켓몬코리아 포켓몬카드 MEGA 확장팩 어비스아이 30팩",
-      "price": 44000,
+      "price": 43680,
       "image": "https://img.danuri.io/catalog-image/180/437/123/1cccd1a3d50b4ea98c48b128adef7126.jpg",
       "url": "https://prod.danawa.com/info/?pcode=123437180",
       "seller": "다나와 최저가",
@@ -2021,7 +2134,7 @@
       "name": "[해외] SAR AR VOL.01 [STELAB] 포켓몬 카드 포케카 오리파 부이즈 수록 이상 1장 봉입 1",
       "price": 44450,
       "image": "https://img1a.coupangcdn.com/image/vendor_inventory/0f75/283db11b14d5b9a6ea6defa71de5dec72c3f315a134b56388922c5880d9a.jpg",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=I28303134688&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17879312934303&cate=16349280",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=I28303134688&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17879398114796&cate=16349280",
       "seller": "다나와 중개",
       "query": "포켓몬카드 오리파",
       "group": "card",
@@ -2037,6 +2150,17 @@
       "query": "포켓몬 카드",
       "group": "card",
       "auth": "official"
+    },
+    {
+      "id": "d5301023",
+      "name": "대동고려삼 불로건 홍삼정 프리미엄 10g 30포",
+      "price": 44710,
+      "image": "https://img.danuri.io/catalog-image/023/301/005/e37e5636f1ff45a9ab05d41552eeef6a.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=5301023",
+      "seller": "다나와 최저가",
+      "query": "홍삼스틱",
+      "group": "prize",
+      "auth": "unknown"
     },
     {
       "id": "d97902494",
@@ -2065,7 +2189,7 @@
       "name": "[해외] 알파 포켓몬스터 카드 오리파 SAR 확정 랜덤팩 단품/미개봉 팩 받기",
       "price": 46380,
       "image": "https://image.auction.co.kr/origin/58/f6/90/58f69074f6.jpg",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=224983&cate_c4=225436&cmpny_c=EE715&link_prod_c=F627983091&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17879312935932&cate=19337898",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=224983&cate_c4=225436&cmpny_c=EE715&link_prod_c=F627983091&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17879398115617&cate=19337898",
       "seller": "다나와 중개",
       "query": "포켓몬카드 오리파",
       "group": "card",
@@ -2080,6 +2204,39 @@
       "seller": "다나와 최저가",
       "query": "커피믹스",
       "group": "daily",
+      "auth": "unknown"
+    },
+    {
+      "id": "d4974254",
+      "name": "홍의보감 진생 에브리데이 홍삼스틱 10ml 30포",
+      "price": 47700,
+      "image": "https://img.danuri.io/catalog-image/254/974/004/370554edbd2645068eef60b12c40f299.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=4974254",
+      "seller": "다나와 최저가",
+      "query": "홍삼스틱",
+      "group": "prize",
+      "auth": "unknown"
+    },
+    {
+      "id": "d47394371",
+      "name": "정관장 홍삼정 에브리타임 소프트 10ml 30포",
+      "price": 47800,
+      "image": "https://img.danuri.io/catalog-image/371/394/047/7a6466d1ea6947bda4d37384af49c721.webp",
+      "url": "https://prod.danawa.com/info/?pcode=47394371",
+      "seller": "다나와 최저가",
+      "query": "홍삼정",
+      "group": "prize",
+      "auth": "unknown"
+    },
+    {
+      "id": "d110199710",
+      "name": "천호엔케어 흑마늘진액 오리지널 80ml 30포",
+      "price": 47880,
+      "image": "https://img.danuri.io/catalog-image/710/199/110/57d01d7aa2e9457aa85ce470ef5f076e.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=110199710",
+      "seller": "다나와 최저가",
+      "query": "흑마늘즙",
+      "group": "prize",
       "auth": "unknown"
     },
     {
@@ -2105,6 +2262,17 @@
       "auth": "unknown"
     },
     {
+      "id": "d124012343",
+      "name": "포켓몬코리아 포켓몬카드 MEGA 확장팩 스톰 에메랄다 30팩",
+      "price": 49900,
+      "image": "https://img.danuri.io/catalog-image/343/012/124/84aa6f7098974eb3b87fd4de67b845e1.jpeg",
+      "url": "https://prod.danawa.com/info/?pcode=124012343",
+      "seller": "다나와 최저가",
+      "query": "포켓몬 카드",
+      "group": "card",
+      "auth": "official"
+    },
+    {
       "id": "d2085488",
       "name": "CJ제일제당 햇반 흑미 210g",
       "price": 49900,
@@ -2120,7 +2288,7 @@
       "name": "(No써치) 메가 스타터 100덱 배틀컬렉션 포켓몬 카드 한국판 100 스타트 덱MEGA 메가 1개 일본판",
       "price": 50000,
       "image": "https://img1a.coupangcdn.com/image/vendor_inventory/cefc/f61afde5d7700cd59debcb860a85564a3adf0669bdf45b5f4f871d0a635d.jpg",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222184&cate_c3=222223&cate_c4=222445&cmpny_c=TP40F&link_prod_c=V95729094528&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EB%B0%B0%ED%8B%80%EB%8D%B1&r=17879313042934&cate=16349370",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222184&cate_c3=222223&cate_c4=222445&cmpny_c=TP40F&link_prod_c=V95729094528&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EB%B0%B0%ED%8B%80%EB%8D%B1&r=17879398251042&cate=16349370",
       "seller": "다나와 중개",
       "query": "포켓몬카드 배틀덱",
       "group": "card",
@@ -2136,17 +2304,6 @@
       "query": "야구 유니폼",
       "group": "uniform",
       "auth": "unknown"
-    },
-    {
-      "id": "d124012343",
-      "name": "포켓몬코리아 포켓몬카드 MEGA 확장팩 스톰 에메랄다 30팩",
-      "price": 50740,
-      "image": "https://img.danuri.io/catalog-image/343/012/124/84aa6f7098974eb3b87fd4de67b845e1.jpeg",
-      "url": "https://prod.danawa.com/info/?pcode=124012343",
-      "seller": "다나와 최저가",
-      "query": "포켓몬 카드",
-      "group": "card",
-      "auth": "official"
     },
     {
       "id": "d5061877",
@@ -2171,11 +2328,22 @@
       "auth": "unknown"
     },
     {
+      "id": "d1179195",
+      "name": "새남해농협 해두룸 흑마늘진액 80ml 30포",
+      "price": 51640,
+      "image": "https://img.danuri.io/catalog-image/195/179/001/1c6512319bc145ceab8c53d5e6cb5cee.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=1179195",
+      "seller": "다나와 최저가",
+      "query": "흑마늘즙",
+      "group": "prize",
+      "auth": "unknown"
+    },
+    {
       "id": "xF648688243",
       "name": "포켓몬 카드 MEGA 하이클래스팩 메가 드림 EX",
       "price": 51840,
       "image": "https://image.auction.co.kr/origin/59/69/7d/59697d6ed6.jpg",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=EE715&link_prod_c=F648688243&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%ED%95%98%EC%9D%B4%ED%81%B4%EB%9E%98%EC%8A%A4&r=17879313008253&cate=16349280",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=EE715&link_prod_c=F648688243&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%ED%95%98%EC%9D%B4%ED%81%B4%EB%9E%98%EC%8A%A4&r=17879398192154&cate=16349280",
       "seller": "다나와 중개",
       "query": "포켓몬카드 하이클래스",
       "group": "card",
@@ -2226,11 +2394,22 @@
       "auth": "unknown"
     },
     {
+      "id": "xP9495910997",
+      "name": "[해외] la 손흥민 후드 바람막이 점퍼 축구 봄 가을 집업 자켓 유니폼 블랙 (한글) 2XL (얇은 모델)",
+      "price": 58400,
+      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/73e4/7ec39049fbdf09f77aba0075f6c0d56a29f0e24f55b8596bfe4ed9e29850.jpg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=1822&cate_c2=228094&cate_c3=228628&cate_c4=0&cmpny_c=TP40F&link_prod_c=P9495910997&keyword=%EC%86%90%ED%9D%A5%EB%AF%BC+%EC%9C%A0%EB%8B%88%ED%8F%BC&r=17879399453177",
+      "seller": "다나와 중개",
+      "query": "손흥민 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
+    },
+    {
       "id": "xI28303134574",
       "name": "[해외] [SAR 111 VOL.01 확정] 포케카 오리파 소녀 수록 호화 포켓몬 카드 전 입 초보자",
       "price": 58450,
       "image": "https://img1a.coupangcdn.com/image/vendor_inventory/7423/edddd71005582d939eca81b14442c8e72dcb01653044a011508e3c4a8a29.jpg",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=I28303134574&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17879312934407&cate=16349280",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=I28303134574&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17879398116111&cate=16349280",
       "seller": "다나와 중개",
       "query": "포켓몬카드 오리파",
       "group": "card",
@@ -2270,6 +2449,28 @@
       "auth": "unknown"
     },
     {
+      "id": "xV95576379149",
+      "name": "[해외] 포켓몬 카드 게임 소드 & 쉴드 하이 클래스 덱 인텔레온 VMAX 1개",
+      "price": 65830,
+      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/44a0/0d00f9cf5628f49799c1ad04617434537591d7f2da6c88ade385e338049c.jpg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95576379149&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%ED%95%98%EC%9D%B4%ED%81%B4%EB%9E%98%EC%8A%A4&r=17879398192563&cate=16349280",
+      "seller": "다나와 중개",
+      "query": "포켓몬카드 하이클래스",
+      "group": "card",
+      "auth": "unknown"
+    },
+    {
+      "id": "d10353135",
+      "name": "정관장 홍삼정 현 선물세트 240g",
+      "price": 67110,
+      "image": "https://img.danuri.io/catalog-image/135/353/010/b98ef937ee4047d5afef841c6385bf3d.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=10353135",
+      "seller": "다나와 최저가",
+      "query": "홍삼정",
+      "group": "prize",
+      "auth": "unknown"
+    },
+    {
       "id": "d123076825",
       "name": "푸마 780339 01 2526 축구 유니폼 맨체스터 시티 홈 저지 맨시티 긴팔 78033901SG 1112982",
       "price": 67600,
@@ -2296,7 +2497,7 @@
       "name": "재고 있음 100 포켓몬 카드 젬 팩 vol6 컬렉션 중국어 간체 6 부스터 박스 PTCG 선물",
       "price": 73310,
       "image": "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/product/9553118779/B.webp?517012518",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=224989&cate_c4=225460&cmpny_c=TH201&link_prod_c=9553118779&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+%EB%B6%80%EC%8A%A4%ED%84%B0%EB%B0%95%EC%8A%A4&r=17879313022025&cate=1921074",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=224989&cate_c4=225460&cmpny_c=TH201&link_prod_c=9553118779&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+%EB%B6%80%EC%8A%A4%ED%84%B0%EB%B0%95%EC%8A%A4&r=17879398226693&cate=1921074",
       "seller": "다나와 중개",
       "query": "포켓몬 카드 부스터박스",
       "group": "card",
@@ -2316,7 +2517,7 @@
     {
       "id": "d79560380",
       "name": "SSG SSG랜더스 레플리카 유니폼 FEMRUF03",
-      "price": 74630,
+      "price": 74670,
       "image": "https://img.danuri.io/catalog-image/380/560/079/1b3fbdd832354dc3b459749ad1113f1d.jpg",
       "url": "https://prod.danawa.com/info/?pcode=79560380",
       "seller": "다나와 최저가",
@@ -2369,6 +2570,17 @@
       "auth": "unknown"
     },
     {
+      "id": "d1954230",
+      "name": "정관장 홍삼정 에브리타임 10ml 30포",
+      "price": 79640,
+      "image": "https://img.danuri.io/catalog-image/230/954/001/57de6dc434e449559815471f1b71b149.jpeg",
+      "url": "https://prod.danawa.com/info/?pcode=1954230",
+      "seller": "다나와 최저가",
+      "query": "홍삼정",
+      "group": "prize",
+      "auth": "unknown"
+    },
+    {
       "id": "d29895302",
       "name": "포켓몬코리아 포켓몬카드 스칼렛 바이올렛 강화 확장팩 레이징서프 30팩",
       "price": 80000,
@@ -2378,6 +2590,17 @@
       "query": "포켓몬 카드",
       "group": "card",
       "auth": "official"
+    },
+    {
+      "id": "x4329341921",
+      "name": "포켓몬카드 강화확장팩 백열의아르카나 포켓몬카드 백열의아르카나",
+      "price": 80360,
+      "image": "https://gdimg.gmarket.co.kr/4329341921/goodsimage?ver=38222799724",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=EE128&link_prod_c=4329341921&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EA%B0%95%ED%99%94%ED%99%95%EC%9E%A5%ED%8C%A9&r=17879398167377&cate=16349280",
+      "seller": "다나와 중개",
+      "query": "포켓몬 강화확장팩",
+      "group": "card",
+      "auth": "unknown"
     },
     {
       "id": "d101549315",
@@ -2395,7 +2618,7 @@
       "name": "포켓몬카드 스칼렛&바이올렛 강화확장팩 열풍의 아레나 30팩 미개봉 비닐밀봉 30팩 1박스 단일",
       "price": 87610,
       "image": "https://img1a.coupangcdn.com/image/vendor_inventory/9f5d/0aa9a544d4751a4f2988727c4151baa6a7212c869dd4dd664d9693e0460a.JPG",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95489370962&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EA%B0%95%ED%99%94%ED%99%95%EC%9E%A5%ED%8C%A9&r=17879312984011&cate=16349280",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95489370962&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EA%B0%95%ED%99%94%ED%99%95%EC%9E%A5%ED%8C%A9&r=17879398165220&cate=16349280",
       "seller": "다나와 중개",
       "query": "포켓몬 강화확장팩",
       "group": "card",
@@ -2428,7 +2651,7 @@
       "name": "포켓몬 카드게임 TCG 테라스탈페스타ex 스칼렛&바이올렛 하이클래스팩 확장팩 1박스 미개봉 (10팩/한글판) one",
       "price": 95050,
       "image": "https://img1a.coupangcdn.com/image/vendor_inventory/0aac/867da2ec2f91a16ba8ca3eca1d87f2e42aff308eff39c374b3b329e4a075.jpeg",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95953979269&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%ED%95%98%EC%9D%B4%ED%81%B4%EB%9E%98%EC%8A%A4&r=17879313009708&cate=16349280",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95953979269&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%ED%95%98%EC%9D%B4%ED%81%B4%EB%9E%98%EC%8A%A4&r=17879398197399&cate=16349280",
       "seller": "다나와 중개",
       "query": "포켓몬카드 하이클래스",
       "group": "card",
@@ -2443,6 +2666,28 @@
       "seller": "다나와 최저가",
       "query": "커피머신",
       "group": "home",
+      "auth": "unknown"
+    },
+    {
+      "id": "d77786720",
+      "name": "서울약사신협 프리미엄 홍삼정 천명스틱 골드 10ml 100포",
+      "price": 96860,
+      "image": "https://img.danuri.io/catalog-image/720/786/077/bcb41541c7ad478dbba2bddc0369d1ff.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=77786720",
+      "seller": "다나와 최저가",
+      "query": "홍삼정",
+      "group": "prize",
+      "auth": "unknown"
+    },
+    {
+      "id": "d10936602",
+      "name": "정관장 홍삼정 에브리타임 리미티드 10ml 30포",
+      "price": 102080,
+      "image": "https://img.danuri.io/catalog-image/602/936/010/9b4630300b9b457aa77cc9fab1bb3ad6.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=10936602",
+      "seller": "다나와 최저가",
+      "query": "홍삼스틱",
+      "group": "prize",
       "auth": "unknown"
     },
     {
@@ -2523,22 +2768,11 @@
       "auth": "unknown"
     },
     {
-      "id": "xI29058377904",
-      "name": "포켓몬카드 TCG [국내발송] [탑로더] 파이어 C (한국판) 환상 전설 드림 컬렉션 PSA MINT 9 (9등급) 1개 파이",
-      "price": 110000,
-      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/86d0/ebce158cbb458a31d9eaea1f04f21d0a5142d0b79bbdcc60927490a434a8.jpg",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=I29058377904&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+PSA&r=17879313113641&cate=16349280",
-      "seller": "다나와 중개",
-      "query": "포켓몬 카드 PSA",
-      "group": "card",
-      "auth": "unknown"
-    },
-    {
       "id": "x9579126931",
       "name": "[해외] 포켓몬카드 에브이 ex SAR 풀아헤드 PK-SV8a-211",
       "price": 113910,
       "image": "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/product/9579126931/B.webp?367925739",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=0&cate_c4=0&cmpny_c=TH201&link_prod_c=9579126931&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+SAR&r=17879313065931",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=0&cate_c4=0&cmpny_c=TH201&link_prod_c=9579126931&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+SAR&r=17879398278213",
       "seller": "다나와 중개",
       "query": "포켓몬카드 SAR",
       "group": "card",
@@ -2556,22 +2790,11 @@
       "auth": "unknown"
     },
     {
-      "id": "xI29057078573",
-      "name": "포켓몬카드 메가가디안ex SAR (메가심포니아) 1개 정품",
-      "price": 115000,
-      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/8be2/071462a922721693fa877cb083255f2f4d4976b748737f8b29b620ce511b.png",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=I29057078573&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+SAR&r=17879313066819&cate=16349280",
-      "seller": "다나와 중개",
-      "query": "포켓몬카드 SAR",
-      "group": "card",
-      "auth": "unknown"
-    },
-    {
       "id": "x9580821370",
       "name": "[해외] 포켓몬카드 에리카의초대 SAR 풀아헤드 포켓몬카드게임",
       "price": 116140,
       "image": "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/pd/v2/8/2/1/3/7/0/oxwVc/9580821370_B.webp",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=0&cate_c4=0&cmpny_c=TH201&link_prod_c=9580821370&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+SAR&r=17879313061093",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=0&cate_c4=0&cmpny_c=TH201&link_prod_c=9580821370&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+SAR&r=17879398278710",
       "seller": "다나와 중개",
       "query": "포켓몬카드 SAR",
       "group": "card",
@@ -2626,7 +2849,7 @@
       "name": "포켓몬 [해외] 포켓몬카드 TCG N의 레시라무 AR 배틀 파트너즈 일본판 PSA10",
       "price": 122123,
       "image": "https://img.croketglobal.net/item/thumbnail/cf1b11dc-c9f6-4039-9d22-535f58aaadda.webp?a=1024&f=jpeg",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=0&cate_c4=0&cmpny_c=TZ7F7&link_prod_c=6a6afa49650d8a33b56315d5&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+PSA&r=17879313113747",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=0&cate_c4=0&cmpny_c=TZ7F7&link_prod_c=6a6afa49650d8a33b56315d5&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+PSA&r=17879398358098",
       "seller": "다나와 중개",
       "query": "포켓몬 카드 PSA",
       "group": "card",
@@ -2635,7 +2858,7 @@
     {
       "id": "d60422522",
       "name": "프로스펙스 농구국가대표팀 유니폼 상의 원정 PT3BB23M012",
-      "price": 123880,
+      "price": 123870,
       "image": "https://img.danawa.com/prod_img/500000/522/422/img/60422522_1.jpg?shrink=130:130",
       "url": "https://prod.danawa.com/info/?pcode=60422522",
       "seller": "다나와 최저가",
@@ -2670,7 +2893,7 @@
       "name": "포켓몬 [해외] 포켓몬카드 TCG 피카츄 25주년 기념 컬렉션 일본판 PSA10",
       "price": 128913,
       "image": "https://img.croketglobal.net/item/thumbnail/d1c61508-ae7e-41f3-9f4e-d58d0a6f9e91.webp?a=1024&f=jpeg",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=0&cate_c4=0&cmpny_c=TZ7F7&link_prod_c=6a6afb8448d47f99d95998de&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+PSA&r=17879313115575",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=0&cate_c4=0&cmpny_c=TZ7F7&link_prod_c=6a6afb8448d47f99d95998de&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+PSA&r=17879398354166",
       "seller": "다나와 중개",
       "query": "포켓몬 카드 PSA",
       "group": "card",
@@ -2699,22 +2922,11 @@
       "auth": "official"
     },
     {
-      "id": "xI29057067648",
-      "name": "포켓몬카드 제크로무ex SAR (블랙볼트) 1개 정품",
-      "price": 129500,
-      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/e298/4e750530013aec6bf9a1e4669ef6c22bf5297a0d53573b52a673d3c92240.png",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=I29057067648&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+SAR&r=17879313067752&cate=16349280",
-      "seller": "다나와 중개",
-      "query": "포켓몬카드 SAR",
-      "group": "card",
-      "auth": "unknown"
-    },
-    {
       "id": "xF647171773",
       "name": "[해외] 포켓몬카드게임 MEGA 확장팩 메가심포니아 BOX 부스터팩 TCG - 단일상품",
       "price": 135600,
       "image": "https://image.auction.co.kr/origin/59/60/52/5960520976.jpg",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=EE715&link_prod_c=F647171773&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+%EB%B6%80%EC%8A%A4%ED%84%B0%EB%B0%95%EC%8A%A4&r=17879313024046&cate=16349280",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=EE715&link_prod_c=F647171773&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+%EB%B6%80%EC%8A%A4%ED%84%B0%EB%B0%95%EC%8A%A4&r=17879398224966&cate=16349280",
       "seller": "다나와 중개",
       "query": "포켓몬 카드 부스터박스",
       "group": "card",
@@ -2725,7 +2937,7 @@
       "name": "[해외] 포켓몬카드게임 MEGA 확장팩 메가심포니아 BOX 부스터팩 TCG - 단일상품",
       "price": 135600,
       "image": "https://gdimg.gmarket.co.kr/4839852785/goodsimage?ver=38232624565",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=EE128&link_prod_c=4839852785&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+%EB%B6%80%EC%8A%A4%ED%84%B0%EB%B0%95%EC%8A%A4&r=17879313024331&cate=16349280",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=EE128&link_prod_c=4839852785&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+%EB%B6%80%EC%8A%A4%ED%84%B0%EB%B0%95%EC%8A%A4&r=17879398224015&cate=16349280",
       "seller": "다나와 중개",
       "query": "포켓몬 카드 부스터박스",
       "group": "card",
@@ -2740,6 +2952,17 @@
       "seller": "다나와 최저가",
       "query": "가습기",
       "group": "home",
+      "auth": "unknown"
+    },
+    {
+      "id": "xV92715746671",
+      "name": "[해외] 멜로엣타 EX SAR 블랙볼트 포켓몬 카드 170/086 특급국제배송(3~4일소요) 1개 7. Meloetta ex",
+      "price": 137910,
+      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/64b3/853e48ce4763e7f4f1522b0d62c8fabe5130c56fc57fa0753a6ead3066dd.png",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V92715746671&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+SAR&r=17879398275360&cate=16349280",
+      "seller": "다나와 중개",
+      "query": "포켓몬카드 SAR",
+      "group": "card",
       "auth": "unknown"
     },
     {
@@ -2765,17 +2988,6 @@
       "auth": "unknown"
     },
     {
-      "id": "x13736975115",
-      "name": "[해외]아디다스 리버풀 써드 긴팔 유니폼 저지 26/27 선수 마킹 패치 KB8273",
-      "price": 146000,
-      "image": "https://pimg.danawa.com/proxy/shop1.phinf.naver.net/20260828_261/1787894699488VnY9x_PNG/122027534616234486_165733942.png?type=m450&shrink=130:130",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=1825&cate_c2=221566&cate_c3=221572&cate_c4=221593&cmpny_c=TY614F&link_prod_c=13736975115&keyword=%EC%9C%A0%EB%8B%88%ED%8F%BC+%EB%A7%88%ED%82%B9&r=17879313869874&cate=13342936",
-      "seller": "다나와 중개",
-      "query": "유니폼 마킹",
-      "group": "uniform",
-      "auth": "unknown"
-    },
-    {
       "id": "d122693952",
       "name": "스파이더 울산웨일즈 어웨이 유니폼 노마킹 SWLPCNRS001MBLK",
       "price": 147120,
@@ -2783,6 +2995,28 @@
       "url": "https://prod.danawa.com/info/?pcode=122693952",
       "seller": "다나와 최저가",
       "query": "유니폼 마킹",
+      "group": "uniform",
+      "auth": "unknown"
+    },
+    {
+      "id": "xF589619879",
+      "name": "정품 보증 두산 베어스 x 브롤 스타즈 x 아디다스 어센틱 유니폼 퍼플 화이트 논 마킹 버전 95",
+      "price": 147200,
+      "image": "https://image.auction.co.kr/origin/58/15/22/581522a636.jpg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=57906&cate_c2=59496&cate_c3=220061&cate_c4=220067&cmpny_c=EE715&link_prod_c=F589619879&keyword=%EC%9C%A0%EB%8B%88%ED%8F%BC+%EB%A7%88%ED%82%B9&r=17879399537368&cate=14243335",
+      "seller": "다나와 중개",
+      "query": "유니폼 마킹",
+      "group": "uniform",
+      "auth": "unknown"
+    },
+    {
+      "id": "xV95717079635",
+      "name": "25-26 토트넘 손흥민 유니폼 저지 성인 남자 어웨이 블랙 상의 오피셜 마킹 HJ4609011 M 마킹없음 M 블랙 라이트",
+      "price": 149000,
+      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/ca73/8528ded4069c7f23b39ab5eb12e4d31f06e8b46bf64ecfea159da551c00d.png",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=1822&cate_c2=228094&cate_c3=228595&cate_c4=0&cmpny_c=TP40F&link_prod_c=V95717079635&keyword=%EC%86%90%ED%9D%A5%EB%AF%BC+%EC%9C%A0%EB%8B%88%ED%8F%BC&r=17879399452769",
+      "seller": "다나와 중개",
+      "query": "손흥민 유니폼",
       "group": "uniform",
       "auth": "unknown"
     },
@@ -2820,6 +3054,17 @@
       "auth": "unknown"
     },
     {
+      "id": "d13263857",
+      "name": "정관장 홍삼정 에브리타임 리미티드 10ml 50포",
+      "price": 160260,
+      "image": "https://img.danuri.io/catalog-image/857/263/013/7c4558239da5401280cb9d304115f765.jpeg",
+      "url": "https://prod.danawa.com/info/?pcode=13263857",
+      "seller": "다나와 최저가",
+      "query": "홍삼스틱",
+      "group": "prize",
+      "auth": "unknown"
+    },
+    {
       "id": "d62164070",
       "name": "쿠쿠전자 CAFO-C1810EDG",
       "price": 164020,
@@ -2837,6 +3082,17 @@
       "image": "https://img.danuri.io/catalog-image/967/806/123/e4c67ab951794f48b6006d014a30ae7d.jpeg",
       "url": "https://prod.danawa.com/info/?pcode=123806967",
       "seller": "다나와 최저가",
+      "query": "유니폼 마킹",
+      "group": "uniform",
+      "auth": "unknown"
+    },
+    {
+      "id": "xLO2694638577",
+      "name": "UnKnown [정품 보증] 삼성 라이온즈 2025 프로페셔널 한자 올드 어웨이 유니폼 스카이 논 마킹 버전",
+      "price": 166180,
+      "image": "https://contents.lotteon.com/itemimage/20260828182456/LO/26/94/63/85/77/_2/69/46/38/57/8/LO2694638577_2694638578_1.jpg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=1822&cate_c2=228094&cate_c3=228613&cate_c4=230887&cmpny_c=EE309&link_prod_c=LO2694638577&keyword=%EC%9C%A0%EB%8B%88%ED%8F%BC+%EB%A7%88%ED%82%B9&r=17879399531572&cate=18345585",
+      "seller": "다나와 중개",
       "query": "유니폼 마킹",
       "group": "uniform",
       "auth": "unknown"
@@ -2886,6 +3142,17 @@
       "auth": "unknown"
     },
     {
+      "id": "xF608746740",
+      "name": "정품 보증 삼성 라이온즈 2025 프로페셔널 한자 올드 어웨이 유니폼 스카이 논 마킹 버전 90",
+      "price": 176000,
+      "image": "https://image.auction.co.kr/origin/58/84/76/5884760af6.jpg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=57906&cate_c2=59496&cate_c3=220061&cate_c4=220067&cmpny_c=EE715&link_prod_c=F608746740&keyword=%EC%9C%A0%EB%8B%88%ED%8F%BC+%EB%A7%88%ED%82%B9&r=17879399534453&cate=14243335",
+      "seller": "다나와 중개",
+      "query": "유니폼 마킹",
+      "group": "uniform",
+      "auth": "unknown"
+    },
+    {
       "id": "d13192118",
       "name": "네스프레소 시티즈 D113",
       "price": 179000,
@@ -2901,7 +3168,7 @@
       "name": "ALPHA [해외] ALPHA 포켓몬스터 카드 오리파 PSA 피카츄 시리즈 확정 랜덤팩",
       "price": 180980,
       "image": "https://contents.lotteon.com/itemimage/20260720125145/LO/27/27/93/93/74/_2/72/79/39/37/5/LO2727939374_2727939375_1.jpg",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=22591&cate_c2=223531&cate_c3=223549&cate_c4=0&cmpny_c=EE309&link_prod_c=LO2727939374&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17879312931618",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=22591&cate_c2=223531&cate_c3=223549&cate_c4=0&cmpny_c=EE309&link_prod_c=LO2727939374&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17879398115254",
       "seller": "다나와 중개",
       "query": "포켓몬카드 오리파",
       "group": "card",
@@ -2923,10 +3190,21 @@
       "name": "[해외] 오리지널 포켓몬 트레이딩 카드 PTCG 일본어 버전 M2 메가 카드 부스터 박스 어린이",
       "price": 193770,
       "image": "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/product/9551633900/B.jpg?811822383",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=22591&cate_c2=0&cate_c3=0&cate_c4=0&cmpny_c=TH201&link_prod_c=9551633900&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+%EB%B6%80%EC%8A%A4%ED%84%B0%EB%B0%95%EC%8A%A4&r=17879313022698",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=22591&cate_c2=0&cate_c3=0&cate_c4=0&cmpny_c=TH201&link_prod_c=9551633900&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+%EB%B6%80%EC%8A%A4%ED%84%B0%EB%B0%95%EC%8A%A4&r=17879398222802",
       "seller": "다나와 중개",
       "query": "포켓몬 카드 부스터박스",
       "group": "card",
+      "auth": "unknown"
+    },
+    {
+      "id": "d1659083",
+      "name": "정관장 홍삼정 240g",
+      "price": 194350,
+      "image": "https://img.danuri.io/catalog-image/083/659/001/3e19f73ebd5c4767882c639f50b03855.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=1659083",
+      "seller": "다나와 최저가",
+      "query": "홍삼정",
+      "group": "prize",
       "auth": "unknown"
     },
     {
@@ -2985,22 +3263,11 @@
       "auth": "unknown"
     },
     {
-      "id": "x13736972534",
-      "name": "[해외]아디다스 리버풀 써드 어센틱 긴팔 유니폼 저지 26/27 선수 마킹 패치 KB8283",
-      "price": 215000,
-      "image": "https://pimg.danawa.com/proxy/shop1.phinf.naver.net/20260828_44/1787894299724jHju7_PNG/9287921716502090_604399036.png?type=m450&shrink=130:130",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=1825&cate_c2=221566&cate_c3=221572&cate_c4=221593&cmpny_c=TY614F&link_prod_c=13736972534&keyword=%EC%9C%A0%EB%8B%88%ED%8F%BC+%EB%A7%88%ED%82%B9&r=17879313869691&cate=13342936",
-      "seller": "다나와 중개",
-      "query": "유니폼 마킹",
-      "group": "uniform",
-      "auth": "unknown"
-    },
-    {
       "id": "x6a828e195494cbc6066fc198",
       "name": "포켓몬 [해외] 포켓몬카드 151 TCG 로손 프로모 피카츄 AR SV2a 173/165 PSA10 일본판",
       "price": 218153,
       "image": "https://img.croketglobal.net/item/thumbnail/f4c306e9-9acd-462c-a55e-a06e5fc43e7a.webp?a=1024&f=jpeg",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=0&cate_c4=0&cmpny_c=TZ7F7&link_prod_c=6a828e195494cbc6066fc198&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+psa10&r=17879313084562",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=0&cate_c4=0&cmpny_c=TZ7F7&link_prod_c=6a828e195494cbc6066fc198&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+psa10&r=17879398306474",
       "seller": "다나와 중개",
       "query": "포켓몬 카드 psa10",
       "group": "card",
@@ -3011,20 +3278,9 @@
       "name": "[해외] 포켓몬카드 님피아 ex SAR 풀헤드 SV8a 212",
       "price": 220330,
       "image": "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/pd/v2/8/4/1/2/1/3/WtqCy/9580841213_B.webp",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=0&cate_c4=0&cmpny_c=TH201&link_prod_c=9580841213&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+SAR&r=17879313065383",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=0&cate_c4=0&cmpny_c=TH201&link_prod_c=9580841213&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+SAR&r=17879398279248",
       "seller": "다나와 중개",
       "query": "포켓몬카드 SAR",
-      "group": "card",
-      "auth": "unknown"
-    },
-    {
-      "id": "xV95722897980",
-      "name": "[해외] 일본판 샤이니트레져ex 강화확장팩 겉비닐 미개봉 1박스 포켓몬카드 일반국제배송(7~8일소요예정)",
-      "price": 226490,
-      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/2093/00231977e58e372d4d5b60b2fd7453236fbb6da8197d5501ebe1470e2609.jpg",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95722897980&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EA%B0%95%ED%99%94%ED%99%95%EC%9E%A5%ED%8C%A9&r=17879312986549&cate=16349280",
-      "seller": "다나와 중개",
-      "query": "포켓몬 강화확장팩",
       "group": "card",
       "auth": "unknown"
     },
@@ -3055,7 +3311,7 @@
       "name": "[해외] 포켓몬 카드 게임 스칼렛 바이올렛 확장팩 스텔라 미라클 부스터 박스 (일본어판)",
       "price": 232190,
       "image": "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/product/9455474013/B.webp?513862434",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=22591&cate_c2=0&cate_c3=0&cate_c4=0&cmpny_c=TH201&link_prod_c=9455474013&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+%EB%B6%80%EC%8A%A4%ED%84%B0%EB%B0%95%EC%8A%A4&r=17879313024212",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=22591&cate_c2=0&cate_c3=0&cate_c4=0&cmpny_c=TH201&link_prod_c=9455474013&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+%EB%B6%80%EC%8A%A4%ED%84%B0%EB%B0%95%EC%8A%A4&r=17879398226844",
       "seller": "다나와 중개",
       "query": "포켓몬 카드 부스터박스",
       "group": "card",
@@ -3066,7 +3322,7 @@
       "name": "포켓몬 [해외] 포켓몬카드 TCG 뮤츠 클래식 일본판 PSA10",
       "price": 248223,
       "image": "https://img.croketglobal.net/item/thumbnail/365fc69a-3769-4fbb-a3f5-b92f129950e3.webp?a=1024&f=jpeg",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=0&cate_c4=0&cmpny_c=TZ7F7&link_prod_c=6a6afcbd48d47f99d959be0d&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+psa10&r=17879313087067",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=0&cate_c4=0&cmpny_c=TZ7F7&link_prod_c=6a6afcbd48d47f99d959be0d&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+psa10&r=17879398307487",
       "seller": "다나와 중개",
       "query": "포켓몬 카드 psa10",
       "group": "card",
@@ -3165,7 +3421,7 @@
       "name": "[해외] 포켓몬 카드 게임 피카츄 ex 스타트덱 100 코로챠오 006/023 PSA 10등급 카드 일반국제배송(7~8일소요예",
       "price": 273150,
       "image": "https://img1a.coupangcdn.com/image/vendor_inventory/d5e6/56d9ed7903b6157fb6f30c46c8f0d4f8a1ab15ac3d97662b1962172ab86f.jpg",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95462615640&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+psa10&r=17879313085918&cate=16349280",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95462615640&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+psa10&r=17879398303175&cate=16349280",
       "seller": "다나와 중개",
       "query": "포켓몬 카드 psa10",
       "group": "card",
@@ -3198,7 +3454,7 @@
       "name": "[해외] 오리파 포켓몬 카드 박스 1개 + PSA10 + 싱글 카드 럭키백 아키하바라 상세설명 참조",
       "price": 288110,
       "image": "https://img1a.coupangcdn.com/image/vendor_inventory/24ce/ca5ac8dd3402b549d0f3f03dc042062da65d7499d8bd0bace0b4566d9a9e.jpg",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=I28960756980&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17879312932856&cate=16349280",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=I28960756980&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17879398116903&cate=16349280",
       "seller": "다나와 중개",
       "query": "포켓몬카드 오리파",
       "group": "card",
@@ -3224,17 +3480,6 @@
       "seller": "다나와 최저가",
       "query": "전기밥솥",
       "group": "home",
-      "auth": "unknown"
-    },
-    {
-      "id": "x9514924458",
-      "name": "[해외] 메가 포켓몬 미스터리 박스 - PSA 등급 카드 정품 오리지널 빈티지",
-      "price": 300430,
-      "image": "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/pd/v2/9/2/4/4/5/8/AGyzu/9514924458_B.webp",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=22591&cate_c2=0&cate_c3=0&cate_c4=0&cmpny_c=TH201&link_prod_c=9514924458&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+PSA&r=17879313115055",
-      "seller": "다나와 중개",
-      "query": "포켓몬 카드 PSA",
-      "group": "card",
       "auth": "unknown"
     },
     {
@@ -3264,7 +3509,7 @@
       "name": "[해외] 포켓몬 카드 게임 포켓몬 GO 일본판 확장팩 잉어킹 021/071 PSA 10등급 카드 일반국제배송(7~8일소요예정)",
       "price": 309170,
       "image": "https://img1a.coupangcdn.com/image/vendor_inventory/d99a/b380f8ed2004a0d0b81b7b3fdcab14762b17fc09d3be978921280a1cf2c5.jpeg",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95645415744&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+psa10&r=17879313088742&cate=16349280",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95645415744&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+psa10&r=17879398304811&cate=16349280",
       "seller": "다나와 중개",
       "query": "포켓몬 카드 psa10",
       "group": "card",
@@ -3275,7 +3520,7 @@
       "name": "[해외] 포켓몬 카드 게임 따라큐 V 미미큐 233/184 CSR PSA 10등급 카드 일반국제배송(7~8일소요예정)",
       "price": 313740,
       "image": "https://img1a.coupangcdn.com/image/vendor_inventory/58a5/510d29ea64efea038fafa31cf86928206a1ef5c64f0e976346fe45d184b4.jpeg",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95462617388&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+psa10&r=17879313089353&cate=16349280",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95462617388&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+psa10&r=17879398306868&cate=16349280",
       "seller": "다나와 중개",
       "query": "포켓몬 카드 psa10",
       "group": "card",
@@ -3286,20 +3531,20 @@
       "name": "[해외] 포케카 오리파 psa10 확정 포켓몬 카드 오리파 우량",
       "price": 319280,
       "image": "https://img1a.coupangcdn.com/image/vendor_inventory/34d8/aa7a2484011434976a2b035e68d7cf67ca7747993060f172e73a39fea8e7.jpg",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=I28303149707&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17879312931270&cate=16349280",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=I28303149707&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17879398111017&cate=16349280",
       "seller": "다나와 중개",
       "query": "포켓몬카드 오리파",
       "group": "card",
       "auth": "unknown"
     },
     {
-      "id": "x7879748351",
-      "name": "[해외] 포켓몬 트레이딩 카드 게임 스칼렛 바이올렛 하이 클래스팩 샤이니 트레저 ex BOX",
-      "price": 321660,
-      "image": "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/product/7879748351/B.jpg?28000000",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=1985&cate_c2=226099&cate_c3=226126&cate_c4=0&cmpny_c=TH201&link_prod_c=7879748351&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%ED%95%98%EC%9D%B4%ED%81%B4%EB%9E%98%EC%8A%A4&r=17879313005828&cate=15241655",
+      "id": "x9580834771",
+      "name": "[해외] 포켓몬카드 레시라무ex SAR 풀아헤드 SV11W 168",
+      "price": 319970,
+      "image": "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/pd/v2/8/3/4/7/7/1/KOJge/9580834771_B.webp",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=0&cate_c4=0&cmpny_c=TH201&link_prod_c=9580834771&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+SAR&r=17879398276715",
       "seller": "다나와 중개",
-      "query": "포켓몬카드 하이클래스",
+      "query": "포켓몬카드 SAR",
       "group": "card",
       "auth": "unknown"
     },
@@ -3352,7 +3597,7 @@
       "name": "[해외] ALPHA 포켓몬스터 카드 오리파 PSA 피카츄 시리즈 확정 랜덤팩 PSA10 확정 1개",
       "price": 346400,
       "image": "https://img1a.coupangcdn.com/image/vendor_inventory/4c5f/a4a8c7cdb5863e53c7df9f3dc155039c1d0ac996dbd34a0bd40f7f0286b8.jpg",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=224983&cate_c4=0&cmpny_c=TP40F&link_prod_c=V95941926280&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17879312938948&cate=1921053",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=224983&cate_c4=0&cmpny_c=TP40F&link_prod_c=V95941926280&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17879398113764&cate=1921053",
       "seller": "다나와 중개",
       "query": "포켓몬카드 오리파",
       "group": "card",
@@ -3440,7 +3685,7 @@
       "name": "[해외] 포켓몬 카드 게임 피카츄 포켓몬 GO 028/071 R PSA 10등급 카드 일반국제배송(7~8일소요예정)",
       "price": 440500,
       "image": "https://img1a.coupangcdn.com/image/vendor_inventory/8c6a/23c7cefb394bd355957e401e9ebd3a8cad0506d656e228f010a01198d5c0.jpeg",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95462616213&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+psa10&r=17879313086906&cate=16349280",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95462616213&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+psa10&r=17879398303148&cate=16349280",
       "seller": "다나와 중개",
       "query": "포켓몬 카드 psa10",
       "group": "card",
@@ -3462,7 +3707,7 @@
       "name": "[해외] 포켓몬 카드 스칼렛&바이올렛 강화 확장팩 리자몽 ex 185/165 PSA10 등급 카드 일반국제배송(7~8일)",
       "price": 448170,
       "image": "https://img1a.coupangcdn.com/image/vendor_inventory/190d/8aec42da861cdb8a559e0ef73411cf55a6ec1648c55dda194a365dc282eb.jpeg",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95632693711&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EB%A6%AC%EC%9E%90%EB%AA%BD+psa&r=17879313092677&cate=16349280",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95632693711&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EB%A6%AC%EC%9E%90%EB%AA%BD+psa&r=17879398338563&cate=16349280",
       "seller": "다나와 중개",
       "query": "포켓몬 리자몽 psa",
       "group": "card",
@@ -3473,10 +3718,21 @@
       "name": "[해외] 포켓몬카드 피카츄 ex SAR 풀아헤드 PK-M2a-234",
       "price": 451270,
       "image": "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/product/9579129690/B.webp?449193440",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=0&cate_c4=0&cmpny_c=TH201&link_prod_c=9579129690&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+SAR&r=17879313067414",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=0&cate_c4=0&cmpny_c=TH201&link_prod_c=9579129690&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+SAR&r=17879398274935",
       "seller": "다나와 중개",
       "query": "포켓몬카드 SAR",
       "group": "card",
+      "auth": "unknown"
+    },
+    {
+      "id": "xF648635830",
+      "name": "정품 보증 기아 타이거즈 x 아이앱 스튜디오 25 어센틱 아이앱 브랜드데이 유니폼 레드 논 마킹 버전 120",
+      "price": 462500,
+      "image": "https://image.auction.co.kr/origin/59/69/32/5969324896.jpg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=57906&cate_c2=59496&cate_c3=220061&cate_c4=220067&cmpny_c=EE715&link_prod_c=F648635830&keyword=%EC%9C%A0%EB%8B%88%ED%8F%BC+%EB%A7%88%ED%82%B9&r=17879399535156&cate=14243335",
+      "seller": "다나와 중개",
+      "query": "유니폼 마킹",
+      "group": "uniform",
       "auth": "unknown"
     },
     {
@@ -3495,7 +3751,7 @@
       "name": "[해외] 포켓몬 카드 게임 2022년 일본 포켓몬 GO 확장팩 PSA 10등급 카드 4종 선택가능 레디언트 리자몽 단품(+16",
       "price": 494500,
       "image": "https://img1a.coupangcdn.com/image/vendor_inventory/0817/360b0129a13277c1d08b7a675c75c1e3cc2f474d89842aad22e60f90b60d.jpeg",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95620451298&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+psa10&r=17879313082169&cate=16349280",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95620451298&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+psa10&r=17879398301274&cate=16349280",
       "seller": "다나와 중개",
       "query": "포켓몬 카드 psa10",
       "group": "card",
@@ -3506,7 +3762,7 @@
       "name": "[해외] 포켓몬 TCG/ 카드 묶음 (PSA 가치 있는 NM-M 등급 빈티지 홀로 일부 포함)",
       "price": 499790,
       "image": "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/pd/v2/7/6/6/5/2/5/ZOaXi/9533766525_B.webp",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=22591&cate_c2=0&cate_c3=0&cate_c4=0&cmpny_c=TH201&link_prod_c=9533766525&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+PSA&r=17879313118149",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=22591&cate_c2=0&cate_c3=0&cate_c4=0&cmpny_c=TH201&link_prod_c=9533766525&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+PSA&r=17879398352383",
       "seller": "다나와 중개",
       "query": "포켓몬 카드 PSA",
       "group": "card",
@@ -3539,7 +3795,7 @@
       "name": "포켓몬카드 피카츄 25th ANNIVERSARY COLLECTION PSA 10등급 일반국제배송(7~8일)",
       "price": 552240,
       "image": "https://img1a.coupangcdn.com/image/vendor_inventory/5faa/0c8365053bf1f313e1a9a8a928a889da2f6240db2396044abdf69a19bbd5.jpeg",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V94873912856&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+psa10&r=17879313086102&cate=16349280",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V94873912856&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+psa10&r=17879398303998&cate=16349280",
       "seller": "다나와 중개",
       "query": "포켓몬 카드 psa10",
       "group": "card",
@@ -3550,7 +3806,7 @@
       "name": "[해외] 포켓몬 카드 게임 2022 포켓몬 찬란한 리자몽 연번 PSA 10등급 카드 일반국제배송(7~8일소요예정)",
       "price": 564000,
       "image": "https://img1a.coupangcdn.com/image/vendor_inventory/1b13/41867571cbe506d51c2fe913dfe00435c26bc10bb3e037568b133ad55591.jpeg",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95632693603&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EB%A6%AC%EC%9E%90%EB%AA%BD+psa&r=17879313091468&cate=16349280",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95632693603&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EB%A6%AC%EC%9E%90%EB%AA%BD+psa&r=17879398332769&cate=16349280",
       "seller": "다나와 중개",
       "query": "포켓몬 리자몽 psa",
       "group": "card",
@@ -3561,7 +3817,7 @@
       "name": "[해외] 포켓몬 TCG 메가 리자몽 UPC 프로모션 카드 PSA 10 오리코리오",
       "price": 571510,
       "image": "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/pd/v2/7/5/6/8/0/8/HSitZ/9548756808_B.webp",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=22591&cate_c2=0&cate_c3=0&cate_c4=0&cmpny_c=TH201&link_prod_c=9548756808&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EB%A6%AC%EC%9E%90%EB%AA%BD+psa&r=17879313093676",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=22591&cate_c2=0&cate_c3=0&cate_c4=0&cmpny_c=TH201&link_prod_c=9548756808&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EB%A6%AC%EC%9E%90%EB%AA%BD+psa&r=17879398339010",
       "seller": "다나와 중개",
       "query": "포켓몬 리자몽 psa",
       "group": "card",
@@ -3572,7 +3828,7 @@
       "name": "[PSA9] 리자몽vmax SSR 308 / 일본판 포켓몬 카드 게임 등급 카드 흑자몽",
       "price": 580000,
       "image": "https://pimg.danawa.com/proxy/shop1.phinf.naver.net/20260726_154/1785066495506YJzvk_JPEG/39688233474040090_898041246.jpg?type=m450&shrink=130:130",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TXA16A&link_prod_c=13683393827&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EB%A6%AC%EC%9E%90%EB%AA%BD+psa&r=17879313094109&cate=16349280",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TXA16A&link_prod_c=13683393827&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EB%A6%AC%EC%9E%90%EB%AA%BD+psa&r=17879398337580&cate=16349280",
       "seller": "다나와 중개",
       "query": "포켓몬 리자몽 psa",
       "group": "card",
@@ -3583,7 +3839,7 @@
       "name": "[해외] 포켓몬카드 리자몽ex SAR 풀아헤드 PK-SV3-134",
       "price": 584890,
       "image": "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/pd/v2/8/3/2/9/2/6/ZNfSE/9580832926_B.webp",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=0&cate_c4=0&cmpny_c=TH201&link_prod_c=9580832926&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+SAR&r=17879313061964",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=0&cate_c4=0&cmpny_c=TH201&link_prod_c=9580832926&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+SAR&r=17879398272436",
       "seller": "다나와 중개",
       "query": "포켓몬카드 SAR",
       "group": "card",
@@ -3594,7 +3850,7 @@
       "name": "[해외] 포켓몬 카드 스페셜 덱 세트 ex 이상해꽃 & 리자몽 & 거북왕 연번 PSA10 등급 카드 일반국제배송(7~8일소요예",
       "price": 586110,
       "image": "https://img1a.coupangcdn.com/image/vendor_inventory/acfc/81fc5454ba26e0e3a3d6c6a5776dae727c88ba2c2a73343fd0e2e4c1ed81.jpeg",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95632694506&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EB%A6%AC%EC%9E%90%EB%AA%BD+psa&r=17879313099442&cate=16349280",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95632694506&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EB%A6%AC%EC%9E%90%EB%AA%BD+psa&r=17879398332430&cate=16349280",
       "seller": "다나와 중개",
       "query": "포켓몬 리자몽 psa",
       "group": "card",
@@ -3605,7 +3861,7 @@
       "name": "[해외] 포켓몬 카드 리자몽 VSTAR SAR 212/172 PSA10 등급 카드 일반국제배송(7~8일)",
       "price": 587160,
       "image": "https://img1a.coupangcdn.com/image/vendor_inventory/cebc/bfeebea7e9ada4d9b26d3141a5fefd1234b26ff998f60952a6a085b000b3.jpeg",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95620450856&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EB%A6%AC%EC%9E%90%EB%AA%BD+psa&r=17879313093866&cate=16349280",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95620450856&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EB%A6%AC%EC%9E%90%EB%AA%BD+psa&r=17879398336348&cate=16349280",
       "seller": "다나와 중개",
       "query": "포켓몬 리자몽 psa",
       "group": "card",
@@ -3671,7 +3927,7 @@
       "name": "[해외] 포켓몬 TCG 메가 리자몽 UPC 프로모션 카드 PSA 10 오리코리오 1개",
       "price": 688600,
       "image": "https://img1a.coupangcdn.com/image/vendor_inventory/f56c/33845d790c4d8257a56a1c2d54e02006a0338c8494502ad1fcea9b7f8db8.jpg",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=224974&cate_c4=225358&cmpny_c=TP40F&link_prod_c=I28896401883&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EB%A6%AC%EC%9E%90%EB%AA%BD+psa&r=17879313095328&cate=1939252",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=224974&cate_c4=225358&cmpny_c=TP40F&link_prod_c=I28896401883&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EB%A6%AC%EC%9E%90%EB%AA%BD+psa&r=17879398335531&cate=1939252",
       "seller": "다나와 중개",
       "query": "포켓몬 리자몽 psa",
       "group": "card",
@@ -3682,7 +3938,7 @@
       "name": "[해외] 포켓몬카드 뮤 ex SAR 풀헤드 PK-SV4a 347 슬리브",
       "price": 1037940,
       "image": "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/pd/v2/8/3/6/8/1/3/qqDeP/9580836813_B.webp",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=0&cate_c4=0&cmpny_c=TH201&link_prod_c=9580836813&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+SAR&r=17879313063336",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=0&cate_c4=0&cmpny_c=TH201&link_prod_c=9580836813&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+SAR&r=17879398278510",
       "seller": "다나와 중개",
       "query": "포켓몬카드 SAR",
       "group": "card",
@@ -3693,7 +3949,7 @@
       "name": "포켓몬 카드 메가리자몽X EX InfernoX PSA 10등급 일반국제배송(7~8일)",
       "price": 1332810,
       "image": "https://img1a.coupangcdn.com/image/vendor_inventory/d5ca/6ba4ac4b3166f2f9ea8b132a424bee58743e392bdbe4743f3081ebe8380d.jpeg",
-      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V94864652337&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EB%A6%AC%EC%9E%90%EB%AA%BD+psa&r=17879313092389&cate=16349280",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V94864652337&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EB%A6%AC%EC%9E%90%EB%AA%BD+psa&r=17879398337925&cate=16349280",
       "seller": "다나와 중개",
       "query": "포켓몬 리자몽 psa",
       "group": "card",

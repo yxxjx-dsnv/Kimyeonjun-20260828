@@ -1,9 +1,18 @@
 /**
- * 올박스의 심장 — 박스 정의 · 확률 곡선 · 꽝 없음 하한 · 추첨.
+ * 올박스의 심장 — 캠페인 포맷 정의 · 확률 · 추첨.
  *
- * 확률표를 손으로 적지 않는다. 아래 두 곡선이 계산한 값을 화면도 추첨도 그대로 쓴다.
- * 크롤한 실제 시세(api/_pool.js)가 계산의 입력이므로, 크롤 결과가 바뀌면 확률이 바뀌고
- * 예산 제약을 넘으면 self-check가 깨진다.
+ * 올박스는 하나의 상품이 아니라 **여러 캠페인 포맷이 매주 교체되며 도는 엔진**이다.
+ * 포맷마다 무엇이 무작위인지, 꽝이 있는지, 참여비가 얼마인지가 다르다.
+ *
+ *   ① 팀 뽑기 (team-draw)  — 등급별 개수가 정해진 뽑기 통. 전원 준비 → 즉시 개봉.
+ *                            혼자보다 여럿이 하면 상위 등급 확률이 오른다. 꽝 없음.
+ *   ② 데일리 100원 (daily) — 100원·하루 1회·재고 소진까지. **꽝 있음, 확률 전부 공개.**
+ *   ③ 공동구매 (group-buy) — 상품은 확정, 확률은 '얼마를 내는가'에만. 꽝 없음.
+ *
+ * **확률을 손으로 적지 않는다.**
+ *   ①은 재고 비율에서, ②는 단위경제에서, ③은 할인 여력에서 유도한다.
+ *   크롤한 실제 시세(api/_pool.js)가 전부의 입력이라, 크롤이 바뀌면 확률이 바뀌고
+ *   예산 제약을 넘으면 self-check가 깨진다.
  *
  * 실행:  node api/_draw.js     (확률표 출력 + 자체 검증)
  */
@@ -49,6 +58,17 @@ export const BANDS = { C: [1, 1.5], B: [1.5, 6], A: [6, 40], S: [100, 250] }
 export const MIN_TIER_ITEMS = 3
 export const TIERS = ['S', 'A', 'B', 'C']
 
+/**
+ * ① 팀 뽑기 — **고정 재고 뽑기 통**.
+ *
+ * 이전 구현은 "인원이 늘면 예산이 늘어 확률이 오르는" 무한 재고 모델이었다.
+ * 실제 뽑기는 그렇지 않다. **등급별 상품 개수가 미리 정해져 있고**, 기본 확률은
+ * 그 재고 비율 그대로다(S 1개 / 1,000개 = 0.1%). 확률을 지어낼 여지가 없다.
+ *
+ * 여럿이 모이면 상위 등급 확률에 **구매력 배수**를 곱한다. 그 배수의 재원은
+ * 대량 매입 원가 절감(costRatio)과 신규 고객 획득비 회수(cacRecovered)이며,
+ * 재고가 상한이라 예산이 남아도 확률을 임의로 더 올리지 못한다.
+ */
 export const BOXES = [
   {
     id: 'starter',
@@ -59,6 +79,11 @@ export const BOXES = [
     // 등급별로 어떤 그룹에서 뽑을지 제한한다. 최고 등급에 커피머신이 섞이면
     // "최고 등급 하이클래스팩"이라는 약속이 흐려진다.
     tierGroups: { S: ['card'], A: null, B: null, C: ['daily'] },
+    // 뽑기 통 — 이번 회차에 실제로 준비된 개수. 합이 곧 총 구좌 수다.
+    stock: { S: 1, A: 6, B: 40, C: 953 },
+    // 천장 — 연속 window회 S 미당첨이면 다음 회차 S 확률을 boostTo로 끌어올린다.
+    // 게임산업법 시행령(2024.3.22)은 이런 '보장형 시스템'도 공시 대상으로 명시한다.
+    pity: { window: 10, boostTo: 0.05 },
   },
   {
     id: 'charizard',
@@ -67,6 +92,30 @@ export const BOXES = [
     topLabel: 'PSA 10 리자몽급',
     blurb: '기본은 생필품, 최고는 오리파가 파는 바로 그 카드',
     tierGroups: { S: ['card'], A: null, B: null, C: ['daily'] },
+    stock: { S: 1, A: 4, B: 25, C: 970 },
+    pity: { window: 10, boostTo: 0.05 },
+  },
+]
+
+/**
+ * ② 데일리 100원 — 재고 소진형. **꽝이 있다.**
+ *
+ * 올박스의 모든 포맷이 꽝 없음을 지키는 것은 아니다. 100원은 스피또 최저가(500원)의
+ * 5분의 1이라 "잃어도 생활에 영향이 없는 금액"이고, 대신 **꽝 확률까지 그대로 공개**한다.
+ * 정직성의 축이 '무손실'이 아니라 '완전 공개'로 옮겨가는 포맷이다.
+ *
+ * 당첨 확률은 지어내지 않는다. 상품 원가를 1인당 순수입으로 나눈 손익분기에서 유도한다.
+ */
+export const DAILIES = [
+  {
+    id: 'daily100',
+    name: '오늘의 100원 뽑기',
+    entry: 100,
+    blurb: '하루 한 번, 100원. 재고가 소진되면 이번 회차는 끝납니다.',
+    match: /홍삼|흑마늘/,
+    totalStock: 100, // 이번 회차에 준비한 경품 수
+    dailyLimit: 1,
+    blank: true, // 꽝 있음 — 숨기지 않는다
   },
 ]
 
@@ -155,24 +204,50 @@ export const cacRecovered = (box, n) =>
 /** 1인당 상품 예산(원가 기준). */
 export const budgetOf = (box, n) => box.entry * (1 - MARGIN) + cacRecovered(box, n)
 
+/** 뽑기 통의 총 구좌 수. 등급별 재고의 합. */
+export const stockTotal = (box) => TIERS.reduce((a, t) => a + (box.stock?.[t] || 0), 0)
+
+/** 기본 확률 = 재고 비율. 지어낼 여지가 없다. */
+export function baseOdds(box) {
+  const tot = stockTotal(box)
+  return Object.fromEntries(TIERS.map((t) => [t, (box.stock?.[t] || 0) / tot]))
+}
+
 /**
- * 확률표. 예산 제약을 등식으로 풀어 얻는다.
- *   예산 = cr · [ Σ_t P(t)·m(t) ]   그리고  Σ P(t) = 1
- *   ⇒ 예산/cr − m(C) = Σ_{t≠C} P(t)·( m(t) − m(C) )
- * 좌변(잉여시가)을 SPLIT 비율로 나눠 상위 티어 확률을 얻는다.
+ * 구매력 배수 — 여럿이 모였을 때 상위 등급 확률에 곱하는 값.
+ *
+ * 재원은 두 곡선이다. 대량 매입으로 원가율이 내려가고(costRatio), 팀원 중
+ * 신규 유입만큼 고객 획득비가 회수된다(cacRecovered). 그 둘이 만든 1인당
+ * 구매력을 혼자일 때와 비교한 비율이 곧 배수다. n=1이면 정확히 1.0이다.
  */
-export function oddsOf(box, teamSize, teamDraws = teamSize, tiers = null) {
+export function teamBoost(box, n) {
+  const power = (k) => budgetOf(box, k) / costRatio(k)
+  return power(Math.min(TEAM_MAX, Math.max(1, n))) / power(1)
+}
+
+/**
+ * 확률표 — 재고 비율에 구매력 배수를 곱하고, 기본 등급이 나머지를 흡수한다.
+ *
+ * pityMiss: 이 참여자의 연속 S 미당첨 횟수. window에 도달하면 S 확률을
+ * box.pity.boostTo로 끌어올린다(천장). 그만큼 기본 등급에서 가져온다.
+ */
+export function oddsOf(box, teamSize, teamDraws = teamSize, tiers = null, pityMiss = 0) {
+  const base = baseOdds(box)
+  const boost = teamBoost(box, teamSize)
   const T = tiers || collapseUp(tiersOf(box))
-  const m = tierMeanRetail(T)
-  const cr = costRatio(teamDraws)
-  const surplus = budgetOf(box, teamSize) / cr - m.C
 
   const P = {}
   let upper = 0
   for (const t of ['S', 'A', 'B']) {
-    // 티어가 비었거나 C와 시가 차이가 없으면 확률을 만들지 않는다.
-    P[t] = T[t].length && m[t] > m.C ? Math.max(0, (surplus * SPLIT[t]) / (m[t] - m.C)) : 0
+    // 재고가 0이거나 해당 등급에 넣을 상품이 없으면 확률을 만들지 않는다.
+    P[t] = T[t].length ? base[t] * boost : 0
     upper += P[t]
+  }
+  // 천장 — 임계에 도달했으면 S를 끌어올린다. 나머지는 기본 등급에서 뺀다.
+  const pity = box.pity
+  if (pity && pityMiss >= pity.window && T.S.length && P.S < pity.boostTo) {
+    upper += pity.boostTo - P.S
+    P.S = pity.boostTo
   }
   if (upper > 1 - MIN_C_SHARE) {
     const f = (1 - MIN_C_SHARE) / upper
@@ -183,16 +258,20 @@ export function oddsOf(box, teamSize, teamDraws = teamSize, tiers = null) {
   return P
 }
 
+/** 천장까지 남은 횟수. 화면이 "S 미당첨 7/10"으로 보여준다. */
+export const pityLeft = (box, pityMiss) =>
+  box.pity ? Math.max(0, box.pity.window - pityMiss) : null
+
 /** 팀 규모별 확률표 전체 (화면의 '더보기' 표가 이걸 그대로 쓴다). */
 export const oddsTable = (box) =>
   Object.fromEntries(Array.from({ length: TEAM_MAX }, (_, i) => [i + 1, oddsOf(box, i + 1)]))
 
 // ─────────────────────── 단위경제 ───────────────────────
 /** 1인당 기대 수령 시가 ÷ 참여비. */
-export function evMultiple(box, n) {
+export function evMultiple(box, n, pityMiss = 0) {
   const T = collapseUp(tiersOf(box))
   const m = tierMeanRetail(T)
-  const P = oddsOf(box, n, n, T)
+  const P = oddsOf(box, n, n, T, pityMiss)
   return TIERS.reduce((s, t) => s + P[t] * m[t], 0) / box.entry
 }
 
@@ -207,6 +286,43 @@ export function customerBEP(box, x = 2) {
   for (let n = 1; n <= TEAM_MAX; n++) if (evMultiple(box, n) >= x) return n
   return null
 }
+
+// ─────────────────────── ② 데일리 100원 ───────────────────────
+/**
+ * 이 회차가 거는 경품. 크롤 풀에서 고른다(중앙값 근처를 대표로).
+ * 상품이 실재하고 가격이 실측이라, 아래 확률도 실측에서 유도된다.
+ */
+export function dailyItem(d) {
+  const xs = POOL.items.filter((i) => i.group === 'prize' && d.match.test(i.name))
+  return xs.sort((a, b) => a.price - b.price)[Math.floor(xs.length / 2)] || xs[0]
+}
+
+/**
+ * 당첨 확률 — 지어내지 않고 손익분기에서 유도한다.
+ *
+ *   경품 원가 = 시가 × 대량 매입 원가율
+ *   1인당 순수입 = 참여비 × (1 − 마진)
+ *   손익분기 참여 수 = 경품 원가 ÷ 1인당 순수입
+ *   당첨 확률 = 1 ÷ 손익분기 참여 수
+ *
+ * 즉 "이 확률보다 후하면 회차가 적자"인 지점을 그대로 확률로 쓴다.
+ * 재고 소진형이라 물량은 totalStock으로 이미 상한이 걸려 있다.
+ */
+export const dailyCost = (d) => dailyItem(d).price * costRatio(TEAM_MAX)
+export const dailyNetPerPlay = (d) => d.entry * (1 - MARGIN)
+export const dailyBreakEvenPlays = (d) => dailyCost(d) / dailyNetPerPlay(d)
+export const dailyWinOdds = (d) => 1 / dailyBreakEvenPlays(d)
+export const dailyBlankOdds = (d) => 1 - dailyWinOdds(d)
+/** 재고를 다 털려면 평균 몇 번의 참여가 필요한가. 회차 길이의 근거. */
+export const dailyPlaysToExhaust = (d) => Math.round(d.totalStock * dailyBreakEvenPlays(d))
+
+/** 한 번의 데일리 뽑기. 당첨/꽝뿐이라 티어 추첨보다 단순하다. */
+export function dailyDraw(d, seed) {
+  const rnd = rngFor(seed)
+  return rnd() < dailyWinOdds(d) ? { win: true, item: dailyItem(d) } : { win: false, item: null }
+}
+
+export const getDaily = (id) => DAILIES.find((x) => x.id === id) || null
 
 // ─────────────────────── 공동구매형 ───────────────────────
 const clampTeam = (gb, n) => Math.min(gb.teamMax, Math.max(1, Math.floor(n) || 1))
@@ -372,6 +488,15 @@ if (process.argv[1]?.endsWith('_draw.js')) {
 
       // 팀이 커지면 실제로 이득이 커진다
       if (n > 1) ok(`${box.id} EV 단조증가`, evMultiple(box, n) > evMultiple(box, n - 1))
+
+      // 재고 불변식 — 확률은 재고 비율에 구매력 배수를 곱한 값이어야 한다
+      const bo = baseOdds(box)
+      const boost = teamBoost(box, n)
+      for (const t of ['S', 'A', 'B'])
+        if (T[t].length && P.C > MIN_C_SHARE + 1e-9)
+          ok(`${box.id} n=${n} ${t} = 재고비율×배수`,
+            Math.abs(P[t] - bo[t] * boost) < 1e-9,
+            `${P[t]} != ${bo[t] * boost}`)
     }
 
     // S자 — 2차 차분의 부호가 양→음으로 정확히 한 번만 바뀐다(변곡점 유일)
@@ -383,6 +508,32 @@ if (process.argv[1]?.endsWith('_draw.js')) {
     const maxIdx = inc.indexOf(Math.max(...inc.filter((x) => x !== null)))
     ok(`${box.id} 변곡점이 6→7명`, maxIdx === 6, `실제 ${maxIdx}→${maxIdx + 1}명`)
     ok(`${box.id} 확률 단조증가`, inc.slice(1).every((d) => d > 0))
+
+    // ── 재고 ──────────────────────────────────────────────
+    ok(`${box.id} 재고 합 = 총 구좌`,
+      TIERS.reduce((a, t) => a + box.stock[t], 0) === stockTotal(box))
+    ok(`${box.id} 재고 전부 양수`, TIERS.every((t) => box.stock[t] > 0))
+    ok(`${box.id} 혼자일 때 배수 1.0`, Math.abs(teamBoost(box, 1) - 1) < 1e-12)
+    ok(`${box.id} 혼자일 때 확률 = 재고비율`,
+      TIERS.every((t) => !T[t].length || Math.abs(oddsOf(box, 1)[t] - baseOdds(box)[t]) < 1e-9))
+    ok(`${box.id} 배수 단조증가`,
+      Array.from({ length: TEAM_MAX - 1 }, (_, i) => teamBoost(box, i + 2) > teamBoost(box, i + 1)).every(Boolean))
+
+    // ── 천장 ──────────────────────────────────────────────
+    const pw = box.pity.window
+    ok(`${box.id} 천장 미도달이면 확률 불변`,
+      Math.abs(oddsOf(box, 1, 1, null, pw - 1).S - oddsOf(box, 1, 1, null, 0).S) < 1e-12)
+    ok(`${box.id} 천장 도달하면 S 상승`,
+      oddsOf(box, 1, 1, null, pw).S > oddsOf(box, 1, 1, null, 0).S)
+    ok(`${box.id} 천장 값이 공시값과 일치`,
+      Math.abs(oddsOf(box, 1, 1, null, pw).S - box.pity.boostTo) < 1e-9)
+    ok(`${box.id} 천장 후에도 확률 합 1`,
+      Math.abs(TIERS.reduce((a, t) => a + oddsOf(box, 1, 1, null, pw)[t], 0) - 1) < 1e-9)
+    ok(`${box.id} 천장 남은 횟수 표기`, pityLeft(box, pw - 3) === 3)
+    console.log(
+      `  재고 ${TIERS.map((t) => `${t}:${box.stock[t]}`).join(' ')} = ${stockTotal(box)}구좌 · ` +
+        `천장 ${pw}회 → S ${(box.pity.boostTo * 100).toFixed(0)}%`
+    )
 
     console.log(
       `  상승폭 ${(oddsOf(box, 10).S / oddsOf(box, 1).S).toFixed(2)}배 · ` +
@@ -424,6 +575,54 @@ if (process.argv[1]?.endsWith('_draw.js')) {
   const fixed = collapseUp(holed)
   ok('collapseUp 후에도 하한 유지',
     TIERS.every((t) => fixed[t].every((i) => i.price >= box.entry)))
+
+  // ── 데일리 100원 ────────────────────────────────────────
+  console.log('')
+  for (const d of DAILIES) {
+    const it = dailyItem(d)
+    ok(`${d.id} 경품 존재`, Boolean(it))
+    const win = dailyWinOdds(d)
+    const blank = dailyBlankOdds(d)
+
+    ok(`${d.id} 확률 합 1`, Math.abs(win + blank - 1) < 1e-12)
+    ok(`${d.id} 꽝이 있다`, blank > 0 && d.blank === true)
+    ok(`${d.id} 당첨 확률 0~1`, win > 0 && win < 1)
+    // 손익분기에서 유도했으므로, 손익분기 횟수만큼 참여하면 경품 원가를 정확히 회수한다
+    ok(`${d.id} 손익분기 정합`,
+      Math.abs(dailyBreakEvenPlays(d) * dailyNetPerPlay(d) - dailyCost(d)) < 1e-6)
+    ok(`${d.id} 참여비가 경품보다 훨씬 싸다`, d.entry * 100 < it.price)
+    ok(`${d.id} 하루 1회 제한`, d.dailyLimit === 1)
+    ok(`${d.id} 재고 양수`, d.totalStock > 0)
+
+    // 10만 회 실측이 공시 확률과 맞는가 (고정 시드라 flaky하지 않다)
+    const N = 100000
+    let wins = 0
+    for (let i = 0; i < N; i++) if (dailyDraw(d, `chk|${d.id}|${i}`).win) wins++
+    const exp = win * N
+    const chi = ((wins - exp) ** 2) / exp + ((N - wins - (N - exp)) ** 2) / (N - exp)
+    ok(`${d.id} 카이제곱 df=1 p>0.001`, chi < 10.83, `X²=${chi.toFixed(2)}`)
+
+    // 같은 시드 = 같은 결과
+    ok(`${d.id} 재추첨 불가`,
+      dailyDraw(d, 'seedX').win === dailyDraw(d, 'seedX').win)
+
+    console.log(`■ ${d.name} — ${it.name.slice(0, 34)} ${it.price.toLocaleString()}원`)
+    console.log(
+      `  참여비 ${d.entry}원 · 경품원가 ${Math.round(dailyCost(d)).toLocaleString()}원 · ` +
+        `손익분기 ${Math.round(dailyBreakEvenPlays(d))}회/개`
+    )
+    console.log(
+      `  당첨 ${(win * 100).toFixed(3)}% · 꽝 ${(blank * 100).toFixed(3)}% · ` +
+        `재고 ${d.totalStock}개 → 약 ${dailyPlaysToExhaust(d).toLocaleString()}회 참여로 소진`
+    )
+    console.log(`  10만 회 실측 ${wins}회 = ${(wins / 1000).toFixed(3)}% (X²=${chi.toFixed(2)})`)
+  }
+
+  // ── 캠페인 id 전역 유일성 (시드 충돌 방지) ──────────────
+  {
+    const ids = [...BOXES, ...DAILIES, ...GROUPBUYS].map((c) => c.id)
+    ok('캠페인 id 전역 유일', new Set(ids).size === ids.length, ids.join(','))
+  }
 
   // ── 공동구매형 ──────────────────────────────────────────
   console.log('')

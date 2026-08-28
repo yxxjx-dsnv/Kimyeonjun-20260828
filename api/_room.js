@@ -67,3 +67,22 @@ export async function mutateRoom(id, fn) {
 const ALPHABET = 'abcdefghjkmnpqrstuvwxyz23456789' // 헷갈리는 글자(i,l,o,0,1) 제외
 export const newId = (n = 6) =>
   Array.from({ length: n }, () => ALPHABET[Math.floor(Math.random() * ALPHABET.length)]).join('')
+
+/**
+ * 원자적 카운터 — 재고 차감·투표 집계처럼 경쟁조건이 실제로 위험한 곳에 쓴다.
+ * 방 상태의 read-modify-write와 달리 Upstash가 원자성을 보장하므로 재시도가 필요 없다.
+ */
+export async function counter(key, delta = 0) {
+  if (!kvEnabled()) {
+    const cur = mem.get(`n:${key}`) || 0
+    const next = delta ? cur + delta : cur
+    if (delta) mem.set(`n:${key}`, next)
+    return next
+  }
+  if (!delta) return Number((await cmd(['GET', key])) || 0)
+  return Number(await cmd(['INCRBY', key, String(delta)]))
+}
+
+/** 오늘 날짜 키(KST 기준). 데일리 한도가 자정에 리셋되도록. */
+export const todayKey = () =>
+  new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10)

@@ -11,7 +11,10 @@ import {
   CR_MIN, CR_MAX, K, N0, CAC, VIRAL_MAX, CAC_CAP, MARGIN, SPLIT,
   MIN_C_SHARE, FIXED_COST_RATIO, PRICE_RATIO, POOL,
   GROUPBUYS, FREE_SHARE, gbItem, gbCostRatio, gbDiscount, gbPayRatio, gbFreeOdds, gbFreeCount,
+  DAILIES, dailyItem, dailyCost, dailyNetPerPlay, dailyBreakEvenPlays, dailyWinOdds,
+  dailyBlankOdds, dailyPlaysToExhaust, baseOdds, teamBoost, stockTotal, pityLeft,
 } from './_draw.js'
+import { readVotes, VOTE_LABEL } from './room.js'
 
 const SAMPLES = 6
 
@@ -38,6 +41,14 @@ export function buildBoxes() {
           .sort((a, b) => (t === 'S' || t === 'A' ? b.price - a.price : a.price - b.price))
           .slice(0, SAMPLES),
       })),
+      // 재고를 그대로 내려보낸다 — 확률이 어디서 왔는지 화면이 직접 보여준다
+      stock: box.stock,
+      stockTotal: stockTotal(box),
+      baseOdds: baseOdds(box),
+      boostByTeam: Object.fromEntries(
+        Array.from({ length: TEAM_MAX }, (_, i) => [i + 1, +teamBoost(box, i + 1).toFixed(4)])
+      ),
+      pity: box.pity,
       oddsByTeam: odds,
       evByTeam: Object.fromEntries(
         Array.from({ length: TEAM_MAX }, (_, i) => [i + 1, +evMultiple(box, i + 1).toFixed(3)])
@@ -73,6 +84,30 @@ export function buildGroupbuys() {
   })
 }
 
+/**
+ * ② 데일리 100원 — 꽝 확률까지 그대로 내려보낸다.
+ * 이 포맷은 무손실이 아니라 **완전 공개**로 정직성을 지킨다.
+ */
+export function buildDailies() {
+  return DAILIES.map((d) => {
+    const item = dailyItem(d)
+    return {
+      id: d.id, name: d.name, blurb: d.blurb,
+      entry: d.entry, dailyLimit: d.dailyLimit, blank: d.blank,
+      item, itemPrice: item.price, totalStock: d.totalStock,
+      winOdds: +(dailyWinOdds(d) * 100).toFixed(3),
+      blankOdds: +(dailyBlankOdds(d) * 100).toFixed(3),
+      // 확률이 어디서 나왔는지 계산 과정을 그대로 노출한다
+      economics: {
+        itemCost: Math.round(dailyCost(d)),
+        netPerPlay: dailyNetPerPlay(d),
+        breakEvenPlays: Math.round(dailyBreakEvenPlays(d)),
+        playsToExhaust: dailyPlaysToExhaust(d),
+      },
+    }
+  })
+}
+
 /** 화면의 '정직성 시트'가 그대로 렌더하는 수식 파라미터. 숨기지 않는다. */
 export const formula = () => ({
   costRatio: { CR_MIN, CR_MAX, K, N0, note: '수량할인 계단(MOQ 임계)의 로지스틱 평활화' },
@@ -90,7 +125,7 @@ export const formula = () => ({
   ],
 })
 
-export default function handler(req, res) {
+export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'GET만 허용합니다.' })
   // s-maxage=3600을 걸었다가 배포해도 화면이 한 시간 동안 안 바뀌었다
   // (x-vercel-cache: HIT, age 3372). 이 응답은 코드와 크롤 데이터로 정해지므로
@@ -101,6 +136,9 @@ export default function handler(req, res) {
   return res.status(200).json({
     boxes: buildBoxes(),
     groupbuys: buildGroupbuys(),
+    dailies: buildDailies(),
+    votes: await readVotes(),
+    voteLabel: VOTE_LABEL,
     // 홈 탭 그리드용. 크롤 데이터가 올박스 밖에서도 화면에 쓰인다.
     sample: POOL.items.filter((i) => i.image).slice(0, 40),
     teamMax: TEAM_MAX,

@@ -10,9 +10,10 @@
 import {
   getBox, collapseUp, tiersOf, oddsOf, drawOne, TIERS, TEAM_MAX, MAX_DRAWS_PER_PERSON, byId,
   getGroupbuy, gbItem, gbPayRatio, gbDiscount, gbFreeOdds, gbFreeCount, gbDraw,
+  getDaily, dailyItem, dailyDraw, dailyWinOdds, dailyBlankOdds, baseOdds, teamBoost, pityLeft,
 } from './_draw.js'
 
-import { readRoom, mutateRoom } from './_room.js'
+import { readRoom, mutateRoom, counter, todayKey } from './_room.js'
 import { teamSizeOf, teamDrawsOf, readyCountOf, allReady, publicState } from './room.js'
 
 // 큐레이션 구성으로 뽑으려면 최소 이만큼은 남아 있어야 한다. 모자라면 전체 풀로 되돌린다.
@@ -23,7 +24,7 @@ const MIN_PICKED = 12
  * pickedIds가 오면 그 구성으로 뽑는다. 클라이언트가 보낸 id는 그대로 믿지 않고
  * 풀과 다시 조인하며, 살아남은 게 모자라면 전체 풀로 되돌린다.
  */
-export function resolve(state, pickedIds = null) {
+export function resolve(state, pickedIds = null, pityMiss = {}) {
   const box = getBox(state.boxId)
   const ids = Array.isArray(pickedIds)
     ? pickedIds.map(String).filter((id) => byId.has(id))
@@ -32,10 +33,15 @@ export function resolve(state, pickedIds = null) {
   const P = oddsOf(box, teamSizeOf(state), teamDrawsOf(state), tiers)
 
   const results = state.members.map((m, idx) => {
+    // 천장은 사람마다 다르다. 이 참여자의 연속 S 미당첨 횟수만큼 확률이 오른다.
+    const miss = Math.max(0, Math.floor(Number(pityMiss[m.id]) || 0))
+    const Pm = miss >= (box.pity?.window ?? Infinity)
+      ? oddsOf(box, teamSizeOf(state), teamDrawsOf(state), tiers, miss)
+      : P
     const picks = []
     for (let i = 0; i < m.draws; i++) {
       // 시드가 방·박스·사람·회차로 고정되므로 같은 방을 다시 열면 같은 결과가 나온다.
-      const { tier, item } = drawOne(box, P, tiers, `${state.roomId}|${state.boxId}|${m.id}|${i}`)
+      const { tier, item } = drawOne(box, Pm, tiers, `${state.roomId}|${state.boxId}|${m.id}|${i}`)
       picks.push({ tier, item })
     }
     const paid = box.entry * m.draws
@@ -48,6 +54,7 @@ export function resolve(state, pickedIds = null) {
       picks,
       best: TIERS[Math.min(...picks.map((p) => TIERS.indexOf(p.tier)))],
       settle: { paid, retailValue, delta: retailValue - paid },
+      pity: { miss, applied: miss >= (box.pity?.window ?? Infinity), sOdds: +(Pm.S * 100).toFixed(3) },
     }
   })
 
@@ -58,6 +65,10 @@ export function resolve(state, pickedIds = null) {
     teamSize: teamSizeOf(state),
     teamDraws: teamDrawsOf(state),
     odds: P,
+    stock: box.stock,
+    boost: +teamBoost(box, teamSizeOf(state)).toFixed(4),
+    baseOdds: baseOdds(box),
+    pityRule: box.pity,
     results,
     seedProof: {
       pattern: '방ID | 박스ID | 참여자ID | 회차',
@@ -144,9 +155,71 @@ function resolveGroupbuy(body) {
   }
 }
 
+/**
+ * ② 데일리 100원 — 하루 1회, 재고 소진까지.
+ *
+ * 서버가 두 개의 게이트를 소유한다.
+ *   ① 오늘 이미 참여했으면 409 (일일 한도)
+ *   ② 재고가 0이면 409 (회차 종료)
+ * 둘 다 원자적 카운터라 동시 요청에도 재고가 음수로 내려가지 않는다.
+ */
+async function resolveDaily(body) {
+  const d = getDaily(body.dailyId)
+  if (!d) return null
+  const who = String(body.memberId || 'anon').slice(0, 24)
+  const day = todayKey()
+
+  // 재고 먼저 확인 — 소진됐으면 뽑기 자체를 하지 않는다
+  const used = await counter(`olbox:daily:${d.id}:used`)
+  const remaining = Math.max(0, d.totalStock - used)
+  if (remaining <= 0)
+    return { over: true, reason: 'soldout', remaining: 0, totalStock: d.totalStock }
+
+  // 일일 한도 — 오늘 참여 횟수를 원자적으로 올리고, 한도를 넘었으면 되돌린다
+  const plays = await counter(`olbox:daily:${d.id}:play:${day}:${who}`, 1)
+  if (plays > d.dailyLimit) {
+    await counter(`olbox:daily:${d.id}:play:${day}:${who}`, -1)
+    return { over: true, reason: 'dailyLimit', remaining, totalStock: d.totalStock }
+  }
+
+  // 추첨 — 시드가 상품·사람·날짜·회차로 고정된다
+  const seq = await counter(`olbox:daily:${d.id}:seq`, 1)
+  const result = dailyDraw(d, `${d.id}|${day}|${who}|${seq}`)
+  if (result.win) await counter(`olbox:daily:${d.id}:used`, 1)
+
+  return {
+    kind: 'daily',
+    dailyId: d.id,
+    name: d.name,
+    entry: d.entry,
+    win: result.win,
+    item: result.item,
+    winOdds: +(dailyWinOdds(d) * 100).toFixed(3),
+    blankOdds: +(dailyBlankOdds(d) * 100).toFixed(3),
+    remaining: Math.max(0, d.totalStock - (used + (result.win ? 1 : 0))),
+    totalStock: d.totalStock,
+    settle: { paid: d.entry, retailValue: result.win ? result.item.price : 0 },
+    seedProof: {
+      pattern: '상품ID | 날짜 | 참여자 | 회차',
+      note: '꽝도 확률로 공개합니다. 같은 시드는 언제 돌려도 같은 결과입니다.',
+    },
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST만 허용합니다.' })
   const { roomId, sim, kind } = req.body || {}
+
+  if (kind === 'daily') {
+    const out = await resolveDaily(req.body)
+    if (!out) return res.status(400).json({ error: '없는 캠페인입니다.' })
+    if (out.over)
+      return res.status(409).json({
+        error: out.reason === 'soldout' ? '재고가 모두 소진되어 이번 회차는 끝났습니다.' : '오늘은 이미 참여하셨습니다.',
+        ...out,
+      })
+    return res.status(200).json(out)
+  }
   if (!roomId) return res.status(400).json({ error: 'roomId가 필요합니다.' })
 
   if (kind === 'groupbuy') {
@@ -160,7 +233,7 @@ export default async function handler(req, res) {
   if (sim) {
     const state = simState(req.body)
     if (!state) return res.status(400).json({ error: '시뮬레이션 입력이 올바르지 않습니다.' })
-    return res.status(200).json({ ...resolve(state, req.body.pickedIds), simulated: true })
+    return res.status(200).json({ ...resolve(state, req.body.pickedIds, req.body.pityMiss), simulated: true })
   }
 
   try {
@@ -185,7 +258,7 @@ export default async function handler(req, res) {
       })) || state
     }
 
-    return res.status(200).json({ ...resolve(state, req.body.pickedIds), state: publicState(state) })
+    return res.status(200).json({ ...resolve(state, req.body.pickedIds, req.body.pityMiss), state: publicState(state) })
   } catch (e) {
     return res.status(500).json({ error: `개봉 실패: ${e.message}` })
   }
