@@ -13,6 +13,7 @@ import {
   won, pct, naturalFreq, Delta, ProductCard, OddsCurve, OddsBars, OddsTable,
   TierStrip, MemberRail, RevealCard, HonestySheet, TasteChat,
   GroupCurve, GroupTable, GroupResult,
+  StockBin, PityBar, DailyCard, DailyEconomics, VoteCard,
   IconHome, IconContent, IconHeart, IconUser, IconBox,
 } from './parts.jsx'
 
@@ -51,9 +52,17 @@ function StubTab({ title, body }) {
 }
 
 /* ─────────────────────────── 올박스 ─────────────────────────── */
-function BoxList({ boxes, groupbuys, onPick, onPickGroup, companyBEP }) {
+function BoxList({ boxes, groupbuys, dailies, onPick, onPickGroup, onPickDaily, companyBEP, votes, voteLabel }) {
   return (
     <>
+      {votes && Object.values(votes).some((v) => v > 0) && (
+        <p className="votetop">
+          {(() => {
+            const top = Object.entries(votes).sort((a, b) => b[1] - a[1])[0]
+            return `이번 주 가장 많이 원한 다음 형식: ${voteLabel[top[0]]} (${top[1]}표)`
+          })()}
+        </p>
+      )}
       <div className="hero">
         <h1>여럿이 모여야 열립니다</h1>
         <p>
@@ -83,6 +92,17 @@ function BoxList({ boxes, groupbuys, onPick, onPickGroup, companyBEP }) {
           </li>
         ))}
       </ul>
+      <h2 className="lead2">하루 한 번, 100원</h2>
+      <p className="lead2__s">
+        <b>이 형식에는 꽝이 있습니다.</b> 대신 당첨 확률도, 꽝 확률도, 그 확률이 나온
+        계산 과정까지 전부 공개합니다. 재고가 소진되면 이번 회차는 끝납니다.
+      </p>
+      <ul className="blist">
+        {dailies.map((d) => (
+          <li key={d.id}><DailyCard d={d} onPick={onPickDaily} /></li>
+        ))}
+      </ul>
+
       <h2 className="lead2">상품이 정해진 공동구매</h2>
       <p className="lead2__s">
         무엇을 받을지는 확정입니다. <b>얼마를 내는지</b>만 확률입니다 —
@@ -128,9 +148,15 @@ export default function App() {
   const [gbId, setGbId] = useState(null) // 공동구매형
   const [gbTeam, setGbTeam] = useState(20)
   const [gbResult, setGbResult] = useState(null)
+  const [dailyId, setDailyId] = useState(null) // 데일리 100원
+  const [dailyResult, setDailyResult] = useState(null)
+  const [pityMiss, setPityMiss] = useState(0) // 천장 체험용 (내 연속 미당첨)
+  const [voted, setVoted] = useState(null)
+  const [votes, setVotes] = useState(null)
   const [sheet, setSheet] = useState(false)
   const [busy, setBusy] = useState(false)
   const timers = useRef([])
+  const myId = useRef(`u${Math.random().toString(36).slice(2, 10)}`)
 
   const clearTimers = () => { timers.current.forEach(clearTimeout); timers.current = [] }
   const later = (fn, ms) => timers.current.push(setTimeout(fn, ms))
@@ -139,7 +165,7 @@ export default function App() {
   useEffect(() => {
     fetch('/api/boxes')
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
-      .then(setData)
+      .then((j) => { setData(j); setVotes(j.votes) })
       .catch((e) => setErr(e.message))
   }, [])
 
@@ -218,6 +244,7 @@ export default function App() {
             members: snapshot.members.map(({ id, name, draws }) => ({ id, name, draws })),
           }
       if (curated?.pickedIds?.length) body.pickedIds = curated.pickedIds
+      if (pityMiss > 0) body.pityMiss = { [snapshot.memberId]: pityMiss }
       const r = await fetch('/api/open', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
       })
@@ -227,7 +254,7 @@ export default function App() {
     } catch (e) {
       setErr(e.message); setPhase('ready')
     } finally { setBusy(false) }
-  }, [boxId, curated])
+  }, [boxId, curated, pityMiss])
 
   /* 뽑기! — 내가 먼저 누르면 나머지가 하나씩 따라 누른다. 마지막 한 명이 관건이다. */
   const pressDraw = () => {
@@ -249,7 +276,36 @@ export default function App() {
   const reset = () => { clearTimers(); setResult(null); setPhase('detail'); openBox(boxId) }
   const backToList = () => {
     clearTimers(); setPhase('list'); setBoxId(null); setRoom(null); setResult(null); setCurated(null)
-    setGbId(null); setGbResult(null)
+    setGbId(null); setGbResult(null); setDailyId(null); setDailyResult(null)
+  }
+
+  const daily = data?.dailies?.find((d) => d.id === dailyId) || null
+  const openDaily = (id) => {
+    setDailyId(id); setDailyResult(null); setBoxId(null); setGbId(null); setPhase('daily')
+  }
+  /** 데일리 뽑기 — 서버가 일일 한도와 재고를 소유한다. */
+  const playDaily = async () => {
+    setBusy(true)
+    try {
+      const r = await fetch('/api/open', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ kind: 'daily', dailyId, roomId: 'daily', memberId: myId.current }),
+      })
+      const j = await r.json()
+      if (!r.ok) { setDailyResult({ blocked: true, ...j }); return }
+      setDailyResult(j)
+    } catch (e) { setErr(e.message) } finally { setBusy(false) }
+  }
+  const castVote = async (choice) => {
+    setVoted(choice)
+    try {
+      const r = await fetch('/api/room', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'vote', roomId: 'vote', choice }),
+      })
+      const j = await r.json()
+      if (r.ok) setVotes(j.votes)
+    } catch { /* 투표 실패는 조용히 넘긴다 — 흐름을 막을 이유가 없다 */ }
   }
 
   const gb = data?.groupbuys?.find((g) => g.id === gbId) || null
@@ -285,6 +341,58 @@ export default function App() {
   else if (tab === 'content') body = <StubTab title="콘텐츠" body="영상·기획전 탭입니다." />
   else if (tab === 'wish') body = <StubTab title="관심상품" body="찜한 상품 탭입니다." />
   else if (tab === 'me') body = <StubTab title="내 정보" body="주문내역·올팜·설정 탭입니다." />
+  else if (phase === 'daily' && daily) {
+    const r = dailyResult
+    body = (
+      <>
+        <button className="back" onClick={backToList}>← 목록</button>
+        <header className="bhead">
+          <h2>{daily.name}</h2>
+          <p>{daily.blurb}</p>
+        </header>
+        <div className="gbhero">
+          {daily.item.image && <img src={daily.item.image} alt="" />}
+          <div>
+            <p className="gbhero__n">{daily.item.name}</p>
+            <p className="gbhero__p">{`시가 ${won(daily.itemPrice)} · 참여비 ${won(daily.entry)}`}</p>
+          </div>
+        </div>
+        <div className="gbnow">
+          <div><b className="hi">{`${daily.winOdds}%`}</b><span>당첨</span></div>
+          <div><b>{`${daily.blankOdds}%`}</b><span>꽝</span></div>
+          <div><b>{`${(r?.remaining ?? daily.totalStock)}/${daily.totalStock}`}</b><span>남은 경품</span></div>
+        </div>
+
+        {r && (r.blocked ? (
+          <div className="dres dres--blocked">
+            <b>{r.error}</b>
+            <p>{r.reason === 'soldout' ? '다음 회차를 기다려 주세요.' : '내일 다시 참여하실 수 있어요.'}</p>
+          </div>
+        ) : (
+          <div className={`dres ${r.win ? 'is-win' : 'is-blank'}`}>
+            <b>{r.win ? '당첨!' : '꽝'}</b>
+            <p>{r.win ? r.item.name : '오늘은 아쉽네요. 내일 다시 도전할 수 있어요.'}</p>
+            {r.win && <p className="dres__pr">{won(r.item.price)}</p>}
+            <p className="seed">{r.seedProof.note}</p>
+          </div>
+        ))}
+
+        {!r && (
+          <button className="btn btn--go" onClick={playDaily} disabled={busy}>
+            {busy ? '뽑는 중…' : `${won(daily.entry)}으로 뽑기`}
+          </button>
+        )}
+        {r && !r.blocked && (
+          <p className="gatenote">하루 한 번만 참여할 수 있습니다. 서버가 한도와 재고를 셉니다.</p>
+        )}
+
+        <DailyEconomics d={daily} />
+        {r && !r.blocked && (
+          <VoteCard labels={data.voteLabel} votes={votes} onVote={castVote} voted={voted} />
+        )}
+      </>
+    )
+  }
   else if (phase === 'group' && gb) {
     const step = gb.steps.find((x) => x.n === gbTeam) || gb.steps[0]
     body = gbResult ? (
@@ -341,7 +449,11 @@ export default function App() {
       </>
     )
   }
-  else if (phase === 'list' || !box) body = <BoxList boxes={data.boxes} groupbuys={data.groupbuys || []} onPick={openBox} onPickGroup={openGroup} companyBEP={data.companyBEP} />
+  else if (phase === 'list' || !box) body = (
+    <BoxList boxes={data.boxes} groupbuys={data.groupbuys || []} dailies={data.dailies || []}
+      onPick={openBox} onPickGroup={openGroup} onPickDaily={openDaily}
+      companyBEP={data.companyBEP} votes={votes} voteLabel={data.voteLabel} />
+  )
   else if (phase === 'result' && result) {
     const mine = result.results.find((r) => r.memberId === room.memberId) || result.results[0]
     body = (
@@ -365,6 +477,7 @@ export default function App() {
           ))}
         </ul>
         <p className="seed">{result.seedProof.note}<br /><code>{result.seedProof.pattern}</code></p>
+        <VoteCard labels={data.voteLabel} votes={votes} onVote={castVote} voted={voted} />
         <div className="row">
           <button className="btn btn--ghost" onClick={backToList}>다른 박스 보기</button>
           <button className="btn" onClick={reset}>다시 해보기</button>
@@ -383,6 +496,8 @@ export default function App() {
         <TasteChat boxId={box.id} teamSize={teamSize || 1} axis={curated?.axis}
           onCurated={setCurated} disabled={phase === 'ready' || phase === 'count'} />
 
+        <PityBar pity={box.pity} miss={pityMiss} onChange={setPityMiss} />
+
         <OddsCurve oddsByTeam={oddsByTeam} teamSize={teamSize || 1}
           customerBEP={box.customerBEP} teamMax={teamMax} />
 
@@ -393,6 +508,9 @@ export default function App() {
         </div>
         <OddsBars odds={odds} />
         <OddsTable oddsByTeam={oddsByTeam} evByTeam={evByTeam} teamMax={teamMax} teamSize={teamSize} />
+
+        <StockBin stock={box.stock} stockTotal={box.stockTotal} baseOdds={box.baseOdds}
+          odds={odds} boost={box.boostByTeam?.[Math.max(1, teamSize || 1)] ?? 1} />
 
         <MemberRail members={members} teamMax={teamMax} readyCount={readyCount}
           phase={phase === 'ready' || phase === 'count' ? 'ready' : 'gather'} />

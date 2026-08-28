@@ -477,3 +477,137 @@ export function GroupResult({ r, mine }) {
     </li>
   )
 }
+
+/* ── 뽑기 통 ───────────────────────────────────────────────
+   확률이 어디서 왔는지 보여주는 가장 직접적인 방법 — 재고를 그대로 그린다.  */
+export function StockBin({ stock, stockTotal, baseOdds, odds, boost }) {
+  return (
+    <section className="bin">
+      <header className="bin__h">
+        <h3>이번 회차 뽑기 통</h3>
+        <span className="bin__tot">{`총 ${stockTotal.toLocaleString()}구좌`}</span>
+      </header>
+      <ul className="bin__rows">
+        {TIERS.map((t) => (
+          <li key={t} className="bin__row">
+            <span className={`tier tier--${t}`}>{t}</span>
+            <span className="bin__qty">{`${stock[t]}개`}</span>
+            <span className="bin__bar">
+              <span className={`bin__fill bin__fill--${t}`}
+                style={{ width: `${Math.max(0.6, (stock[t] / stockTotal) * 100)}%` }} />
+            </span>
+            <span className="bin__odds">
+              {pct(baseOdds[t], baseOdds[t] < 0.01 ? 3 : 1)}
+              {odds && boost > 1.001 && t !== 'C' && (
+                <em>{` → ${pct(odds[t], odds[t] < 0.01 ? 3 : 1)}`}</em>
+              )}
+            </span>
+          </li>
+        ))}
+      </ul>
+      <p className="bin__note">
+        {boost > 1.001
+          ? `기본 확률은 재고 비율 그대로입니다. 지금 ${boost.toFixed(2)}배가 곱해져 있습니다.`
+          : '기본 확률은 재고 비율 그대로입니다. 사람이 모이면 상위 등급에 배수가 곱해집니다.'}
+      </p>
+    </section>
+  )
+}
+
+/* ── 천장 진행도 ────────────────────────────────────────── */
+export function PityBar({ pity, miss, onChange }) {
+  if (!pity) return null
+  const hit = miss >= pity.window
+  return (
+    <div className={`pity ${hit ? 'is-hit' : ''}`}>
+      <div className="pity__top">
+        <span className="pity__lab">{hit ? '천장 도달' : '최고 등급 연속 미당첨'}</span>
+        <b>{`${Math.min(miss, pity.window)} / ${pity.window}`}</b>
+      </div>
+      <span className="pity__track">
+        <span className="pity__fill" style={{ width: `${Math.min(100, (miss / pity.window) * 100)}%` }} />
+      </span>
+      <p className="pity__note">
+        {hit
+          ? `이번 회차 최고 등급 확률이 ${pct(pity.boostTo, 0)}로 올라갑니다.`
+          : `${pity.window}회 연속 못 뽑으면 다음 회차 최고 등급이 ${pct(pity.boostTo, 0)}가 됩니다.`}
+      </p>
+      {onChange && (
+        <div className="pity__sim">
+          <span>천장 체험</span>
+          <input type="range" min="0" max={pity.window} value={Math.min(miss, pity.window)}
+            onChange={(e) => onChange(Number(e.target.value))} aria-label="연속 미당첨 횟수" />
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* ── 데일리 100원 ───────────────────────────────────────── */
+export function DailyCard({ d, onPick }) {
+  const sold = d.totalStock - (d.remaining ?? d.totalStock)
+  return (
+    <button className="dcard" onClick={() => onPick(d.id)}>
+      <span className="dcard__row">
+        {d.item.image && <img className="gbcard__thumb" src={d.item.image} alt="" loading="lazy" />}
+        <span className="gbcard__b">
+          <span className="dcard__tag">하루 한 번 · 꽝 있음</span>
+          <span className="gbcard__name">{d.name}</span>
+          <span className="gbcard__it">{d.item.name}</span>
+          <span className="dcard__odds">
+            {`${won(d.entry)}으로 ${won(d.itemPrice)} 도전 · 당첨 ${d.winOdds}%`}
+          </span>
+        </span>
+      </span>
+      <span className="dcard__stock">
+        <span className="dcard__bar">
+          <span className="dcard__fill" style={{ width: `${(sold / d.totalStock) * 100}%` }} />
+        </span>
+        <em>{`남은 경품 ${(d.remaining ?? d.totalStock)}/${d.totalStock}개`}</em>
+      </span>
+    </button>
+  )
+}
+
+/** 확률이 어디서 나왔는지 계산 과정을 그대로 편다. */
+export function DailyEconomics({ d }) {
+  const e = d.economics
+  return (
+    <div className="deco">
+      <h4>이 확률은 어떻게 나왔나요?</h4>
+      <ol className="deco__ol">
+        <li>{`경품 시가 ${won(d.itemPrice)} × 대량 매입 원가율 = 원가 ${won(e.itemCost)}`}</li>
+        <li>{`참여비 ${won(d.entry)} × (1 − 마진) = 1회당 순수입 ${won(e.netPerPlay)}`}</li>
+        <li>{`${won(e.itemCost)} ÷ ${won(e.netPerPlay)} = ${e.breakEvenPlays.toLocaleString()}회 참여당 경품 1개`}</li>
+        <li><b>{`당첨 확률 = 1 ÷ ${e.breakEvenPlays.toLocaleString()} = ${d.winOdds}%`}</b></li>
+      </ol>
+      <p className="deco__note">
+        {`이 확률보다 후하면 회차가 적자입니다. 재고 ${d.totalStock}개는 약 ${e.playsToExhaust.toLocaleString()}회 참여로 소진됩니다.`}
+        <br />
+        <b>{`꽝 ${d.blankOdds}%도 숨기지 않고 그대로 적습니다.`}</b>
+      </p>
+    </div>
+  )
+}
+
+/* ── 다음 회차 투표 ────────────────────────────────────── */
+export function VoteCard({ labels, votes, onVote, voted }) {
+  const keys = Object.keys(labels)
+  const total = keys.reduce((a, k) => a + (votes?.[k] || 0), 0)
+  return (
+    <section className="vote">
+      <h3>다음 올박스, 뭐가 좋을까요?</h3>
+      <p className="vote__s">올박스는 매주 형식이 바뀝니다. 다음 회차를 고객이 정합니다.</p>
+      <div className="vote__chips">
+        {keys.map((k) => (
+          <button key={k} className={`chip ${voted === k ? 'is-on' : ''}`}
+            onClick={() => onVote(k)} disabled={Boolean(voted)}>
+            {labels[k]}
+            {total > 0 && <em>{` ${votes[k] || 0}`}</em>}
+          </button>
+        ))}
+      </div>
+      {voted && <p className="vote__done">투표해주셔서 감사합니다. 집계는 목록 화면에서 계속 볼 수 있어요.</p>}
+    </section>
+  )
+}

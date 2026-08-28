@@ -402,3 +402,68 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
 .rv.is-free { border-color: var(--brand); background: var(--brand-weak); }
 .lead2 { font-size: 19px; font-weight: 800; margin-top: 26px; letter-spacing: -.02em; }
 .lead2__s { font-size: 14px; color: var(--ink-2); line-height: 1.6; margin: 4px 0 12px; }
+
+/* ── 뽑기 통 ───────────────────────────────────────────────── */
+.bin { border: 1px solid var(--hair); border-radius: var(--r); padding: 14px; margin: 14px 0; }
+.bin__h { display: flex; align-items: baseline; gap: 8px; }
+.bin__h h3 { font-size: 16px; font-weight: 800; }
+.bin__tot { margin-left: auto; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.bin__rows { display: grid; gap: 7px; margin-top: 10px; }
+.bin__row { display: grid; grid-template-columns: 26px 44px 1fr 96px; align-items: center; gap: 8px; }
+.bin__qty { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.bin__bar { height: 9px; border-radius: 999px; background: var(--band); overflow: hidden; }
+.bin__fill { display: block; height: 100%; border-radius: 999px; }
+.bin__fill--S { background: var(--t-s); } .bin__fill--A { background: var(--t-a); }
+.bin__fill--B { background: var(--t-b); } .bin__fill--C { background: var(--t-c); }
+.bin__odds { font-size: 12px; text-align: right; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.bin__odds em { font-style: normal; color: var(--brand); font-weight: 700; }
+.bin__note { font-size: 12px; color: var(--muted); margin-top: 9px; line-height: 1.5; }
+
+/* ── 천장 ───────────────────────────────────────────────────── */
+.pity { border: 1px solid var(--hair); border-radius: var(--r); padding: 12px 14px; margin-bottom: 12px; }
+.pity.is-hit { border-color: var(--brand); background: var(--brand-weak); }
+.pity__top { display: flex; align-items: baseline; }
+.pity__lab { font-size: 14px; font-weight: 700; }
+.pity.is-hit .pity__lab { color: var(--brand); }
+.pity__top b { margin-left: auto; font-size: 15px; font-variant-numeric: tabular-nums; }
+.pity__track { display: block; height: 8px; border-radius: 999px; background: var(--band); overflow: hidden; margin-top: 8px; }
+.pity__fill { display: block; height: 100%; background: var(--brand); border-radius: 999px; transition: width .3s; }
+.pity__note { font-size: 12px; color: var(--muted); margin-top: 7px; line-height: 1.5; }
+.pity__sim { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 12px; color: var(--muted); }
+.pity__sim input { flex: 1; accent-color: var(--brand); }
+
+/* ── 데일리 100원 ───────────────────────────────────────────── */
+.dcard { display: block; width: 100%; text-align: left; border: 1px solid var(--hair); border-radius: var(--r); overflow: hidden; background: var(--paper); transition: border-color .15s, transform .15s; }
+.dcard:hover { border-color: var(--brand); transform: translateY(-1px); }
+.dcard__row { display: flex; gap: 12px; padding: 13px 14px; align-items: center; }
+.dcard__tag { display: inline-block; font-size: 11px; font-weight: 700; color: #8a5a00; background: #fff4e0; padding: 2px 6px; border-radius: 4px; }
+.dcard__odds { display: block; font-size: 13px; color: var(--brand); font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.dcard__stock { display: block; padding: 0 14px 12px; }
+.dcard__bar { display: block; height: 7px; border-radius: 999px; background: var(--band); overflow: hidden; }
+.dcard__fill { display: block; height: 100%; background: var(--brand); border-radius: 999px; }
+.dcard__stock em { display: block; font-style: normal; font-size: 12px; color: var(--muted); margin-top: 5px; font-variant-numeric: tabular-nums; }
+.deco { border: 1px solid var(--hair); border-radius: var(--r); padding: 14px; margin: 14px 0; background: var(--band); }
+.deco h4 { font-size: 15px; font-weight: 800; }
+.deco__ol { counter-reset: n; display: grid; gap: 6px; margin-top: 10px; font-size: 13px; color: var(--ink-2); line-height: 1.55; font-variant-numeric: tabular-nums; }
+.deco__ol li { counter-increment: n; padding-left: 20px; position: relative; }
+.deco__ol li::before { content: counter(n); position: absolute; left: 0; width: 15px; height: 15px; border-radius: 50%; background: var(--ink-2); color: #fff; font-size: 10px; font-weight: 700; display: grid; place-items: center; top: 3px; }
+.deco__note { font-size: 12px; color: var(--muted); margin-top: 10px; line-height: 1.6; }
+
+/* ── 투표 ───────────────────────────────────────────────────── */
+.vote { border: 1px solid var(--hair); border-radius: var(--r); padding: 14px; margin-top: 18px; }
+.vote h3 { font-size: 16px; font-weight: 800; }
+.vote__s { font-size: 13px; color: var(--muted); margin-top: 3px; line-height: 1.5; }
+.vote__chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.vote__chips .chip em { font-style: normal; color: var(--brand); font-weight: 800; font-variant-numeric: tabular-nums; }
+.vote__done { font-size: 12px; color: var(--good); margin-top: 9px; font-weight: 600; }
+.votetop { font-size: 13px; color: var(--ink-2); background: var(--band); border-radius: 9px; padding: 9px 11px; margin-bottom: 12px; line-height: 1.5; }
+.dres { border: 1px solid var(--hair); border-radius: var(--r); padding: 18px 16px; margin: 14px 0; text-align: center; }
+.dres b { display: block; font-size: 26px; font-weight: 800; letter-spacing: -.02em; }
+.dres p { font-size: 14px; color: var(--ink-2); margin-top: 6px; line-height: 1.5; }
+.dres__pr { font-size: 18px !important; font-weight: 800; color: var(--brand) !important; }
+.dres.is-win { border-color: var(--brand); background: var(--brand-weak); }
+.dres.is-win b { color: var(--brand); }
+.dres.is-blank b { color: var(--muted); }
+.dres--blocked { background: var(--band); }
+.dres--blocked b { font-size: 17px; }
+.dres .seed { margin-top: 10px; font-size: 11px; }
