@@ -399,13 +399,14 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
 @keyframes tick { from { transform: scale(1.5); opacity: 0.2; } to { transform: scale(1); opacity: 1; } }
 
 /* ── 등급별 상품 ───────────────────────────────────────────── */
-.tiers { margin-top: 22px; display: grid; gap: 16px; }
-.tstrip__head { display: flex; align-items: center; gap: 7px; }
-.tstrip__label { font-size: var(--fs-body); font-weight: 700; }
-.tstrip__odds { margin-left: auto; text-align: right; font-size: var(--fs-body); font-weight: 800; font-variant-numeric: tabular-nums; }
+.tiers { margin-top: var(--s5); display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s4); }
+.tstrip { min-width: 0; }
+.tstrip__head { display: flex; align-items: center; gap: var(--s2); min-width: 0; }
+.tstrip__label { font-size: var(--fs-body); font-weight: 700; white-space: nowrap; }
+.tstrip__odds { margin-left: auto; flex: none; text-align: right; font-size: var(--fs-body); font-weight: 800; font-variant-numeric: tabular-nums; }
 .tstrip__odds em { display: block; font-style: normal; font-size: var(--fs-micro); font-weight: 500; color: var(--muted); }
 .tstrip__band { font-size: var(--fs-label); color: var(--muted); margin: 3px 0 8px; font-variant-numeric: tabular-nums; }
-.tstrip__list { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
+.tstrip__list { display: flex; gap: var(--s2); min-width: 0; overflow-x: auto; padding-bottom: var(--s1); scrollbar-width: thin; overscroll-behavior-x: contain; }
 .tstrip__list li { flex: 0 0 104px; }
 .tstrip__list img, .tstrip__ph { width: 104px; height: 104px; object-fit: cover; border-radius: 9px; background: var(--band); border: 1px solid var(--hair); display: block; }
 .tstrip__nm { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: var(--fs-label); line-height: 1.35; margin-top: 5px; color: var(--ink-2); }

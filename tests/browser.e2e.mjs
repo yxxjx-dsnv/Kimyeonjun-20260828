@@ -20,6 +20,36 @@ const check = (label, cond, extra = '') => {
   if (!cond) fail++
 }
 
+/**
+ * 가로 넘침 검사 — 같은 원인(grid/flex 아이템의 min-width:auto)으로 두 번 화면이 깨졌다.
+ * 처음엔 개봉 결과 카드, 다음엔 등급 스트립이 414px 안에서 664px로 그려졌다.
+ * 검사가 한 화면만 보고 있어서 두 번째를 놓쳤으므로, 이제 모든 화면에서 부른다.
+ *
+ * 가로 스크롤 컨테이너 안의 자식이 밖으로 나가는 것은 정상이므로 제외한다.
+ */
+const spill = (page) =>
+  page.evaluate(() => {
+    const host = document.querySelector('.body')
+    if (!host) return []
+    const W = host.clientWidth
+    const L = host.getBoundingClientRect().left
+    const clipped = (el) => {
+      for (let p = el.parentElement; p && p !== document.body; p = p.parentElement) {
+        const ov = getComputedStyle(p).overflowX
+        if (ov === 'auto' || ov === 'scroll' || ov === 'hidden') return true
+        if (p === host) return false
+      }
+      return false
+    }
+    return [...host.querySelectorAll('*')]
+      .filter((e) => {
+        const b = e.getBoundingClientRect()
+        return b.width > 0 && b.right > L + W + 1 && !clipped(e)
+      })
+      .slice(0, 5)
+      .map((e) => `${e.tagName.toLowerCase()}.${String(e.className).slice(0, 30)}(+${Math.round(e.getBoundingClientRect().right - (L + W))}px)`)
+  })
+
 const browser = await chromium.launch()
 const ctx = await browser.newContext({ viewport: { width: 414, height: 900 }, deviceScaleFactor: 2 })
 const page = await ctx.newPage()
@@ -44,6 +74,7 @@ check('등급 막대 4개', (await page.$$('.bars__row')).length === 4)
 const oddsAlone = await page.textContent('.now__num')
 check('자연빈도 병기', (await page.textContent('.now__nf')).includes('명 중 약'))
 check('재고 요약 노출', /[\d,]+구좌/.test(await page.textContent('.odds__stock')))
+check('가로 넘침 없음 — 박스 상세', (await spill(page)).length === 0, (await spill(page)).join(' | '))
 
 // 상세 화면이 다시 15블록으로 불어나는 것을 막는다.
 const blocks = await page.$$eval('.body > *', (e) => e.length)
@@ -55,6 +86,7 @@ await page.waitForSelector('.sheet__live', { timeout: 5000 })
 check('시트에 확률 곡선', await page.isVisible('.curve__line'))
 check('시트에 뽑기 통', (await page.$$('.sheet__live .bin__row')).length === 4)
 check('시트에 천장 바', await page.isVisible('.sheet__live .pity'))
+check('가로 넘침 없음 — 확률 근거 시트', (await spill(page)).length === 0, (await spill(page)).join(' | '))
 await page.click('.more__btn')
 await page.waitForSelector('.otable', { timeout: 5000 })
 check('더보기 표 1~10명', (await page.$$('.otable tbody tr')).length === 10)
@@ -65,6 +97,8 @@ await page.waitForSelector('.sheet', { state: 'detached', timeout: 5000 })
 await page.click('text=손주 줄 것도 넣어서')
 await page.waitForSelector('.tiers__note', { timeout: 40000 })
 check('취향 구성 반영', (await page.textContent('.tiers__note')).includes('좁혔습니다'))
+// 등급 스트립이 664px로 그려져 화면 밖으로 나갔던 자리다.
+check('가로 넘침 없음 — 등급 스트립', (await spill(page)).length === 0, (await spill(page)).join(' | '))
 
 // 5. 인원 모으기 — 곡선 위의 점이 움직인다
 await page.click('text=명 채우기')
@@ -89,16 +123,7 @@ check('정산 표기 10건', deltas.length === 10, deltas.slice(0, 3).join(' '))
 check('음수 차액 없음', deltas.every((d) => !d.includes('-')), deltas.join(' '))
 check('재추첨 불가 안내', (await page.textContent('.seed')).includes('같은 방'))
 
-// 가로 넘침 — 결과 카드가 뷰포트를 넘어 시가가 잘렸던 적이 있다(grid item의 min-width:auto).
-// 눈으로만 잡히는 결함이라 검사로 못 박는다.
-const spill = await page.evaluate(() => {
-  const W = window.innerWidth
-  return [...document.querySelectorAll('body *')]
-    .filter((e) => Math.round(e.getBoundingClientRect().right) > W + 1)
-    .slice(0, 4)
-    .map((e) => `${e.tagName}.${String(e.className).slice(0, 30)}`)
-})
-check('가로 넘침 없음', spill.length === 0, spill.join(' | '))
+check('가로 넘침 없음 — 개봉 결과', (await spill(page)).length === 0, (await spill(page)).join(' | '))
 
 // 8. 공동구매형 — 상품 확정, 확률은 '얼마를 내는가'에만
 {
@@ -124,6 +149,7 @@ check('가로 넘침 없음', spill.length === 0, spill.join(' | '))
   check('발주 결과에 무료 당첨자', free >= 1 && free < all, `${free}/${all}명`)
   const gd = await page.$$eval('.rv .rv__delta, .rv .rv__even', (els) => els.map((e) => e.textContent))
   check('공동구매도 손해 없음', gd.length === all && gd.every((d) => !d.includes('-')))
+  check('가로 넘침 없음 — 공동구매', (await spill(page)).length === 0, (await spill(page)).join(' | '))
 }
 
 // 9. 데일리 100원 — 꽝 있는 포맷, 확률 전부 공개
@@ -143,6 +169,7 @@ check('가로 넘침 없음', spill.length === 0, spill.join(' | '))
   const t = (await page.textContent('.dres b')).trim()
   check('당첨 또는 꽝이 나온다', ['당첨!', '꽝'].includes(t), t)
   check('투표 카드 등장', await page.isVisible('.vote'))
+  check('가로 넘침 없음 — 데일리', (await spill(page)).length === 0, (await spill(page)).join(' | '))
 }
 
 // 10. 뽑기 통과 천장
@@ -231,6 +258,7 @@ check('천장은 공시 대상', sheet.includes('보장형 시스템'))
   check('카테고리 전환 동작', (await page.textContent('.shead h2')).includes('포켓몬'))
   check('카드에 별점 렌더', (await page.$$('.pcard__rate')).length > 0)
   check('카드에 스펙 칩 렌더', (await page.$$('.chip2')).length > 0)
+  check('가로 넘침 없음 — 홈', (await spill(page)).length === 0, (await spill(page)).join(' | '))
 }
 
 check('콘솔 에러 없음', errors.length === 0, errors.slice(0, 2).join(' | '))
