@@ -37,19 +37,29 @@ check(`랜덤박스 ${meta.boxes.length}종 노출`, (await page.$$('.bcard')).l
 check(`공동구매 ${meta.groupbuys.length}종 노출`, (await page.$$('.gbcard')).length === meta.groupbuys.length)
 check('탭바에 올박스', await page.isVisible('.tabbar__b.is-center'))
 
-// 2. 박스 진입 — 확률 곡선과 등급 막대
+// 2. 박스 진입 — 상세는 '지금 확률' 한 카드만 보여준다
 await page.click('.bcard')
-await page.waitForSelector('.curve__svg', { timeout: 10000 })
-check('확률 곡선 렌더', await page.isVisible('.curve__line'))
+await page.waitForSelector('.odds', { timeout: 10000 })
 check('등급 막대 4개', (await page.$$('.bars__row')).length === 4)
 const oddsAlone = await page.textContent('.now__num')
 check('자연빈도 병기', (await page.textContent('.now__nf')).includes('명 중 약'))
+check('재고 요약 노출', /[\d,]+구좌/.test(await page.textContent('.odds__stock')))
 
-// 3. 더보기 표
+// 상세 화면이 다시 15블록으로 불어나는 것을 막는다.
+const blocks = await page.$$eval('.body > *', (e) => e.length)
+check('상세 블록 7개 이하', blocks <= 7, `${blocks}블록`)
+
+// 3. 확률 근거 시트 — 곡선·표·뽑기통·천장은 전부 여기로 내렸다
+await page.click('.odds__why')
+await page.waitForSelector('.sheet__live', { timeout: 5000 })
+check('시트에 확률 곡선', await page.isVisible('.curve__line'))
+check('시트에 뽑기 통', (await page.$$('.sheet__live .bin__row')).length === 4)
+check('시트에 천장 바', await page.isVisible('.sheet__live .pity'))
 await page.click('.more__btn')
 await page.waitForSelector('.otable', { timeout: 5000 })
 check('더보기 표 1~10명', (await page.$$('.otable tbody tr')).length === 10)
-await page.click('.more__btn')
+await page.click('.sheet .btn--ghost')
+await page.waitForSelector('.sheet', { state: 'detached', timeout: 5000 })
 
 // 4. 취향 대화 (ChatGPT) — 키가 없으면 규칙 기반으로 내려앉는다
 await page.click('text=손주 줄 것도 넣어서')
@@ -142,6 +152,8 @@ check('가로 넘침 없음', spill.length === 0, spill.join(' | '))
   await page.goto(BASE, { waitUntil: 'domcontentloaded' })
   await page.waitForSelector('.blist li:nth-child(2) .bcard', { timeout: 20000 })
   await page.click('.blist li:nth-child(2) .bcard')
+  await page.waitForSelector('.odds__why', { timeout: 10000 })
+  await page.click('.odds__why')
   await page.waitForSelector('.bin', { timeout: 10000 })
   check('뽑기 통 4등급', (await page.$$('.bin__row')).length === 4)
   const tot = await page.textContent('.bin__tot')
@@ -194,6 +206,31 @@ check('천장은 공시 대상', sheet.includes('보장형 시스템'))
     `page=${m.pageScrolls} body=${m.bodyScrolls}`)
   check('데스크톱 레일 노출', m.rails)
   await desk.close()
+}
+
+// 13. 홈 탭 — 실제 올웨이즈 구조를 따라가는지. 눌러도 아무 일 없는 컨트롤이 없어야 한다.
+{
+  await page.goto(BASE, { waitUntil: 'domcontentloaded' })
+  await page.waitForSelector('.bcard', { timeout: 20000 })
+  await page.click('.tabbar__b:nth-child(1)')
+  await page.waitForSelector('.pcard', { timeout: 10000 })
+  check('Alwayz 워드마크', (await page.textContent('.top__logo')) === 'Alwayz')
+  check('카테고리 6개', (await page.$$('.cats__b')).length === 6)
+  check('퀵메뉴 6개', (await page.$$('.quick__t')).length === 6)
+  check('섹션 헤더 존재', (await page.$$('.shead')).length >= 3)
+
+  const before = (await page.$$('.pcard')).length
+  await page.fill('.hsearch input', '리자몽')
+  await page.waitForTimeout(400)
+  const after = (await page.$$('.pcard')).length
+  check('검색이 실제로 동작', after > 0 && after < before, `${before} → ${after}건`)
+
+  await page.fill('.hsearch input', '')
+  await page.click('.cats__b:nth-child(4)')
+  await page.waitForTimeout(400)
+  check('카테고리 전환 동작', (await page.textContent('.shead h2')).includes('포켓몬'))
+  check('카드에 별점 렌더', (await page.$$('.pcard__rate')).length > 0)
+  check('카드에 스펙 칩 렌더', (await page.$$('.chip2')).length > 0)
 }
 
 check('콘솔 에러 없음', errors.length === 0, errors.slice(0, 2).join(' | '))

@@ -47,6 +47,8 @@
   --r2: 10px;
   --r3: 14px;
   --rp: 999px;
+  /* 탭바 높이 — 고정 CTA가 그 위에 앉으려면 값을 알아야 한다. */
+  --tabbar-h: 72px;
   --r: 12px; /* 기존 사용처 유지 — 치환이 끝나면 제거한다 */
 
   /* ── 입체 3단계 ──────────────────────────────────────────
@@ -123,6 +125,7 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
   position: sticky; bottom: 0; z-index: 20;
   display: grid; grid-template-columns: repeat(5, 1fr);
   background: var(--paper); border-top: 1px solid var(--hair);
+  min-height: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));
   padding: 6px 0 max(6px, env(safe-area-inset-bottom));
 }
 .tabbar__b {
@@ -614,3 +617,36 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
 .dres--blocked { background: var(--band); }
 .dres--blocked b { font-size: var(--fs-lead); }
 .dres .seed { margin-top: 10px; font-size: var(--fs-micro); }
+
+/* ── 올박스 상세: 확률 카드 + 고정 CTA ─────────────────────────
+   차트 3종·표 1개가 한 스크롤에 쌓여 '분석 대시보드'로 읽혔다.
+   지금 확률만 카드 하나로 남기고 유도 과정은 시트로 내렸다. */
+.odds {
+  background: var(--paper); border-radius: var(--r3); padding: var(--s4);
+  box-shadow: var(--e2); margin-bottom: var(--s4);
+}
+.odds__stock {
+  margin-top: var(--s3); padding: var(--s2) var(--s3); border-radius: var(--r1);
+  background: var(--band); font-size: var(--fs-label); color: var(--ink-2);
+  font-weight: 600; font-variant-numeric: tabular-nums;
+}
+.odds__why {
+  display: block; width: 100%; margin-top: var(--s3);
+  padding: var(--s3); border-radius: var(--r2); border: 1px solid var(--hair);
+  font-size: var(--fs-body); font-weight: 700; color: var(--ink-2); text-align: center;
+}
+.odds__why:hover { border-color: var(--brand); color: var(--brand); }
+
+/* 하단 고정 CTA — 실제 앱의 구매 바와 같은 자리. */
+.cta {
+  position: sticky; bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px)); z-index: 15;
+  margin: var(--s5) calc(-1 * var(--s4)) 0;
+  padding: var(--s3) var(--s4);
+  background: var(--paper); box-shadow: var(--e3);
+}
+.cta .btn--go { margin-top: 0; }
+.cta .draws { margin-bottom: var(--s3); }
+
+/* 시트 안 실시간 확률 섹션 */
+.sheet__live { margin-bottom: var(--s5); padding-bottom: var(--s5); border-bottom: 1px solid var(--hair); }
+.sheet__live > * + * { margin-top: var(--s4); }

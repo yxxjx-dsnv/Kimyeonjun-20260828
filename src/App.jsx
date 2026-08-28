@@ -597,8 +597,8 @@ export default function App() {
   } else {
     body = (
       <>
-        <button className="back" onClick={backToList}>← 박스 목록</button>
         <header className="bhead">
+          <button className="back" onClick={backToList}>← 박스 목록</button>
           <h2>{box.name}</h2>
           <p>{won(box.entry)} · 최고 등급 {box.topLabel}</p>
         </header>
@@ -606,21 +606,23 @@ export default function App() {
         <TasteChat boxId={box.id} teamSize={teamSize || 1} axis={curated?.axis}
           onCurated={setCurated} disabled={phase === 'ready' || phase === 'count'} />
 
-        <PityBar pity={box.pity} miss={pityMiss} onChange={setPityMiss} />
-
-        <OddsCurve oddsByTeam={oddsByTeam} teamSize={teamSize || 1}
-          customerBEP={box.customerBEP} teamMax={teamMax} />
-
-        <div className="now">
-          <span className="now__lab">지금 {teamSize || 1}명 기준 최고 등급</span>
-          <strong className="now__num">{pct(odds.S, 3)}</strong>
-          <em className="now__nf">{naturalFreq(odds.S)}</em>
-        </div>
-        <OddsBars odds={odds} />
-        <OddsTable oddsByTeam={oddsByTeam} evByTeam={evByTeam} teamMax={teamMax} teamSize={teamSize} />
-
-        <StockBin stock={box.stock} stockTotal={box.stockTotal} baseOdds={box.baseOdds}
-          odds={odds} boost={box.boostByTeam?.[Math.max(1, teamSize || 1)] ?? 1} />
+        {/* 확률은 한 카드로 모은다. 곡선·표·뽑기통·천장은 '확률 근거'
+            시트로 내렸다 — 증거는 행동을 가로막지 않아야 한다. */}
+        <section className="odds">
+          <div className="now">
+            <span className="now__lab">지금 {teamSize || 1}명 기준 최고 등급</span>
+            <strong className="now__num">{pct(odds.S, 3)}</strong>
+            <em className="now__nf">{naturalFreq(odds.S)}</em>
+          </div>
+          <OddsBars odds={odds} />
+          <p className="odds__stock">
+            뽑기 통 {TIERS.map((t) => `${t} ${box.stock[t]}개`).join(' · ')}
+            {' = '}{box.stockTotal.toLocaleString()}구좌
+          </p>
+          <button className="odds__why" onClick={() => setSheet(true)}>
+            이 확률이 어떻게 나왔나 ›
+          </button>
+        </section>
 
         <MemberRail members={members} teamMax={teamMax} readyCount={readyCount}
           phase={phase === 'ready' || phase === 'count' ? 'ready' : 'gather'} />
@@ -639,6 +641,18 @@ export default function App() {
           </div>
         )}
 
+        <div className="tiers">
+          {curated && (
+            <p className="tiers__note">
+              취향에 맞춰 후보를 {curated.pickedCount}개로 좁혔습니다.
+              {curated.usedFallback && ' (후보가 모자라 기본 구성으로 담았습니다)'}
+              {!curated.aiEnabled && ' (AI 키 없이 규칙 기반으로 구성했습니다)'}
+            </p>
+          )}
+          {tierList.map((t) => <TierStrip key={t.tier} tier={t} odds={odds[t.tier]} />)}
+        </div>
+
+        <div className="cta">
         {phase !== 'count' && phase !== 'ready' && (
           <div className="draws">
             <span>내 뽑기 수</span>
@@ -663,16 +677,6 @@ export default function App() {
         {phase === 'ready' && (
           <p className="gatenote">한 명이라도 누르지 않으면 열리지 않습니다. 서버가 카운트를 셉니다.</p>
         )}
-
-        <div className="tiers">
-          {curated && (
-            <p className="tiers__note">
-              취향에 맞춰 후보를 {curated.pickedCount}개로 좁혔습니다.
-              {curated.usedFallback && ' (후보가 모자라 기본 구성으로 담았습니다)'}
-              {!curated.aiEnabled && ' (AI 키 없이 규칙 기반으로 구성했습니다)'}
-            </p>
-          )}
-          {tierList.map((t) => <TierStrip key={t.tier} tier={t} odds={odds[t.tier]} />)}
         </div>
       </>
     )
@@ -686,7 +690,13 @@ export default function App() {
         <>
           <div className="scrim" onClick={() => setSheet(false)} />
           <HonestySheet formula={data.formula} pool={data.pool} companyBEP={data.companyBEP}
-            onClose={() => setSheet(false)} />
+            onClose={() => setSheet(false)}
+            live={box && tab === 'olbox' ? {
+              box, odds, oddsByTeam, evByTeam, teamMax,
+              teamSize: teamSize || 1,
+              boost: box.boostByTeam?.[Math.max(1, teamSize || 1)] ?? 1,
+              pityMiss, onPityChange: setPityMiss,
+            } : null} />
         </>
       )}
     </Shell>

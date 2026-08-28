@@ -382,12 +382,28 @@ export function TasteChat({ boxId, teamSize, onCurated, axis, disabled }) {
 }
 
 /* ── 정직성 시트 ───────────────────────────────────────────── */
-export function HonestySheet({ formula, pool, companyBEP, onClose }) {
+export function HonestySheet({ formula, pool, companyBEP, onClose, live }) {
   const f = formula
   return (
     <div className="sheet" role="dialog" aria-label="확률이 어떻게 정해지나요">
       <div className="sheet__bar" />
       <h3>확률이 어떻게 정해지나요</h3>
+
+      {/* 상세 화면에 차트 3종·표 1개가 한 스크롤에 쌓여 있어 '분석 대시보드'로
+          읽혔다. 근거는 숨기는 게 아니라 요청했을 때 나와야 한다 — 상세에는
+          지금 확률만 남기고, 유도 과정 전체를 여기로 옮겼다. */}
+      {live && (
+        <section className="sheet__live">
+          <h4>지금 이 박스의 확률</h4>
+          <StockBin stock={live.box.stock} stockTotal={live.box.stockTotal}
+            baseOdds={live.box.baseOdds} odds={live.odds} boost={live.boost} />
+          <OddsCurve oddsByTeam={live.oddsByTeam} teamSize={live.teamSize}
+            customerBEP={live.box.customerBEP} teamMax={live.teamMax} />
+          <OddsTable oddsByTeam={live.oddsByTeam} evByTeam={live.evByTeam}
+            teamMax={live.teamMax} teamSize={live.teamSize} />
+          <PityBar pity={live.box.pity} miss={live.pityMiss} onChange={live.onPityChange} />
+        </section>
+      )}
 
       <p className="sheet__lead">
         확률표를 사람이 적지 않습니다. <b>형식마다 다른 곳에서 유도됩니다</b> —
