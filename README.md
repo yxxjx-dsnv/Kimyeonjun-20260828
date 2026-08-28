@@ -3,7 +3,7 @@
 올웨이즈 앱 하단에 붙는 신규 탭입니다. 꽝이 없는 확률형 구매를 팀으로 열고,
 사람이 모일수록 좋은 등급이 나올 확률이 오르며, **참여자 전원이 뽑기를 눌러야만** 상자가 열립니다.
 
-🔗 **배포:** https://olbox-alwayz.vercel.app
+🔗 **배포:** https://albox-alwayz.vercel.app
 
 ```
 혼자                        10명이 함께
@@ -30,7 +30,7 @@ npm run build && npm run serve     # http://localhost:3111
 ```bash
 node --env-file=.env.local tests/serve.mjs 3111   # AI 포함 로컬 구동
 npm i -D playwright --no-save && npx playwright install chromium
-node tests/browser.e2e.mjs https://olbox-alwayz.vercel.app   # 배포본 E2E 19단계
+node tests/browser.e2e.mjs https://albox-alwayz.vercel.app   # 배포본 E2E 19단계
 ```
 
 ## 구조
@@ -59,7 +59,7 @@ Vercel KV도 SDK 없이 REST를 `fetch`로 부릅니다. Playwright는 애드혹
 | 백엔드 Node.js + JavaScript | Vercel 서버리스 함수 5개 (`api/*.js`) |
 | 대화형 AI에 ChatGPT API | `api/curate.js` — `gpt-4o-mini`, raw fetch, JSON 모드 |
 | 크롤링 데이터를 제품에 활용 | 다나와 332건이 **상품 목록이자 확률 계산의 입력**입니다 |
-| 외부 접속 가능한 배포 | https://olbox-alwayz.vercel.app |
+| 외부 접속 가능한 배포 | https://albox-alwayz.vercel.app |
 
 ### 수집 현황 (2026-08-28 실측)
 

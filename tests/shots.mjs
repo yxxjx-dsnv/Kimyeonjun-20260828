@@ -9,7 +9,7 @@ import { mkdir } from 'node:fs/promises'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-const BASE = process.argv[2] || 'https://olbox-alwayz.vercel.app'
+const BASE = process.argv[2] || 'https://albox-alwayz.vercel.app'
 const OUT = process.argv[3] || join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'images')
 await mkdir(OUT, { recursive: true })
 
