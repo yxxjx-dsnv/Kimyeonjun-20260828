@@ -76,13 +76,12 @@ export function ProductCard({ item, badge }) {
           </svg>
         </span>
       </div>
-      {item.spec?.length > 0 && (
-        <span className="pcard__chips">
-          {item.spec.slice(0, 2).map((c, i) => (
-            <span key={i} className="chip2">{c.length > 12 ? c.slice(0, 12) + '…' : c}</span>
-          ))}
-        </span>
-      )}
+      {/* 칩 줄은 스펙이 없어도 자리를 차지한다 — 옆 카드와 행이 어긋나지 않게. */}
+      <span className="pcard__chips">
+        {(item.spec || []).slice(0, 2).map((c, i) => (
+          <span key={i} className="chip2">{c.length > 12 ? c.slice(0, 12) + '…' : c}</span>
+        ))}
+      </span>
       <p className="pcard__seller">{item.seller} <span aria-hidden="true">›</span></p>
       <p className="pcard__name">{item.name}</p>
       <p className="pcard__price"><em>최저가</em>{won(item.price)}</p>
