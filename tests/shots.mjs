@@ -72,9 +72,38 @@ await page.evaluate(() => document.querySelector('.more').scrollIntoView({ block
 await page.waitForTimeout(300)
 await shot(page, 'ob8_table', 640)                    // ⑧ 1~10명 확률표
 
+// 뽑기 통 + 천장 — 확률이 재고에서 나온다는 것을 보이는 화면
+await page.goto(BASE, { waitUntil: 'domcontentloaded' })
+await page.waitForSelector('.blist li:nth-child(2) .bcard', { timeout: 20000 })
+await page.click('.blist li:nth-child(2) .bcard')
+await page.waitForSelector('.bin', { timeout: 15000 })
+await page.evaluate(() => document.querySelector('.pity').scrollIntoView({ block: 'start' }))
+await page.waitForTimeout(400)
+await shot(page, 'ob13_pity', 560)                    // ⑬ 천장 진행도
+await page.evaluate(() => document.querySelector('.bin').scrollIntoView({ block: 'start' }))
+await page.waitForTimeout(300)
+await shot(page, 'ob14_bin', 480)                     // ⑭ 뽑기 통 (혼자)
+await page.click('text=명 채우기')
+await page.waitForFunction(() => document.querySelectorAll('.av.is-in').length === 10, null, { timeout: 20000 })
+await page.evaluate(() => document.querySelector('.bin').scrollIntoView({ block: 'start' }))
+await page.waitForTimeout(500)
+await shot(page, 'ob15_bin10', 480)                   // ⑮ 뽑기 통 (10명, 배수 적용)
+
+// 데일리 100원 — 꽝 있는 포맷, 확률 전부 공개
+await page.goto(BASE, { waitUntil: 'domcontentloaded' })
+await page.waitForSelector('.dcard', { timeout: 20000 })
+await page.click('.dcard')
+await page.waitForSelector('.gbnow', { timeout: 15000 })
+await page.waitForTimeout(400)
+await shot(page, 'ob16_daily', 900)                   // ⑯ 데일리 + 계산 근거
+await page.click('.btn--go')
+await page.waitForSelector('.dres', { timeout: 20000 })
+await page.waitForTimeout(400)
+await shot(page, 'ob17_dresult', 820)                 // ⑰ 뽑기 결과 + 투표
+
 // 공동구매형 — 상품 확정, 확률은 '얼마를 내는가'에만
-await page.goto(BASE, { waitUntil: 'networkidle' })
-await page.waitForSelector('.gbcard')
+await page.goto(BASE, { waitUntil: 'domcontentloaded' })
+await page.waitForSelector('.gbcard', { timeout: 20000 })
 await shot(page, 'ob10_list2', 900)                   // ⑩ 목록 전체(박스 + 공동구매)
 await page.click('.gbcard')
 await page.waitForSelector('.gbnow')
