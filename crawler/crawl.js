@@ -110,6 +110,10 @@ for (const { q, group, min, max, per } of QUERIES) {
       query: q,
       group,
       auth: authOf(r.rawTitle, r.seller),
+      // 다나와가 내려주는 값을 그대로 옮긴다. 없으면 null로 두고 화면에서 생략한다.
+      rating: r.rating ?? null,
+      reviews: r.reviews ?? null,
+      spec: r.spec ?? [],
     })
   }
   console.log(`${q.padEnd(14)} ${String(rows.length).padStart(3)}건 조회 → ${kept}건 채택${rows.length ? '' : '  ⚠ 빈 응답'}`)
@@ -138,5 +142,7 @@ console.log(`총 ${items.length}건 · 검색어 ${QUERIES.length}개 · 실패 
 console.log('그룹별 :', by('group'))
 console.log('정품표기 :', by('auth'))
 console.log(`가격대 : ${prices[0].toLocaleString()}원 ~ ${prices.at(-1).toLocaleString()}원`)
+const has = (k) => items.filter((i) => (Array.isArray(i[k]) ? i[k].length : i[k] != null)).length
+console.log(`평점/리뷰 : ${has('rating')}건 / ${has('reviews')}건 · 스펙 ${has('spec')}건 (전체 ${items.length})`)
 console.log(`이미지 : ${items.filter((i) => i.image).length}건 확보`)
 if (failed.length) console.log('실패   :', failed.join(' / '))

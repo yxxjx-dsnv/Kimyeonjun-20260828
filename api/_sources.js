@@ -1,6 +1,6 @@
 /**
  * 상품 소스 파서 — 크롤러(1회성 풀 생성)와 서버가 같은 코드를 쓴다.
- * 반환 스키마 하나로 통일: {id, rawTitle, price, seller, url, image}
+ * 반환 스키마 하나로 통일: {id, rawTitle, price, seller, url, image, rating, reviews, spec}
  *
  * 직전 과제(Kimyeonjun-20260815)에서 20곳을 실측해 살아남은 파서를 옮겨왔다.
  * cheerio·puppeteer를 쓰지 않는다 — 다나와는 SSR HTML이라 정규식으로 충분하다.
@@ -74,6 +74,23 @@ export async function danawaSearch(q, limit = 10, timeoutMs) {
     let image = imgM ? imgM[1] : ''
     if (image.startsWith('//')) image = 'https:' + image
     if (/noimg|blank|loading/i.test(image)) image = ''
+
+    // 다나와는 평점·리뷰수·스펙을 같은 블록에 이미 내려준다. 그동안 block을
+    // 손에 쥐고도 정규식 4개만 돌려서 전부 버리고 있었다. 실측(참기름 40건)에서
+    // 평점·리뷰 35/40, 스펙 40/40. 이게 있어야 상품 카드를 지어내지 않고 채운다.
+    const ratingM = block.match(/class="text__score">\s*([\d.]+)\s*</)
+    const reviewM = block.match(/class="text__review"[\s\S]{0,160}?\(\s*<span[^>]*>\s*([\d,]+)/)
+    const specM = block.match(/class="spec_list">([\s\S]*?)<\/div>/)
+    const spec = specM
+      ? specM[1]
+          .replace(/<em>\/<\/em>/g, '\u0001')
+          .replace(/<[^>]+>/g, '')
+          .split('\u0001')
+          .map((x) => x.replace(/\s+/g, ' ').trim())
+          .filter(Boolean)
+          .slice(0, 4)
+      : []
+
     out.push({
       id: pcode ? `d${pcode}` : `x${linkCode}`,
       rawTitle,
@@ -81,6 +98,10 @@ export async function danawaSearch(q, limit = 10, timeoutMs) {
       seller: pcode ? '다나와 최저가' : '다나와 중개',
       url: pcode ? `https://prod.danawa.com/info/?pcode=${pcode}` : href,
       image,
+      rating: ratingM ? Number(ratingM[1]) : null,
+      // 다나와는 리뷰수를 999에서 끊는다. 그대로 두고 화면에서 '999+'로 적는다.
+      reviews: reviewM ? Number(reviewM[1].replace(/,/g, '')) : null,
+      spec,
     })
   }
   return out
