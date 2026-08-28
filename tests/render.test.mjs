@@ -15,7 +15,7 @@ import { createServer } from 'vite'
 import { renderToString } from 'react-dom/server'
 import React from 'react'
 import boxesHandler from '../api/boxes.js'
-import { getBox, oddsOf, evMultiple, customerBEP, TIERS, TEAM_MAX } from '../api/_draw.js'
+import { getBox, oddsOf, evMultiple, customerBEP, TIERS, TEAM_MAX, BOXES } from '../api/_draw.js'
 
 let fail = 0
 const check = (label, cond, extra = '') => {
@@ -38,7 +38,7 @@ const { default: App } = await vite.ssrLoadModule('/src/App.jsx')
 }
 
 // ── ② 화면 숫자 = 서버 계산 ────────────────────────────────
-for (const id of ['malang', 'ipad', 'premium']) {
+for (const id of BOXES.map((b) => b.id)) {
   const box = getBox(id)
   const odds = oddsOf(box, 7)
   const bars = renderToString(React.createElement(parts.OddsBars, { odds }))
@@ -70,7 +70,7 @@ for (const id of ['malang', 'ipad', 'premium']) {
 
 // ── ③ 자연빈도 병기 (Gigerenzer & Hoffrage 1995) ───────────
 {
-  const box = getBox('ipad')
+  const box = getBox('charizard')
   const odds = oddsOf(box, 10)
   const strip = renderToString(
     React.createElement(parts.TierStrip, {
@@ -94,7 +94,7 @@ for (const id of ['malang', 'ipad', 'premium']) {
   const res = { code: 0, body: null, status(c) { this.code = c; return this }, setHeader() { return this }, json(b) { this.body = b; return this } }
   boxesHandler({ method: 'GET' }, res)
   check('GET /api/boxes 200', res.code === 200)
-  check('박스 3종', res.body.boxes.length === 3)
+  check(`박스 ${BOXES.length}종`, res.body.boxes.length === BOXES.length)
   check('수식 파라미터 노출', Boolean(res.body.formula.assumptions.length))
   check('홈 탭용 샘플 포함', res.body.sample.length > 0)
 }

@@ -10,6 +10,7 @@ import {
   customerBEP, companyBEP, costRatio, cacRecovered, budgetOf, poolMeta,
   CR_MIN, CR_MAX, K, N0, CAC, VIRAL_MAX, CAC_CAP, MARGIN, SPLIT,
   MIN_C_SHARE, FIXED_COST_RATIO, PRICE_RATIO, POOL,
+  GROUPBUYS, FREE_SHARE, gbItem, gbCostRatio, gbDiscount, gbPayRatio, gbFreeOdds, gbFreeCount,
 } from './_draw.js'
 
 const SAMPLES = 6
@@ -46,6 +47,32 @@ export function buildBoxes() {
   })
 }
 
+/**
+ * 공동구매형 — 상품이 확정이고 확률은 '얼마를 내는가'에만 작동한다.
+ * 인원별 표를 통째로 내려보내 화면이 서버와 같은 값을 쓰게 한다.
+ */
+export function buildGroupbuys() {
+  return GROUPBUYS.map((gb) => {
+    const item = gbItem(gb)
+    const steps = []
+    for (let n = gb.minTeam; n <= gb.teamMax; n++) {
+      steps.push({
+        n,
+        pay: Math.round(item.price * gbPayRatio(gb, n)),
+        discount: +(gbDiscount(gb, n) * 100).toFixed(1),
+        freeOdds: +(gbFreeOdds(gb, n) * 100).toFixed(2),
+        freeCount: gbFreeCount(gb, n),
+        costRatio: +gbCostRatio(gb, n).toFixed(4),
+      })
+    }
+    return {
+      id: gb.id, name: gb.name, blurb: gb.blurb,
+      minTeam: gb.minTeam, teamMax: gb.teamMax,
+      item, listPrice: item.price, freeShare: FREE_SHARE, steps,
+    }
+  })
+}
+
 /** 화면의 '정직성 시트'가 그대로 렌더하는 수식 파라미터. 숨기지 않는다. */
 export const formula = () => ({
   costRatio: { CR_MIN, CR_MAX, K, N0, note: '수량할인 계단(MOQ 임계)의 로지스틱 평활화' },
@@ -68,6 +95,7 @@ export default function handler(req, res) {
   res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=86400')
   return res.status(200).json({
     boxes: buildBoxes(),
+    groupbuys: buildGroupbuys(),
     // 홈 탭 그리드용. 크롤 데이터가 올박스 밖에서도 화면에 쓰인다.
     sample: POOL.items.filter((i) => i.image).slice(0, 40),
     teamMax: TEAM_MAX,

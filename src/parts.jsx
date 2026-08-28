@@ -388,3 +388,92 @@ export function HonestySheet({ formula, pool, companyBEP, onClose }) {
     </div>
   )
 }
+
+/* ── 공동구매형 ───────────────────────────────────────────
+   상품은 확정이고 확률은 '얼마를 내는가'에만 작동한다. 안 당첨돼도 정가보다
+   싸게 산 유니폼이 오므로 잃을 것이 구조적으로 없다.                        */
+
+/** 인원에 따라 할인율과 무료 당첨 인원이 함께 오르는 곡선. */
+export function GroupCurve({ steps, teamSize }) {
+  const W = 320, H = 128, PL = 34, PR = 34, PT = 14, PB = 26
+  const n0 = steps[0].n, n1 = steps.at(-1).n
+  const x = (n) => PL + ((n - n0) / (n1 - n0)) * (W - PL - PR)
+  const maxD = Math.max(...steps.map((s) => s.discount)) * 1.1
+  const maxF = Math.max(...steps.map((s) => s.freeOdds)) * 1.1
+  const yD = (v) => H - PB - (v / maxD) * (H - PT - PB)
+  const yF = (v) => H - PB - (v / maxF) * (H - PT - PB)
+  const path = (fy, key) => steps.map((s, i) => `${i ? 'L' : 'M'} ${x(s.n)} ${fy(s[key])}`).join(' ')
+  const cur = steps.find((s) => s.n === teamSize) || steps[0]
+
+  return (
+    <div className="curve">
+      <svg viewBox={`0 0 ${W} ${H}`} className="curve__svg" role="img"
+        aria-label={`${cur.n}명일 때 할인 ${cur.discount}%, 무료 당첨 ${cur.freeOdds}%`}>
+        <line x1={PL} y1={H - PB} x2={W - PR} y2={H - PB} className="curve__axis" />
+        <path d={path(yD, 'discount')} className="curve__line curve__line--alt" />
+        <path d={path(yF, 'freeOdds')} className="curve__line" />
+        <circle cx={x(cur.n)} cy={yD(cur.discount)} r="4.5" className="curve__dot curve__dot--alt" />
+        <circle cx={x(cur.n)} cy={yF(cur.freeOdds)} r="5" className="curve__dot" />
+        {[n0, Math.round((n0 + n1) / 2), n1].map((n) => (
+          <text key={n} x={x(n)} y={H - 8} className="curve__tick">{n}</text>
+        ))}
+      </svg>
+      <p className="curve__cap">
+        <span className="lg lg--alt">전원 할인</span>
+        <span className="lg">무료 당첨 확률</span>
+        <span className="curve__capx">가로축 참여 인원</span>
+      </p>
+    </div>
+  )
+}
+
+/** 인원별 지불액·무료 인원 표. 더보기로 접어 둔다. */
+export function GroupTable({ steps, teamSize, listPrice }) {
+  const [open, setOpen] = useState(false)
+  const rows = steps.filter((s) => s.n % 5 === 0 || s.n === steps[0].n || s.n === teamSize)
+  return (
+    <div className="more">
+      <button className="more__btn" onClick={() => setOpen(!open)} aria-expanded={open}>
+        인원이 늘면 얼마가 되나요? <span className={`more__arw ${open ? 'is-open' : ''}`}>▾</span>
+      </button>
+      {open && (
+        <div className="more__body">
+          <table className="otable">
+            <thead><tr><th>인원</th><th>내는 돈</th><th>할인</th><th>무료 당첨</th><th>무료 인원</th></tr></thead>
+            <tbody>
+              {rows.map((s) => (
+                <tr key={s.n} className={s.n === teamSize ? 'is-now' : ''}>
+                  <td>{`${s.n}명`}</td>
+                  <td className="num">{won(s.pay)}</td>
+                  <td className="num sub">{`${s.discount}%`}</td>
+                  <td className="num">{`${s.freeOdds}%`}</td>
+                  <td className="num">{`${s.freeCount}명`}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="more__note">
+            {`정가 ${won(listPrice)} 기준입니다. 할인과 무료 당첨은 발주 수량이 늘어 매입 단가가 내려간 만큼을 나눈 것입니다.`}
+          </p>
+        </div>
+      )}
+    </div>
+  )
+}
+
+/** 발주 결과 — 누가 무료인지. */
+export function GroupResult({ r, mine }) {
+  return (
+    <li className={`rv ${mine ? 'is-mine' : ''} ${r.free ? 'is-free' : ''}`}>
+      <header className="rv__head">
+        <span className="rv__who">{r.name}{mine ? ' (나)' : ''}</span>
+        {r.sim && <span className="simtag">시뮬</span>}
+        <span className={r.free ? 'freetag' : 'paytag'}>{r.free ? '무료 당첨' : won(r.settle.paid)}</span>
+      </header>
+      <p className="rv__settle">
+        {`정가 ${won(r.settle.retailValue)} · 낸 돈 ${won(r.settle.paid)}`}
+        <Delta v={r.settle.delta} />
+      </p>
+    </li>
+  )
+}

@@ -291,7 +291,7 @@ export default async function handler(req, res) {
 /* ── 자체 검증 (네트워크 없이) ─────────────────────────────── */
 if (process.argv[1]?.endsWith('curate.js')) {
   const { strict: assert } = await import('node:assert')
-  const box = getBox('ipad')
+  const box = getBox('charizard')
   let n = 0
   const ok = (l, c, e = '') => { n++; if (!c) throw new Error(`✗ ${l}${e ? ' — ' + e : ''}`) }
 

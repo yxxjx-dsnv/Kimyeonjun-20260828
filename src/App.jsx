@@ -12,6 +12,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   won, pct, naturalFreq, Delta, ProductCard, OddsCurve, OddsBars, OddsTable,
   TierStrip, MemberRail, RevealCard, HonestySheet, TasteChat,
+  GroupCurve, GroupTable, GroupResult,
   IconHome, IconContent, IconHeart, IconUser, IconBox,
 } from './parts.jsx'
 
@@ -50,7 +51,7 @@ function StubTab({ title, body }) {
 }
 
 /* ─────────────────────────── 올박스 ─────────────────────────── */
-function BoxList({ boxes, onPick, companyBEP }) {
+function BoxList({ boxes, groupbuys, onPick, onPickGroup, companyBEP }) {
   return (
     <>
       <div className="hero">
@@ -82,6 +83,30 @@ function BoxList({ boxes, onPick, companyBEP }) {
           </li>
         ))}
       </ul>
+      <h2 className="lead2">상품이 정해진 공동구매</h2>
+      <p className="lead2__s">
+        무엇을 받을지는 확정입니다. <b>얼마를 내는지</b>만 확률입니다 —
+        모일수록 싸지고, 그중 몇 명은 공짜입니다.
+      </p>
+      <ul className="blist">
+        {groupbuys.map((g) => (
+          <li key={g.id}>
+            <button className="gbcard" onClick={() => onPickGroup(g.id)}>
+              <span className="gbcard__row">
+                {g.item.image && <img className="gbcard__thumb" src={g.item.image} alt="" loading="lazy" />}
+                <span className="gbcard__b">
+                  <span className="gbcard__tag">상품 확정</span>
+                  <span className="gbcard__name">{g.name}</span>
+                  <span className="gbcard__it">{g.item.name}</span>
+                  <span className="gbcard__odds">
+                    {`${g.minTeam}명 ${g.steps[0].discount}%↓ · ${g.teamMax}명 ${g.steps.at(-1).discount}%↓ + ${g.steps.at(-1).freeCount}명 무료`}
+                  </span>
+                </span>
+              </span>
+            </button>
+          </li>
+        ))}
+      </ul>
       <p className="foot">
         회차는 {companyBEP}명부터 회사에 흑자입니다. 그래서 사람을 모으라고 권합니다 —
         숨길 이유가 없는 숫자라 적어 둡니다.
@@ -100,6 +125,9 @@ export default function App() {
   const [count, setCount] = useState(3)
   const [result, setResult] = useState(null)
   const [curated, setCurated] = useState(null) // 취향 대화 결과 (확률표까지 함께 바뀐다)
+  const [gbId, setGbId] = useState(null) // 공동구매형
+  const [gbTeam, setGbTeam] = useState(20)
+  const [gbResult, setGbResult] = useState(null)
   const [sheet, setSheet] = useState(false)
   const [busy, setBusy] = useState(false)
   const timers = useRef([])
@@ -219,7 +247,32 @@ export default function App() {
   }
 
   const reset = () => { clearTimers(); setResult(null); setPhase('detail'); openBox(boxId) }
-  const backToList = () => { clearTimers(); setPhase('list'); setBoxId(null); setRoom(null); setResult(null); setCurated(null) }
+  const backToList = () => {
+    clearTimers(); setPhase('list'); setBoxId(null); setRoom(null); setResult(null); setCurated(null)
+    setGbId(null); setGbResult(null)
+  }
+
+  const gb = data?.groupbuys?.find((g) => g.id === gbId) || null
+  const openGroup = (id) => {
+    const g = data.groupbuys.find((x) => x.id === id)
+    setGbId(id); setGbResult(null); setGbTeam(g.minTeam); setBoxId(null); setPhase('group')
+  }
+  /** 발주 — 인원이 최소 수량을 넘어야 서버가 200을 준다. */
+  const placeOrder = async () => {
+    setBusy(true)
+    try {
+      const r = await fetch('/api/open', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          kind: 'groupbuy', gbId, roomId: `gb${gbTeam}`,
+          members: Array.from({ length: gbTeam }, (_, i) => ({ id: `g${i}`, name: i === 0 ? '나' : SIM_NAMES[(i - 1) % SIM_NAMES.length] + (i > 9 ? i : '') })),
+        }),
+      })
+      const j = await r.json()
+      if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`)
+      setGbResult(j)
+    } catch (e) { setErr(e.message) } finally { setBusy(false) }
+  }
 
   /* ── 렌더 ───────────────────────────────────────────────── */
   if (err && !data) return <Shell tab={tab} setTab={setTab}><div className="empty"><h2>불러오지 못했습니다</h2><p>{err}</p></div></Shell>
@@ -232,7 +285,63 @@ export default function App() {
   else if (tab === 'content') body = <StubTab title="콘텐츠" body="영상·기획전 탭입니다." />
   else if (tab === 'wish') body = <StubTab title="관심상품" body="찜한 상품 탭입니다." />
   else if (tab === 'me') body = <StubTab title="내 정보" body="주문내역·올팜·설정 탭입니다." />
-  else if (phase === 'list' || !box) body = <BoxList boxes={data.boxes} onPick={openBox} companyBEP={data.companyBEP} />
+  else if (phase === 'group' && gb) {
+    const step = gb.steps.find((x) => x.n === gbTeam) || gb.steps[0]
+    body = gbResult ? (
+      <>
+        <button className="back" onClick={backToList}>← 목록</button>
+        <header className="rhead">
+          <h2>{`${gbResult.gbName} 발주 완료`}</h2>
+          <p>{`${gbResult.teamSize}명 · 정가 ${won(gbResult.listPrice)} → ${won(gbResult.pay)} (${gbResult.discountPct}% 할인) · 무료 당첨 ${gbResult.freeCount}명`}</p>
+        </header>
+        <ul className="rvlist">
+          {gbResult.results.map((r) => (
+            <GroupResult key={r.memberId} r={r} mine={r.memberId === 'g0'} />
+          ))}
+        </ul>
+        <p className="seed">{gbResult.seedProof.note}<br /><code>{gbResult.seedProof.pattern}</code></p>
+        <div className="row">
+          <button className="btn btn--ghost" onClick={backToList}>목록으로</button>
+          <button className="btn" onClick={() => setGbResult(null)}>인원 바꿔보기</button>
+        </div>
+      </>
+    ) : (
+      <>
+        <button className="back" onClick={backToList}>← 목록</button>
+        <header className="bhead">
+          <h2>{gb.name}</h2>
+          <p>{gb.blurb}</p>
+        </header>
+        <div className="gbhero">
+          {gb.item.image && <img src={gb.item.image} alt="" />}
+          <div>
+            <p className="gbhero__n">{gb.item.name}</p>
+            <p className="gbhero__p">{`정가 ${won(gb.listPrice)} · 최소 발주 ${gb.minTeam}명`}</p>
+          </div>
+        </div>
+        <GroupCurve steps={gb.steps} teamSize={gbTeam} />
+        <div className="gbnow">
+          <div><b>{won(step.pay)}</b><span>내가 내는 돈</span></div>
+          <div><b className="hi">{`${step.discount}%`}</b><span>전원 할인</span></div>
+          <div><b className="hi">{`${step.freeCount}명`}</b><span>{`무료 당첨 (${step.freeOdds}%)`}</span></div>
+        </div>
+        <div className="gbslider">
+          <span>참여 인원</span>
+          <input type="range" min={gb.minTeam} max={gb.teamMax} value={gbTeam}
+            onChange={(e) => setGbTeam(Number(e.target.value))} aria-label="참여 인원" />
+          <b>{`${gbTeam}명`}</b>
+        </div>
+        <GroupTable steps={gb.steps} teamSize={gbTeam} listPrice={gb.listPrice} />
+        <button className="btn btn--go" onClick={placeOrder} disabled={busy}>
+          {busy ? '발주 중…' : `${gbTeam}명으로 발주하기`}
+        </button>
+        <p className="gatenote">
+          {`상품은 확정입니다. 안 당첨돼도 정가보다 ${won(gb.listPrice - step.pay)} 싸게 삽니다.`}
+        </p>
+      </>
+    )
+  }
+  else if (phase === 'list' || !box) body = <BoxList boxes={data.boxes} groupbuys={data.groupbuys || []} onPick={openBox} onPickGroup={openGroup} companyBEP={data.companyBEP} />
   else if (phase === 'result' && result) {
     const mine = result.results.find((r) => r.memberId === room.memberId) || result.results[0]
     body = (

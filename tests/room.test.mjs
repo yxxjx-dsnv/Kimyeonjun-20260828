@@ -10,7 +10,7 @@
 import boxesHandler from '../api/boxes.js'
 import roomHandler from '../api/room.js'
 import openHandler from '../api/open.js'
-import { TEAM_MAX, MAX_DRAWS_PER_PERSON } from '../api/_draw.js'
+import { TEAM_MAX, MAX_DRAWS_PER_PERSON, BOXES } from '../api/_draw.js'
 
 let fail = 0
 const check = (label, cond, extra = '') => {
@@ -37,7 +37,7 @@ const post = async (h, body) => {
   const r = res()
   await boxesHandler({ method: 'GET' }, r)
   check('GET /api/boxes 200', r.code === 200)
-  check('박스 3종', r.body.boxes.length === 3, `${r.body.boxes.length}종`)
+  check(`박스 ${BOXES.length}종`, r.body.boxes.length === BOXES.length, `${r.body.boxes.length}종`)
   const b = r.body.boxes[1]
   check('팀 1~10 확률표 전부 존재', Object.keys(b.oddsByTeam).length === TEAM_MAX)
   check('확률 합 1', Math.abs(Object.values(b.oddsByTeam[7]).reduce((a, x) => a + x, 0) - 1) < 1e-9)
@@ -52,7 +52,7 @@ const post = async (h, body) => {
 }
 
 // ── 2. 방 만들기와 합류 ────────────────────────────────────────
-const created = await post(roomHandler, { action: 'create', boxId: 'ipad', name: '김연준' })
+const created = await post(roomHandler, { action: 'create', boxId: 'charizard', name: '김연준' })
 check('방 생성 200', created.code === 200)
 const roomId = created.body.state.roomId
 const me = created.body.memberId
@@ -121,7 +121,7 @@ check('상품에 이미지·링크 존재',
 
 // ── 6. 정원 ───────────────────────────────────────────────────
 {
-  const c = await post(roomHandler, { action: 'create', boxId: 'malang', name: '방장' })
+  const c = await post(roomHandler, { action: 'create', boxId: 'starter', name: '방장' })
   const rid = c.body.state.roomId
   for (let i = 1; i < TEAM_MAX; i++) await post(roomHandler, { action: 'join', roomId: rid, sim: true })
   const s = (await post(roomHandler, { action: 'state', roomId: rid })).body.state

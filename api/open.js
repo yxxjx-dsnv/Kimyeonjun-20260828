@@ -9,6 +9,7 @@
  */
 import {
   getBox, collapseUp, tiersOf, oddsOf, drawOne, TIERS, TEAM_MAX, MAX_DRAWS_PER_PERSON, byId,
+  getGroupbuy, gbItem, gbPayRatio, gbDiscount, gbFreeOdds, gbFreeCount, gbDraw,
 } from './_draw.js'
 
 import { readRoom, mutateRoom } from './_room.js'
@@ -92,10 +93,69 @@ function simState(body) {
   }
 }
 
+/**
+ * 공동구매형 발주 — 상품은 확정이고, 누가 무료인지만 정한다.
+ * 인원·상품·방ID만 클라이언트에서 받고 가격·할인·당첨 인원은 전부 서버가 계산한다.
+ */
+function resolveGroupbuy(body) {
+  const gb = getGroupbuy(body.gbId)
+  if (!gb) return null
+  const members = (Array.isArray(body.members) ? body.members : [])
+    .slice(0, gb.teamMax)
+    .map((m, i) => ({
+      id: String(m?.id ?? `g${i}`).slice(0, 16),
+      name: String(m?.name ?? `참여자${i + 1}`).replace(/\s+/g, ' ').trim().slice(0, 12) || `참여자${i + 1}`,
+      sim: i !== 0,
+    }))
+  const n = members.length
+  if (n < gb.minTeam) return { short: true, need: gb.minTeam - n, minTeam: gb.minTeam, teamSize: n }
+
+  const item = gbItem(gb)
+  const roomId = String(body.roomId || 'sim').slice(0, 24)
+  const winners = gbDraw(gb, members.map((m) => m.id), roomId)
+  const pay = Math.round(item.price * gbPayRatio(gb, n))
+
+  return {
+    kind: 'groupbuy',
+    gbId: gb.id,
+    gbName: gb.name,
+    item,
+    listPrice: item.price,
+    teamSize: n,
+    pay,
+    discountPct: +(gbDiscount(gb, n) * 100).toFixed(1),
+    freeOdds: +(gbFreeOdds(gb, n) * 100).toFixed(2),
+    freeCount: gbFreeCount(gb, n),
+    results: members.map((m, idx) => {
+      const free = winners.has(m.id)
+      return {
+        memberIndex: idx, memberId: m.id, name: m.name, sim: m.sim, free,
+        settle: {
+          paid: free ? 0 : pay,
+          retailValue: item.price,
+          delta: item.price - (free ? 0 : pay),
+        },
+      }
+    }),
+    seedProof: {
+      pattern: '방ID | 상품ID | 참여 인원',
+      note: '당첨자는 인원이 확정되는 순간 정해집니다. 인원이 바뀌면 다시 뽑습니다 — 아직 발주 전이기 때문입니다.',
+    },
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST만 허용합니다.' })
-  const { roomId, sim } = req.body || {}
+  const { roomId, sim, kind } = req.body || {}
   if (!roomId) return res.status(400).json({ error: 'roomId가 필요합니다.' })
+
+  if (kind === 'groupbuy') {
+    const out = resolveGroupbuy(req.body)
+    if (!out) return res.status(400).json({ error: '없는 공동구매입니다.' })
+    if (out.short)
+      return res.status(409).json({ error: `${out.minTeam}명이 모여야 발주합니다.`, ...out })
+    return res.status(200).json(out)
+  }
 
   if (sim) {
     const state = simState(req.body)

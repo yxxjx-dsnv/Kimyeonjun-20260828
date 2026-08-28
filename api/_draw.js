@@ -51,25 +51,51 @@ export const TIERS = ['S', 'A', 'B', 'C']
 
 export const BOXES = [
   {
-    id: 'malang',
-    name: '말랑이 올박스',
+    id: 'starter',
+    name: '오늘의 올박스',
     entry: 2000,
-    topLabel: '닌텐도 스위치급',
-    blurb: '요즘 그 말랑이·왁뿌볼이 기본으로 들어갑니다',
+    topLabel: '하이클래스팩급',
+    blurb: '기본은 늘 쓰는 생필품, 최고는 포켓몬 하이클래스팩',
+    // 등급별로 어떤 그룹에서 뽑을지 제한한다. 최고 등급에 커피머신이 섞이면
+    // "최고 등급 하이클래스팩"이라는 약속이 흐려진다.
+    tierGroups: { S: ['card'], A: null, B: null, C: ['daily'] },
   },
   {
-    id: 'ipad',
-    name: '아이패드 올박스',
+    id: 'charizard',
+    name: '리자몽 올박스',
     entry: 5000,
-    topLabel: '아이패드급',
-    blurb: '매일 쓰는 생필품이 기본, 최고는 태블릿',
+    topLabel: 'PSA 10 리자몽급',
+    blurb: '기본은 생필품, 최고는 오리파가 파는 바로 그 카드',
+    tierGroups: { S: ['card'], A: null, B: null, C: ['daily'] },
   },
+]
+
+/**
+ * 공동구매형 — 상품이 **확정**이고 확률은 '얼마를 내는가'에만 작동한다.
+ *
+ * 랜덤박스형이 "무엇을 받는가"를 확률에 맡긴다면, 이쪽은 주문한 그 유니폼이
+ * 그대로 온다. 대신 팀이 커질수록 **무료 당첨 인원이 늘어난다**.
+ * 안 당첨돼도 정가보다 싸게 산 유니폼이 오므로 잃을 것이 구조적으로 없고,
+ * 그래서 사행성 논란에서 완전히 자유롭다.
+ *
+ * 유니폼은 사이즈·마킹 때문에 원래도 여럿이 모여 한 번에 발주하는 품목이라
+ * 최소 주문 수량(minTeam)이 실제로 존재한다. 그 임계를 그대로 쓴다.
+ */
+export const FREE_SHARE = 0.15 // 할인 여력 중 무료 당첨에 배정하는 비율
+
+export const GROUPBUYS = [
   {
-    id: 'premium',
-    name: '프리미엄 올박스',
-    entry: 15000,
-    topLabel: 'OLED TV급',
-    blurb: '살림 살 것을 담고, 최고는 대형가전',
+    id: 'uniform',
+    name: '유니폼 팀구매',
+    blurb: '마킹까지 넣어 한 번에 발주합니다. 모일수록 싸지고, 몇 명은 공짜입니다.',
+    match: /유니폼|저지/,
+    minTeam: 20, // 이 인원을 넘어야 발주가 나간다
+    teamMax: 60,
+    // 유니폼 발주의 수량할인은 20~60장 구간에서 열린다. 박스보다 완만한 곡선.
+    k: 0.12,
+    n0: 30,
+    crMin: 0.42,
+    crMax: 0.78,
   },
 ]
 
@@ -82,7 +108,10 @@ export function tiersOf(box, pickedIds = null) {
   const out = {}
   for (const t of TIERS) {
     const [lo, hi] = BANDS[t]
-    out[t] = pool.filter((i) => i.price >= box.entry * lo && i.price < box.entry * hi)
+    const only = box.tierGroups?.[t] || null
+    out[t] = pool.filter(
+      (i) => i.price >= box.entry * lo && i.price < box.entry * hi && (!only || only.includes(i.group))
+    )
   }
   return out
 }
@@ -178,6 +207,43 @@ export function customerBEP(box, x = 2) {
   for (let n = 1; n <= TEAM_MAX; n++) if (evMultiple(box, n) >= x) return n
   return null
 }
+
+// ─────────────────────── 공동구매형 ───────────────────────
+const clampTeam = (gb, n) => Math.min(gb.teamMax, Math.max(1, Math.floor(n) || 1))
+
+/** 발주 수량이 늘수록 내려가는 매입 원가율. 박스와 같은 로지스틱, 파라미터만 다르다. */
+export const gbCostRatio = (gb, n) =>
+  gb.crMin + (gb.crMax - gb.crMin) / (1 + Math.exp(gb.k * (clampTeam(gb, n) - gb.n0)))
+
+/** 정가 대비 내릴 수 있는 최대 폭. 올웨이즈가 공개한 20~60% 할인폭과 같은 자리다. */
+export const gbHeadroom = (gb, n) => Math.max(0, 1 - gbCostRatio(gb, n) / (1 - MARGIN))
+
+/** 그 여력을 전원 할인과 무료 당첨으로 나눈다. */
+export const gbDiscount = (gb, n) => gbHeadroom(gb, n) * (1 - FREE_SHARE)
+export const gbPayRatio = (gb, n) => 1 - gbDiscount(gb, n)
+export const gbFreeOdds = (gb, n) => (gbHeadroom(gb, n) * FREE_SHARE) / gbPayRatio(gb, n)
+export const gbFreeCount = (gb, n) => Math.floor(clampTeam(gb, n) * gbFreeOdds(gb, n))
+
+/** 이 공동구매가 취급하는 상품. 크롤 풀에서 가장 비싼 것을 대표로 세운다. */
+export const gbItem = (gb) =>
+  POOL.items.filter((i) => i.group === 'uniform' && gb.match.test(i.name)).sort((a, b) => b.price - a.price)[0]
+
+/** 당첨자 선정. 방·상품·회차 시드로 고정되므로 다시 열어도 같은 사람이 당첨된다. */
+export function gbDraw(gb, memberIds, roomId) {
+  const n = memberIds.length
+  const k = Math.min(n, gbFreeCount(gb, n))
+  const rnd = rngFor(`${roomId}|${gb.id}|${n}`)
+  // Fisher-Yates로 섞어 앞에서 k명. 인원이 바뀌면 시드가 바뀌어 결과도 바뀐다
+  // (발주 전이라 아직 확정이 아니라는 뜻이고, 화면에도 그렇게 적는다).
+  const order = [...memberIds]
+  for (let i = order.length - 1; i > 0; i--) {
+    const j = Math.floor(rnd() * (i + 1))
+    ;[order[i], order[j]] = [order[j], order[i]]
+  }
+  return new Set(order.slice(0, k))
+}
+
+export const getGroupbuy = (id) => GROUPBUYS.find((g) => g.id === id) || null
 
 // ─────────────────────── 추첨 (서버 전용) ───────────────────────
 // 시드 = (roomId, boxId, memberId, drawIndex). 같은 방을 다시 열면 같은 결과가 나온다.
@@ -330,7 +396,7 @@ if (process.argv[1]?.endsWith('_draw.js')) {
   ok('회사 손익분기부터 흑자', contribution(BOXES[1], 6) > 0)
 
   // 10만 회 추첨 — 공표 확률과 실제 배출이 일치하는가 (고정 시드라 flaky하지 않다)
-  const box = getBox('ipad')
+  const box = getBox('charizard')
   const T = collapseUp(tiersOf(box))
   const P = oddsOf(box, 10)
   const N = 100000
@@ -359,8 +425,48 @@ if (process.argv[1]?.endsWith('_draw.js')) {
   ok('collapseUp 후에도 하한 유지',
     TIERS.every((t) => fixed[t].every((i) => i.price >= box.entry)))
 
+  // ── 공동구매형 ──────────────────────────────────────────
+  console.log('')
+  for (const gb of GROUPBUYS) {
+    const it = gbItem(gb)
+    ok(`${gb.id} 대표 상품 존재`, Boolean(it))
+    console.log(`■ ${gb.name} — ${it.name.slice(0, 38)} ${it.price.toLocaleString()}원`)
+    console.log('   n   원가율   전원할인   실지불      무료확률  무료인원')
+    let prevOdds = -1
+    for (let n = gb.minTeam; n <= gb.teamMax; n++) {
+      const cr = gbCostRatio(gb, n)
+      const pay = gbPayRatio(gb, n)
+      const odds = gbFreeOdds(gb, n)
+      const k = gbFreeCount(gb, n)
+
+      ok(`${gb.id} n=${n} 항상 할인`, pay < 1, `지불비율 ${pay}`)
+      ok(`${gb.id} n=${n} 무료 확률 단조증가`, odds > prevOdds, `${prevOdds} → ${odds}`)
+      prevOdds = odds
+      ok(`${gb.id} n=${n} 최소 1명 무료`, k >= 1, `${k}명`)
+      ok(`${gb.id} n=${n} 당첨자가 팀보다 적다`, k < n)
+      // 예산 제약 — 받은 돈으로 상품 원가와 당첨자 몫을 모두 감당하는가
+      const revenue = n * pay * (1 - MARGIN)
+      const cost = (n + k) * cr
+      ok(`${gb.id} n=${n} 예산 제약`, revenue >= cost - 1e-9,
+        `수입 ${revenue.toFixed(3)} < 원가 ${cost.toFixed(3)}`)
+
+      if ([gb.minTeam, 30, 40, gb.teamMax].includes(n))
+        console.log(
+          `  ${String(n).padStart(2)} ${cr.toFixed(4)}   ${(gbDiscount(gb, n) * 100).toFixed(1)}%    ` +
+            `${Math.round(it.price * pay).toLocaleString().padStart(9)}원  ${(odds * 100).toFixed(2)}%     ${k}명`
+        )
+    }
+    // 당첨자 선정의 결정론성
+    const ids = Array.from({ length: 30 }, (_, i) => `m${i}`)
+    const w1 = gbDraw(gb, ids, 'roomA')
+    const w2 = gbDraw(gb, ids, 'roomA')
+    ok(`${gb.id} 같은 방 = 같은 당첨자`, [...w1].join() === [...w2].join())
+    ok(`${gb.id} 당첨 인원 = 계산값`, w1.size === gbFreeCount(gb, 30), `${w1.size}`)
+    ok(`${gb.id} 다른 방 = 다른 당첨자`, [...gbDraw(gb, ids, 'roomB')].join() !== [...w1].join())
+  }
+
   console.log(
-    `10만 회 추첨: S ${obs.S} A ${obs.A} B ${obs.B} C ${obs.C} · X²=${chi.toFixed(2)} · 최저 시가 ${minPrice.toLocaleString()}원`
+    `\n10만 회 추첨: S ${obs.S} A ${obs.A} B ${obs.B} C ${obs.C} · X²=${chi.toFixed(2)} · 최저 시가 ${minPrice.toLocaleString()}원`
   )
   const pct = (x) => +(x * 100).toFixed(1)
   console.log(`회사 손익분기 ${companyBEP()}명 (회차 고정비 ${pct(FIXED_COST_RATIO)}% / 마진 ${pct(MARGIN)}%)`)
