@@ -167,6 +167,26 @@ check('꽝 있는 형식도 명시', sheet.includes('이 형식에는 꽝이 있
 check('확률 출처 3가지', sheet.includes('재고 비율') && sheet.includes('손익분기') && sheet.includes('할인 여력'))
 check('천장은 공시 대상', sheet.includes('보장형 시스템'))
 
+// 12. 데스크톱 가이드 레일 — 홈 그리드처럼 긴 화면에서 스크롤해도 남아 있어야 한다.
+// (레일이 페이지 맨 위에 고정돼 스크롤과 함께 사라지던 결함이 있었다.)
+{
+  const desk = await browser.newContext({ viewport: { width: 1512, height: 950 } })
+  const dp = await desk.newPage()
+  await dp.goto(BASE, { waitUntil: 'domcontentloaded' })
+  await dp.waitForSelector('.bcard', { timeout: 20000 })
+  const seen = async () => dp.evaluate(() => ['left', 'right'].every((s) => {
+    const b = document.querySelector(`.rail2--${s}`)?.getBoundingClientRect()
+    return b && b.height > 0 && b.bottom > 0 && b.top < window.innerHeight
+  }))
+  check('데스크톱 레일 노출', await seen())
+  await dp.click('.tabbar__b:nth-child(1)')            // 홈 탭 — 가장 긴 화면
+  await dp.waitForSelector('.hgrid, .home', { timeout: 10000 }).catch(() => {})
+  await dp.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+  await dp.waitForTimeout(400)
+  check('긴 화면에서 스크롤해도 레일 유지', await seen())
+  await desk.close()
+}
+
 check('콘솔 에러 없음', errors.length === 0, errors.slice(0, 2).join(' | '))
 await browser.close()
 console.log(fail === 0 ? '\n✅ 전부 통과' : `\n❌ 실패 ${fail}건`)

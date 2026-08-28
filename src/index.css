@@ -340,7 +340,17 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
 .rail2__it--now { padding: 11px 13px; background: var(--paper); border-radius: 10px; border: 1px solid var(--hair); }
 
 @media (min-width: 1180px) {
-  .rail2 { display: block; }
+  /* 홈 그리드처럼 내용이 길면 레일이 페이지 맨 위에 남아 스크롤과 함께 사라졌다.
+     sticky로 붙여 어느 위치에서도 화면과 이유를 같이 보게 한다.
+     레일 자체가 뷰포트보다 길어질 수 있으므로 안에서 스크롤되게 둔다. */
+  .rail2 {
+    display: block;
+    position: sticky;
+    top: 24px;
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
   .phone { min-height: auto; margin: 24px 0; border-radius: 20px; overflow: hidden; }
   .body { min-height: 72vh; }
 }
