@@ -10,7 +10,7 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
-  won, pct, naturalFreq, Delta, ProductCard, OddsCurve, OddsBars, OddsTable,
+  won, pct, naturalFreq, Delta, TIERS, ProductCard, OddsCurve, OddsBars, OddsTable,
   TierStrip, MemberRail, RevealCard, HonestySheet, TasteChat,
   GroupCurve, GroupTable, GroupResult,
   StockBin, PityBar, DailyCard, DailyEconomics, VoteCard,
@@ -64,12 +64,19 @@ function BoxList({ boxes, groupbuys, dailies, onPick, onPickGroup, onPickDaily, 
         </p>
       )}
       <div className="hero">
-        <h1>여럿이 모여야 열립니다</h1>
+        <h1>올박스</h1>
         <p>
-          꽝이 없는 확률형 구매입니다. 사람이 모일수록 좋은 등급이 나올 확률이 오르고,
-          <b> 참여자 전원이 뽑기를 눌러야만</b> 상자가 열립니다.
+          하나의 상품이 아니라 <b>여러 형식이 매주 바뀌며 도는 뽑기</b>입니다.
+          형식마다 무엇이 무작위인지, 꽝이 있는지가 다릅니다 —
+          그래서 <b>형식마다 정직한 방식도 다릅니다.</b>
         </p>
       </div>
+
+      <h2 className="lead2">① 팀 뽑기 — 여럿이 모여야 열립니다</h2>
+      <p className="lead2__s">
+        <b>꽝이 없습니다.</b> 최하위 등급도 시가가 참여비 이상입니다.
+        사람이 모일수록 상위 등급 확률이 오르고, <b>전원이 뽑기를 눌러야만</b> 열립니다.
+      </p>
       <ul className="blist">
         {boxes.map((b) => (
           <li key={b.id}>
@@ -85,14 +92,18 @@ function BoxList({ boxes, groupbuys, dailies, onPick, onPickGroup, onPickDaily, 
                   혼자 {pct(b.oddsByTeam[1].S, 3)} → 10명 {pct(b.oddsByTeam[10].S, 3)}
                 </em>
               </span>
+              <span className="bcard__stock">
+                뽑기 통 {TIERS.map((t) => `${t} ${b.stock[t]}개`).join(' · ')} = {b.stockTotal.toLocaleString()}구좌
+              </span>
               <span className="bcard__ratio">
-                참여비는 최고 상품가({won(b.topRetail)})의 200분의 1입니다
+                참여비는 최고 상품가({won(b.topRetail)})의 200분의 1
+                {b.pity && ` · ${b.pity.window}회 연속 미당첨이면 다음 회차 ${pct(b.pity.boostTo, 0)}`}
               </span>
             </button>
           </li>
         ))}
       </ul>
-      <h2 className="lead2">하루 한 번, 100원</h2>
+      <h2 className="lead2">② 하루 한 번, 100원</h2>
       <p className="lead2__s">
         <b>이 형식에는 꽝이 있습니다.</b> 대신 당첨 확률도, 꽝 확률도, 그 확률이 나온
         계산 과정까지 전부 공개합니다. 재고가 소진되면 이번 회차는 끝납니다.
@@ -103,7 +114,7 @@ function BoxList({ boxes, groupbuys, dailies, onPick, onPickGroup, onPickDaily, 
         ))}
       </ul>
 
-      <h2 className="lead2">상품이 정해진 공동구매</h2>
+      <h2 className="lead2">③ 상품이 정해진 공동구매</h2>
       <p className="lead2__s">
         무엇을 받을지는 확정입니다. <b>얼마를 내는지</b>만 확률입니다 —
         모일수록 싸지고, 그중 몇 명은 공짜입니다.
@@ -623,13 +634,16 @@ function Shell({ tab, setTab, children, onSheet, live, guide }) {
 /* 데스크톱 여백에 설계 근거를 붙인다 — 심사자가 화면과 이유를 같이 보게. */
 function GuideRail({ side, phase, box, data, teamSize }) {
   const left = [
-    ['컬처 시그널', '말랑이·슬랑이·왁뿌볼. 감각(손에 오는 확정 피드백) × 확률(불확실성의 해소) × 사회(리빌이 콘텐츠)의 3층 구조.'],
+    ['컬처 시그널', '포켓몬 카드 열풍, 그중 오리파(카드숍이 내용물을 직접 구성해 파는 뽑기). KREAM 트레이딩 카드 거래액 전년 대비 5,600%↑.'],
+    ['왜 지금인가', '시세가 생겨 재테크가 됐고, 무작위 보상이 반복을 만들고, 실물 판매라 확률형 규제 밖이라 지출에 상한이 없다.'],
     ['결핍', '전부 확정된 하루 안의 싸고 즉각적인 사건 하나, 그리고 그걸 봐줄 사람.'],
     ['왜 올웨이즈인가', '올팜은 매일 시간을 쓰지만 보상이 확정적이고 30일 지연된다. 사건이 아니라 노동이다.'],
-    ['왜 꽝이 없나', '혜택 소비자는 낭비를 못 견딘다. "꽝 나오면 돈 버린 것"이 확률형의 유일한 진입장벽이었다.'],
+    ['왜 캠페인 엔진인가', '올박스는 하나의 상품이 아니라 매주 형식이 바뀌는 엔진이다. 그래서 "꽝 없음"은 제품의 원칙이 아니라 일부 형식의 속성이다.'],
   ]
   const right = [
-    ['확률표는 계산 결과다', `수량할인 곡선과 바이럴 회수 곡선의 합성. 수집한 ${data?.pool.size ?? 0}건의 실제 판매가가 계산의 입력이다.`],
+    ['확률은 유도된 값이다', `팀 뽑기는 재고 비율, 데일리는 손익분기, 공동구매는 할인 여력에서 나온다. 사람이 적은 값이 하나도 없다. 수집한 ${data?.pool.size ?? 0}건의 실제 판매가가 계산의 입력이다.`],
+    ['재고가 상한이다', '기본 확률 = 등급 재고 ÷ 총 구좌. 예산이 남아도 확률을 임의로 올릴 수 없다. 화면이 뽑기 통을 그대로 그린다.'],
+    ['천장', '10회 연속 미당첨이면 다음 회차 확률을 올린다. 게임산업법 시행령(2024.3.22)이 보장형 시스템을 공시 대상으로 명시해, 숨길 장치가 아니라 밝혀야 하는 장치다.'],
     ['전원 게이트', '준비 카운트를 서버가 센다. 한 명이라도 안 누르면 409를 돌려준다. 프론트가 앞당길 수 없다.'],
     ['재추첨 불가', '시드가 방·박스·사람·회차로 고정된다. 같은 방을 다시 열면 같은 결과가 나온다.'],
     ['표기', '확률 옆에 언제나 자연빈도를 쓴다(Gigerenzer·Hoffrage 1995). 백분율만 쓰면 낮은 확률이 과대평가된다.'],

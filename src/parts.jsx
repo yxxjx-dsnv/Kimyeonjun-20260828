@@ -86,7 +86,11 @@ export function OddsCurve({ oddsByTeam, teamSize, customerBEP, teamMax = 10 }) {
         {customerBEP && (
           <g>
             <line x1={x(customerBEP)} y1={PT - 6} x2={x(customerBEP)} y2={H - PB} className="curve__bep" />
-            <text x={x(customerBEP) + 4} y={PT + 2} className="curve__beptext">{`${customerBEP}명부터 2배`}</text>
+            <text
+              x={x(customerBEP) + (x(customerBEP) > W - 78 ? -4 : 4)}
+              y={PT + 2}
+              textAnchor={x(customerBEP) > W - 78 ? 'end' : 'start'}
+              className="curve__beptext">{`${customerBEP}명부터 2배`}</text>
           </g>
         )}
         <circle cx={x(cur)} cy={y(vals[cur - 1])} r="5.5" className="curve__dot" />

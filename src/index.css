@@ -152,7 +152,10 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
 .bcard__odds { display: block; margin-top: 10px; font-size: 14px; color: var(--ink-2); }
 .bcard__odds b { color: var(--ink); }
 .bcard__odds em { display: block; font-style: normal; font-size: 13px; color: var(--brand); font-weight: 700; margin-top: 2px; font-variant-numeric: tabular-nums; }
-.bcard__ratio { display: block; margin-top: 8px; font-size: 12px; color: var(--muted); }
+.bcard__stock { display: block; margin-top: 8px; padding: 6px 9px; border-radius: 8px;
+  background: var(--band); font-size: 12px; color: var(--ink-2); font-weight: 600;
+  font-variant-numeric: tabular-nums; }
+.bcard__ratio { display: block; margin-top: 6px; font-size: 12px; color: var(--muted); line-height: 1.5; }
 .foot { margin-top: 16px; font-size: 13px; color: var(--muted); line-height: 1.6; }
 
 .back { font-size: 14px; color: var(--muted); padding: 2px 0 10px; }
