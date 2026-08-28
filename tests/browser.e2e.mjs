@@ -167,23 +167,32 @@ check('꽝 있는 형식도 명시', sheet.includes('이 형식에는 꽝이 있
 check('확률 출처 3가지', sheet.includes('재고 비율') && sheet.includes('손익분기') && sheet.includes('할인 여력'))
 check('천장은 공시 대상', sheet.includes('보장형 시스템'))
 
-// 12. 데스크톱 가이드 레일 — 홈 그리드처럼 긴 화면에서 스크롤해도 남아 있어야 한다.
-// (레일이 페이지 맨 위에 고정돼 스크롤과 함께 사라지던 결함이 있었다.)
+// 12. 데스크톱 셸 — 폰이 '기기'로 보여야 한다.
+// 프레임에 높이 상한이 없어 홈 그리드에서 3,885px까지 자랐던 적이 있다.
+// 실제 앱은 화면이 고정되고 스크롤은 본문 안에서만 일어난다.
 {
   const desk = await browser.newContext({ viewport: { width: 1512, height: 950 } })
   const dp = await desk.newPage()
   await dp.goto(BASE, { waitUntil: 'domcontentloaded' })
   await dp.waitForSelector('.bcard', { timeout: 20000 })
-  const seen = async () => dp.evaluate(() => ['left', 'right'].every((s) => {
-    const b = document.querySelector(`.rail2--${s}`)?.getBoundingClientRect()
-    return b && b.height > 0 && b.bottom > 0 && b.top < window.innerHeight
-  }))
-  check('데스크톱 레일 노출', await seen())
-  await dp.click('.tabbar__b:nth-child(1)')            // 홈 탭 — 가장 긴 화면
-  await dp.waitForSelector('.hgrid, .home', { timeout: 10000 }).catch(() => {})
-  await dp.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
-  await dp.waitForTimeout(400)
-  check('긴 화면에서 스크롤해도 레일 유지', await seen())
+  await dp.click('.tabbar__b:nth-child(1)')          // 홈 — 내용이 가장 긴 탭
+  await dp.waitForTimeout(600)
+  const m = await dp.evaluate(() => {
+    const body = document.querySelector('.body')
+    const rail = (s) => document.querySelector(`.rail2--${s}`)?.getBoundingClientRect()
+    const seen = (b) => Boolean(b) && b.height > 0 && b.bottom > 0 && b.top < window.innerHeight
+    return {
+      frame: Math.round(document.querySelector('.phone').getBoundingClientRect().height),
+      vh: window.innerHeight,
+      pageScrolls: document.documentElement.scrollHeight > window.innerHeight + 1,
+      bodyScrolls: body.scrollHeight > body.clientHeight + 1,
+      rails: seen(rail('left')) && seen(rail('right')),
+    }
+  })
+  check('폰 프레임이 뷰포트를 넘지 않음', m.frame <= m.vh, `${m.frame}px / ${m.vh}px`)
+  check('페이지가 아니라 본문이 스크롤', !m.pageScrolls && m.bodyScrolls,
+    `page=${m.pageScrolls} body=${m.bodyScrolls}`)
+  check('데스크톱 레일 노출', m.rails)
   await desk.close()
 }
 

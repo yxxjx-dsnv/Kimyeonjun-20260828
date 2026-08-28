@@ -340,19 +340,23 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
 .rail2__it--now { padding: 11px 13px; background: var(--paper); border-radius: 10px; border: 1px solid var(--hair); }
 
 @media (min-width: 1180px) {
-  /* 홈 그리드처럼 내용이 길면 레일이 페이지 맨 위에 남아 스크롤과 함께 사라졌다.
-     sticky로 붙여 어느 위치에서도 화면과 이유를 같이 보게 한다.
-     레일 자체가 뷰포트보다 길어질 수 있으므로 안에서 스크롤되게 둔다. */
-  .rail2 {
-    display: block;
-    position: sticky;
-    top: 24px;
-    max-height: calc(100vh - 48px);
-    overflow-y: auto;
-    overscroll-behavior: contain;
+  /* 레일이 뷰포트보다 길면 페이지가 늘어나 폰 프레임 고정이 깨진다. 안에서 스크롤시킨다. */
+  .rail2 { display: block; max-height: calc(100vh - 48px); overflow-y: auto; overscroll-behavior: contain; }
+  /* 데스크톱에서는 폰이 '기기'로 보여야 한다. 높이 상한이 없으면 내용만큼 늘어나
+     홈 그리드에서 프레임이 3,885px까지 자랐다 — 실제 앱 사용 환경과 다르다.
+     프레임을 뷰포트에 맞춰 고정하고, 스크롤은 본문 안에서만 일어나게 한다. */
+  .phone {
+    height: calc(100vh - 48px);
+    min-height: 620px;
+    max-height: 920px;
+    margin: 24px 0;
+    border-radius: 20px;
+    overflow: hidden;
   }
-  .phone { min-height: auto; margin: 24px 0; border-radius: 20px; overflow: hidden; }
-  .body { min-height: 72vh; }
+  /* min-height:0 이 없으면 플렉스 아이템이 내용 크기 아래로 못 줄어 스크롤이 안 생긴다. */
+  .body { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-bottom: 24px; }
+  /* 프레임이 고정이라 헤더·탭바를 붙여둘 이유가 없어졌다. */
+  .top, .tabbar { position: static; }
 }
 
 @media (prefers-reduced-motion: reduce) {
