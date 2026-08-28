@@ -20,18 +20,31 @@ const EXCLUDE = [
   '거치대', '충전기만', '샘플', '증정품', '체험분', '리퍼', '중고',
 ]
 
-// 완구에만 적용하는 추가 차단. '리필'을 전역으로 막으면 세제·샴푸 리필처럼
-// 그 자체가 정상 상품인 생필품까지 사라진다. 그래서 그룹을 받는다.
-const TOY_EXCLUDE = ['만들기', '리필', '지비츠', '에그캡슐', '빈캡슐', '재료', '공예']
+// 카드 그룹에만 적용하는 추가 차단.
+// 처음엔 '슬리브'·'바인더'도 막았는데, 고가 카드가 슬리브에 넣어 팔리는 경우가 많아
+// ("뮤 ex SAR 풀헤드 … 슬리브") 상위 등급 상품이 통째로 사라졌다. 액세서리 단품은
+// 가격 밴드가 이미 걸러내므로, 카드가 아닌 것이 확실한 것만 남긴다.
+const CARD_EXCLUDE = [
+  '플레이매트', '덱케이스', '보관함', '수납장',
+  '대여', '프록시', '가짜', '연습용', '코스프레', '피규어', '인형', '스티커',
+]
 
 export const isJunk = (flat, group) =>
   EXCLUDE.some((k) => flat.includes(k)) ||
-  (group === 'trend' && TOY_EXCLUDE.some((k) => flat.includes(k)))
+  (group === 'card' && CARD_EXCLUDE.some((k) => flat.includes(k)))
 
-// KC 안전확인은 '확인된 것만' 표기한다. 없으면 인증되었다고 주장하지 않는다.
-const KC_MARKS = ['KC', '안전확인', '적합확인', '안전인증', 'KC인증']
-export const kcOf = (rawTitle) =>
-  KC_MARKS.some((m) => rawTitle.toUpperCase().includes(m.toUpperCase())) ? 'certified' : 'unknown'
+/**
+ * 정식 유통 여부. 카드 시장의 실제 쟁점은 KC가 아니라 **짝퉁·재포장**이다
+ * (언론이 "전문 리셀러의 재포장 유통"을 반복해 지적했다).
+ * 국내 정식 유통사 표기가 있을 때만 official로 두고, 나머지는 unknown이다.
+ * 확인되지 않은 것을 정품이라고 주장하지 않는다.
+ */
+const OFFICIAL = ['포켓몬코리아', '타카라토미']
+export const authOf = (rawTitle, seller = '') => {
+  const t = rawTitle + ' ' + seller
+  if (/\[해외\]|병행|직구/.test(t)) return 'unknown'
+  return OFFICIAL.some((m) => t.includes(m)) ? 'official' : 'unknown'
+}
 
 /** 다나와 통합검색 SSR HTML → prod_item 블록 정규식 파싱. */
 export async function danawaSearch(q, limit = 10, timeoutMs) {
@@ -49,18 +62,24 @@ export async function danawaSearch(q, limit = 10, timeoutMs) {
     if (!nameM || !priceM) continue
     const rawTitle = cleanTitle(nameM[2].replace(/<[^>]+>/g, ''))
     const price = Number(priceM[1].replace(/,/g, ''))
-    const pcode = (nameM[1].match(/pcode=(\d+)/) || [])[1]
-    if (!rawTitle || !price || !pcode) continue
+    const href = nameM[1].replace(/&amp;/g, '&')
+
+    // 다나와에는 자사 상품(pcode)과 **중개 상품**(go_link_goods.php?link_prod_c=…)이
+    // 섞여 있다. pcode만 받다가 중개 상품 40건이 통째로 사라졌고, 고가 카드가
+    // 전부 거기 속해 상위 등급이 비었다. 두 형식을 모두 받는다.
+    const pcode = (href.match(/pcode=(\d+)/) || [])[1]
+    const linkCode = (href.match(/link_prod_c=([A-Za-z0-9]+)/) || [])[1]
+    if (!rawTitle || !price || (!pcode && !linkCode)) continue
     const imgM = block.match(/<img[^>]+(?:data-original|src)="([^"]+)"/)
     let image = imgM ? imgM[1] : ''
     if (image.startsWith('//')) image = 'https:' + image
     if (/noimg|blank|loading/i.test(image)) image = ''
     out.push({
-      id: `d${pcode}`,
+      id: pcode ? `d${pcode}` : `x${linkCode}`,
       rawTitle,
       price,
-      seller: '다나와 최저가',
-      url: `https://prod.danawa.com/info/?pcode=${pcode}`,
+      seller: pcode ? '다나와 최저가' : '다나와 중개',
+      url: pcode ? `https://prod.danawa.com/info/?pcode=${pcode}` : href,
       image,
     })
   }

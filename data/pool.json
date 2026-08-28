@@ -1,16 +1,18 @@
 {
-  "crawledAt": "2026-08-28T09:38:24.747Z",
+  "crawledAt": "2026-08-28T15:36:28.141Z",
   "source": "danawa",
   "minPrice": 2000,
   "queries": [
-    "말랑이",
-    "슬랑이",
-    "왁뿌볼",
-    "스퀴시",
-    "뿌셔볼",
-    "피젯토이",
-    "스트레스볼",
-    "캡슐토이",
+    "포켓몬카드 오리파",
+    "포켓몬 카드",
+    "포켓몬 강화확장팩",
+    "포켓몬카드 하이클래스",
+    "포켓몬 카드 부스터박스",
+    "포켓몬카드 배틀덱",
+    "포켓몬카드 SAR",
+    "포켓몬 카드 psa10",
+    "포켓몬 리자몽 psa",
+    "포켓몬 카드 PSA",
     "참기름",
     "들기름",
     "즉석밥",
@@ -37,40 +39,14 @@
     "커피머신",
     "전기요",
     "음식물처리기",
-    "아이패드",
-    "닌텐도 스위치",
-    "에어팟",
-    "다이슨 에어랩",
-    "로봇청소기",
-    "노트북",
-    "OLED TV",
-    "김치냉장고",
-    "드럼세탁기",
-    "스타일러"
+    "축구 유니폼",
+    "야구 유니폼",
+    "손흥민 유니폼",
+    "레플리카 유니폼",
+    "농구 유니폼",
+    "유니폼 마킹"
   ],
   "items": [
-    {
-      "id": "d122718588",
-      "name": "크런치 망고 슬랑이 말랑이",
-      "price": 2000,
-      "image": "https://img.danuri.io/catalog-image/588/718/122/07ff86dda79c4f679f416b5a6ec33677.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=122718588",
-      "seller": "다나와 최저가",
-      "query": "말랑이",
-      "group": "trend",
-      "kc": "unknown"
-    },
-    {
-      "id": "d123538036",
-      "name": "초코 왁뿌볼 말랑이",
-      "price": 2000,
-      "image": "https://img.danuri.io/catalog-image/036/538/123/1e66d72d08ec4366b220155597e3d7e6.webp",
-      "url": "https://prod.danawa.com/info/?pcode=123538036",
-      "seller": "다나와 최저가",
-      "query": "왁뿌볼",
-      "group": "trend",
-      "kc": "unknown"
-    },
     {
       "id": "d64234799",
       "name": "태화 고무장갑 (대)",
@@ -80,7 +56,7 @@
       "seller": "다나와 최저가",
       "query": "고무장갑",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d5238536",
@@ -91,7 +67,7 @@
       "seller": "다나와 최저가",
       "query": "조미김",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d101706749",
@@ -102,29 +78,7 @@
       "seller": "다나와 최저가",
       "query": "고무장갑",
       "group": "daily",
-      "kc": "unknown"
-    },
-    {
-      "id": "d106729463",
-      "name": "솜사탕 왁뿌볼",
-      "price": 2120,
-      "image": "https://img.danuri.io/catalog-image/463/729/106/34d1c6f0254e4d169b3c87074544cb1b.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=106729463",
-      "seller": "다나와 최저가",
-      "query": "왁뿌볼",
-      "group": "trend",
-      "kc": "unknown"
-    },
-    {
-      "id": "d123538022",
-      "name": "애플 왁뿌볼 슬랑이",
-      "price": 2130,
-      "image": "https://img.danuri.io/catalog-image/022/538/123/449b0eb2ee204ea78c4e15b69147a593.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=123538022",
-      "seller": "다나와 최저가",
-      "query": "왁뿌볼",
-      "group": "trend",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d10601838",
@@ -135,7 +89,7 @@
       "seller": "다나와 최저가",
       "query": "주방세제",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d102027782",
@@ -146,18 +100,7 @@
       "seller": "다나와 최저가",
       "query": "밀폐용기",
       "group": "daily",
-      "kc": "unknown"
-    },
-    {
-      "id": "d122718671",
-      "name": "땅콩 크런치 슬랑이 말랑이",
-      "price": 2230,
-      "image": "https://img.danuri.io/catalog-image/671/718/122/5d571ffbba1142d3adca77d7f3762a5d.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=122718671",
-      "seller": "다나와 최저가",
-      "query": "말랑이",
-      "group": "trend",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d29341316",
@@ -168,7 +111,7 @@
       "seller": "다나와 최저가",
       "query": "수면양말",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d48469547",
@@ -179,51 +122,7 @@
       "seller": "다나와 최저가",
       "query": "수세미",
       "group": "daily",
-      "kc": "unknown"
-    },
-    {
-      "id": "d122725322",
-      "name": "도넛 왁스 슬랑이 말랑이 왁뿌볼",
-      "price": 2400,
-      "image": "https://img.danuri.io/catalog-image/322/725/122/2ca16f7699c14abab5127346fd99765a.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=122725322",
-      "seller": "다나와 최저가",
-      "query": "슬랑이",
-      "group": "trend",
-      "kc": "unknown"
-    },
-    {
-      "id": "d122720759",
-      "name": "계란 뿌수기 왁뿌볼 말랑이",
-      "price": 2490,
-      "image": "https://img.danuri.io/catalog-image/759/720/122/56876128011a48aab99bfd288af95712.png",
-      "url": "https://prod.danawa.com/info/?pcode=122720759",
-      "seller": "다나와 최저가",
-      "query": "왁뿌볼",
-      "group": "trend",
-      "kc": "unknown"
-    },
-    {
-      "id": "d122719186",
-      "name": "버터스틱 슬랑이 말랑이",
-      "price": 2500,
-      "image": "https://img.danuri.io/catalog-image/186/719/122/fff346f346694ccd86b794f740f32224.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=122719186",
-      "seller": "다나와 최저가",
-      "query": "말랑이",
-      "group": "trend",
-      "kc": "unknown"
-    },
-    {
-      "id": "d122718372",
-      "name": "청사과 왁뿌볼 슬랑이 말랑이",
-      "price": 2530,
-      "image": "https://img.danuri.io/catalog-image/372/718/122/b2592a57a7a14d8a94c530bad435ef2b.jpeg",
-      "url": "https://prod.danawa.com/info/?pcode=122718372",
-      "seller": "다나와 최저가",
-      "query": "말랑이",
-      "group": "trend",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d5581567",
@@ -234,18 +133,7 @@
       "seller": "다나와 최저가",
       "query": "핸드크림",
       "group": "daily",
-      "kc": "unknown"
-    },
-    {
-      "id": "d122718403",
-      "name": "비누 크런치 슬랑이 말랑이",
-      "price": 2800,
-      "image": "https://img.danuri.io/catalog-image/403/718/122/b776d676e1ad458f8ad7e7b7d2f91878.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=122718403",
-      "seller": "다나와 최저가",
-      "query": "말랑이",
-      "group": "trend",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d4280094",
@@ -256,29 +144,7 @@
       "seller": "다나와 최저가",
       "query": "치약",
       "group": "daily",
-      "kc": "unknown"
-    },
-    {
-      "id": "d21388238",
-      "name": "레인보우 무지개 푸쉬팝 팝잇 피젯토이",
-      "price": 2970,
-      "image": "https://img.danuri.io/catalog-image/238/388/021/85bd15f9ce3d42589f6092bbaeaa1cd1.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=21388238",
-      "seller": "다나와 최저가",
-      "query": "피젯토이",
-      "group": "trend",
-      "kc": "unknown"
-    },
-    {
-      "id": "d122720813",
-      "name": "바삭 치즈 크런치 슬랑이 말랑이",
-      "price": 3000,
-      "image": "https://img.danuri.io/catalog-image/813/720/122/d840efff351144e5a4ba779e11a99583.png",
-      "url": "https://prod.danawa.com/info/?pcode=122720813",
-      "seller": "다나와 최저가",
-      "query": "말랑이",
-      "group": "trend",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d118644771",
@@ -289,18 +155,7 @@
       "seller": "다나와 최저가",
       "query": "건조나물",
       "group": "daily",
-      "kc": "unknown"
-    },
-    {
-      "id": "d106704161",
-      "name": "영진토이 뽀로로 히어로즈 캡슐 슈팅카",
-      "price": 3180,
-      "image": "https://img.danuri.io/catalog-image/161/704/106/20413b7b997f463f842c0e2ec9c4ab7a.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=106704161",
-      "seller": "다나와 최저가",
-      "query": "캡슐토이",
-      "group": "trend",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d8170729",
@@ -311,7 +166,7 @@
       "seller": "다나와 최저가",
       "query": "주방세제",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d18525104",
@@ -322,18 +177,7 @@
       "seller": "다나와 최저가",
       "query": "치약",
       "group": "daily",
-      "kc": "unknown"
-    },
-    {
-      "id": "d41455391",
-      "name": "대왕 푸시팝 퍼즐 버블 푸쉬 팝 팝잇 실리콘뽁뽁이 장난감 피젯 팝잇 버블푸쉬팝",
-      "price": 3730,
-      "image": "https://img.danuri.io/catalog-image/391/455/041/632e75323710486ea8e52d9838469be2.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=41455391",
-      "seller": "다나와 최저가",
-      "query": "피젯토이",
-      "group": "trend",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d2354455",
@@ -344,7 +188,7 @@
       "seller": "다나와 최저가",
       "query": "커피믹스",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d3191666",
@@ -355,7 +199,7 @@
       "seller": "다나와 최저가",
       "query": "치약",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d101703473",
@@ -366,7 +210,7 @@
       "seller": "다나와 최저가",
       "query": "수세미",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d30843911",
@@ -377,7 +221,7 @@
       "seller": "다나와 최저가",
       "query": "수세미",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d28800488",
@@ -388,7 +232,7 @@
       "seller": "다나와 최저가",
       "query": "수면양말",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d3617512",
@@ -399,7 +243,7 @@
       "seller": "다나와 최저가",
       "query": "화장지",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d10390683",
@@ -410,40 +254,7 @@
       "seller": "다나와 최저가",
       "query": "치약",
       "group": "daily",
-      "kc": "unknown"
-    },
-    {
-      "id": "d122719855",
-      "name": "딸기 크런치 말랑이 슬랑이",
-      "price": 4220,
-      "image": "https://img.danuri.io/catalog-image/855/719/122/2a89ef4d455c4448b407c96a0e5eb4e6.webp",
-      "url": "https://prod.danawa.com/info/?pcode=122719855",
-      "seller": "다나와 최저가",
-      "query": "슬랑이",
-      "group": "trend",
-      "kc": "unknown"
-    },
-    {
-      "id": "d122719177",
-      "name": "왕메론빵 슬랑이 말랑이",
-      "price": 4300,
-      "image": "https://img.danuri.io/catalog-image/177/719/122/1da12da5e07948b8801bf464bc795931.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=122719177",
-      "seller": "다나와 최저가",
-      "query": "슬랑이",
-      "group": "trend",
-      "kc": "unknown"
-    },
-    {
-      "id": "d122726973",
-      "name": "크런치 삼각 치즈 슬랑이 말랑이",
-      "price": 4400,
-      "image": "https://img.danuri.io/catalog-image/973/726/122/fdefd1b152ad4d47b7d4af88ea10847e.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=122726973",
-      "seller": "다나와 최저가",
-      "query": "슬랑이",
-      "group": "trend",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d62268662",
@@ -454,7 +265,7 @@
       "seller": "다나와 최저가",
       "query": "건조나물",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d7309333",
@@ -465,7 +276,7 @@
       "seller": "다나와 최저가",
       "query": "세탁세제",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d17790125",
@@ -476,7 +287,7 @@
       "seller": "다나와 최저가",
       "query": "샴푸",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d101141027",
@@ -487,7 +298,7 @@
       "seller": "다나와 최저가",
       "query": "치약",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d4689187",
@@ -498,40 +309,7 @@
       "seller": "다나와 최저가",
       "query": "참기름",
       "group": "daily",
-      "kc": "unknown"
-    },
-    {
-      "id": "d122721073",
-      "name": "돌멩이 크런치 슬랑이 말랑이",
-      "price": 5280,
-      "image": "https://img.danuri.io/catalog-image/073/721/122/32d1f49bcaea41ef83d750961d9b56d5.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=122721073",
-      "seller": "다나와 최저가",
-      "query": "슬랑이",
-      "group": "trend",
-      "kc": "unknown"
-    },
-    {
-      "id": "d68913197",
-      "name": "일정문구 레이지스타 스퀴시 미니 다이어리",
-      "price": 5480,
-      "image": "https://img.danuri.io/catalog-image/197/913/068/5c5841fd87284793ab80a832b63e0cb5.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=68913197",
-      "seller": "다나와 최저가",
-      "query": "스퀴시",
-      "group": "trend",
-      "kc": "unknown"
-    },
-    {
-      "id": "d32925635",
-      "name": "피넛츠 스누피 버블헤드 컬렉션1탄 캡슐토이 가챠",
-      "price": 5670,
-      "image": "https://img.danuri.io/catalog-image/635/925/032/d3746a4a24a54afab4b29abc9058c089.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=32925635",
-      "seller": "다나와 최저가",
-      "query": "캡슐토이",
-      "group": "trend",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d99865817",
@@ -542,29 +320,7 @@
       "seller": "다나와 최저가",
       "query": "들기름",
       "group": "daily",
-      "kc": "unknown"
-    },
-    {
-      "id": "d21314270",
-      "name": "메세 모찌타운 스트레스볼 인형",
-      "price": 5950,
-      "image": "https://img.danuri.io/catalog-image/270/314/021/0cd09d03a7764e1fbf28ddfda2924488.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=21314270",
-      "seller": "다나와 최저가",
-      "query": "스트레스볼",
-      "group": "trend",
-      "kc": "unknown"
-    },
-    {
-      "id": "d104628932",
-      "name": "반다이 캡슐 포켓몬스터 쥬얼리 스탠드8",
-      "price": 6000,
-      "image": "https://img.danuri.io/catalog-image/932/628/104/ee510a5959fb45c79bbcadddce382dfb.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=104628932",
-      "seller": "다나와 최저가",
-      "query": "캡슐토이",
-      "group": "trend",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d15311489",
@@ -575,29 +331,7 @@
       "seller": "다나와 최저가",
       "query": "치약",
       "group": "daily",
-      "kc": "unknown"
-    },
-    {
-      "id": "d28360727",
-      "name": "레인보우 메탈 피젯 무소음 베어링 회전 스피너 야광",
-      "price": 6090,
-      "image": "https://img.danuri.io/catalog-image/727/360/028/e46e4927aaaa4376b1fe5eb2387d954d.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=28360727",
-      "seller": "다나와 최저가",
-      "query": "피젯토이",
-      "group": "trend",
-      "kc": "unknown"
-    },
-    {
-      "id": "d41470790",
-      "name": "손 감각 고급 메탈 피젯 스피너 큐브 어른 장난감",
-      "price": 6140,
-      "image": "https://img.danuri.io/catalog-image/790/470/041/717f4d4d50144d0c98d5a52d07704347.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=41470790",
-      "seller": "다나와 최저가",
-      "query": "피젯토이",
-      "group": "trend",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d20280362",
@@ -608,40 +342,7 @@
       "seller": "다나와 최저가",
       "query": "물티슈",
       "group": "daily",
-      "kc": "unknown"
-    },
-    {
-      "id": "d25359935",
-      "name": "레인보우 레인보우 피젯스피너 led 메탈",
-      "price": 6690,
-      "image": "https://img.danuri.io/catalog-image/935/359/025/a524cf610c2846eaa08f7ed31a964776.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=25359935",
-      "seller": "다나와 최저가",
-      "query": "피젯토이",
-      "group": "trend",
-      "kc": "unknown"
-    },
-    {
-      "id": "d122718595",
-      "name": "모닝빵 크런치 슬랑이 말랑이",
-      "price": 6740,
-      "image": "https://img.danuri.io/catalog-image/595/718/122/3730b36a2f554812b87a258f148da4cf.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=122718595",
-      "seller": "다나와 최저가",
-      "query": "슬랑이",
-      "group": "trend",
-      "kc": "unknown"
-    },
-    {
-      "id": "d122725161",
-      "name": "키위 샤베트 슬랑이 말랑이",
-      "price": 6750,
-      "image": "https://img.danuri.io/catalog-image/161/725/122/76f7deddbe5b4be99ca35865ea8757a4.png",
-      "url": "https://prod.danawa.com/info/?pcode=122725161",
-      "seller": "다나와 최저가",
-      "query": "슬랑이",
-      "group": "trend",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d3623899",
@@ -652,18 +353,7 @@
       "seller": "다나와 최저가",
       "query": "참기름",
       "group": "daily",
-      "kc": "unknown"
-    },
-    {
-      "id": "d51565118",
-      "name": "이젠 일정 15000 레이지스타반전스퀴시피규어 스퀴시 피젯 토이 스트레스해소 동물인형 말랑말랑 스퀴시인",
-      "price": 6870,
-      "image": "https://img.danuri.io/catalog-image/118/565/051/c2ead99d4a10445c99cc3efc578646ff.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=51565118",
-      "seller": "다나와 최저가",
-      "query": "스퀴시",
-      "group": "trend",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d30833603",
@@ -674,7 +364,7 @@
       "seller": "다나와 최저가",
       "query": "고무장갑",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d1151141",
@@ -685,7 +375,7 @@
       "seller": "다나와 최저가",
       "query": "즉석밥",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d2365265",
@@ -696,7 +386,7 @@
       "seller": "다나와 최저가",
       "query": "커피믹스",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d10943421",
@@ -707,7 +397,7 @@
       "seller": "다나와 최저가",
       "query": "화장지",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d1764947",
@@ -718,7 +408,18 @@
       "seller": "다나와 최저가",
       "query": "들기름",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "d123668197",
+      "name": "포켓몬코리아 포켓몬카드 스칼렛 바이올렛 강화 확장팩 레이징서프 1팩",
+      "price": 7900,
+      "image": "https://img.danuri.io/catalog-image/197/668/123/f02d2e486912446da67072ecfb30a708.jpeg",
+      "url": "https://prod.danawa.com/info/?pcode=123668197",
+      "seller": "다나와 최저가",
+      "query": "포켓몬 강화확장팩",
+      "group": "card",
+      "auth": "official"
     },
     {
       "id": "d29270780",
@@ -729,18 +430,7 @@
       "seller": "다나와 최저가",
       "query": "세탁세제",
       "group": "daily",
-      "kc": "unknown"
-    },
-    {
-      "id": "d122721351",
-      "name": "망고스틴 크런치 슬랑이 말랑이",
-      "price": 7990,
-      "image": "https://img.danuri.io/catalog-image/351/721/122/ab10278a1809478ca46b824686b363b2.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=122721351",
-      "seller": "다나와 최저가",
-      "query": "슬랑이",
-      "group": "trend",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d34400195",
@@ -751,7 +441,7 @@
       "seller": "다나와 최저가",
       "query": "고무장갑",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d6678898",
@@ -762,7 +452,7 @@
       "seller": "다나와 최저가",
       "query": "수면양말",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d68689544",
@@ -773,7 +463,7 @@
       "seller": "다나와 최저가",
       "query": "치약",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d17757503",
@@ -784,7 +474,7 @@
       "seller": "다나와 최저가",
       "query": "샴푸",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d91078925",
@@ -795,29 +485,7 @@
       "seller": "다나와 최저가",
       "query": "즉석밥",
       "group": "daily",
-      "kc": "unknown"
-    },
-    {
-      "id": "d21386300",
-      "name": "DIY 자이로 피젯 스피너 조이트로프",
-      "price": 8380,
-      "image": "https://img.danuri.io/catalog-image/300/386/021/131d4d7221fd4a24bfcf37e721326066.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=21386300",
-      "seller": "다나와 최저가",
-      "query": "피젯토이",
-      "group": "trend",
-      "kc": "unknown"
-    },
-    {
-      "id": "d122725087",
-      "name": "스내피 스퀴시 스트레스 볼",
-      "price": 8400,
-      "image": "https://img.danuri.io/catalog-image/087/725/122/e9797450fac742a39db174d31484c0ee.png",
-      "url": "https://prod.danawa.com/info/?pcode=122725087",
-      "seller": "다나와 최저가",
-      "query": "말랑이",
-      "group": "trend",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d5694081",
@@ -828,7 +496,7 @@
       "seller": "다나와 최저가",
       "query": "수면양말",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d32015969",
@@ -839,40 +507,7 @@
       "seller": "다나와 최저가",
       "query": "핸드크림",
       "group": "daily",
-      "kc": "unknown"
-    },
-    {
-      "id": "d41483387",
-      "name": "더블 피젯 패드 조이스틱 스피너 키덜트 토이 푸쉬팝 팝잇 틱톡 누르는 장난감 스트레스해소 집중력향상",
-      "price": 8740,
-      "image": "https://img.danuri.io/catalog-image/387/483/041/82744b8de3844aaa9b60018138438143.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=41483387",
-      "seller": "다나와 최저가",
-      "query": "피젯토이",
-      "group": "trend",
-      "kc": "unknown"
-    },
-    {
-      "id": "d41475056",
-      "name": "공룡 캡슐블럭 6개입 블록합체 킹티라노",
-      "price": 9020,
-      "image": "https://img.danuri.io/catalog-image/056/475/041/44d570a590274ed399cf3889e2ddd596.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=41475056",
-      "seller": "다나와 최저가",
-      "query": "캡슐토이",
-      "group": "trend",
-      "kc": "unknown"
-    },
-    {
-      "id": "d97317269",
-      "name": "토미카 드림 드래곤볼 부르마 캡슐 No.9 바이크 051957",
-      "price": 9200,
-      "image": "https://img.danuri.io/catalog-image/269/317/097/4362e2a5b5e941d897dbdd787e847bb7.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=97317269",
-      "seller": "다나와 최저가",
-      "query": "캡슐토이",
-      "group": "trend",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d3630770",
@@ -883,7 +518,7 @@
       "seller": "다나와 최저가",
       "query": "화장지",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d49110866",
@@ -894,7 +529,7 @@
       "seller": "다나와 최저가",
       "query": "수면양말",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d13780043",
@@ -905,7 +540,7 @@
       "seller": "다나와 최저가",
       "query": "주방세제",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d101706806",
@@ -916,7 +551,7 @@
       "seller": "다나와 최저가",
       "query": "고무장갑",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d12833396",
@@ -927,7 +562,7 @@
       "seller": "다나와 최저가",
       "query": "수면양말",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d16815974",
@@ -938,7 +573,7 @@
       "seller": "다나와 최저가",
       "query": "화장지",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d12026483",
@@ -949,29 +584,7 @@
       "seller": "다나와 최저가",
       "query": "샴푸",
       "group": "daily",
-      "kc": "unknown"
-    },
-    {
-      "id": "d76466438",
-      "name": "손오공 스퀴시멜로우 7.5인치 B타입",
-      "price": 9900,
-      "image": "https://img.danuri.io/catalog-image/438/466/076/6633b53f0e0c4ee38f037ed6806a31f2.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=76466438",
-      "seller": "다나와 최저가",
-      "query": "스퀴시",
-      "group": "trend",
-      "kc": "unknown"
-    },
-    {
-      "id": "d54221981",
-      "name": "미미월드 탭탭 스마트 피젯게임기",
-      "price": 9990,
-      "image": "https://img.danuri.io/catalog-image/981/221/054/f0af502022cf48208977cfaa9cba881f.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=54221981",
-      "seller": "다나와 최저가",
-      "query": "피젯토이",
-      "group": "trend",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d7626574",
@@ -982,7 +595,7 @@
       "seller": "다나와 최저가",
       "query": "물티슈",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d14651378",
@@ -993,7 +606,7 @@
       "seller": "다나와 최저가",
       "query": "수세미",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d102040097",
@@ -1004,18 +617,7 @@
       "seller": "다나와 최저가",
       "query": "밀폐용기",
       "group": "daily",
-      "kc": "unknown"
-    },
-    {
-      "id": "d28019909",
-      "name": "레인보우 개구리알 포도송이 요요 주물럭 12개입 -말랑이 스트레스볼 말랑이 단품",
-      "price": 10170,
-      "image": "https://img.danuri.io/catalog-image/909/019/028/6918b42413214446a2e9a6a4dbf30719.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=28019909",
-      "seller": "다나와 최저가",
-      "query": "스트레스볼",
-      "group": "trend",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d10964580",
@@ -1026,7 +628,7 @@
       "seller": "다나와 최저가",
       "query": "견과류",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d74254904",
@@ -1037,7 +639,7 @@
       "seller": "다나와 최저가",
       "query": "밀폐용기",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d122715671",
@@ -1048,18 +650,7 @@
       "seller": "다나와 최저가",
       "query": "치약",
       "group": "daily",
-      "kc": "unknown"
-    },
-    {
-      "id": "d122719322",
-      "name": "메론 쿠마 슬랑이 말랑이",
-      "price": 10900,
-      "image": "https://img.danuri.io/catalog-image/322/719/122/de16a70db92240978023d563e0a6c9aa.png",
-      "url": "https://prod.danawa.com/info/?pcode=122719322",
-      "seller": "다나와 최저가",
-      "query": "말랑이",
-      "group": "trend",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d79701491",
@@ -1070,18 +661,7 @@
       "seller": "다나와 최저가",
       "query": "물티슈",
       "group": "daily",
-      "kc": "unknown"
-    },
-    {
-      "id": "d33259463",
-      "name": "애니토이 말랑말랑 스퀴시볼펜 세트 0.7mm",
-      "price": 11040,
-      "image": "https://img.danuri.io/catalog-image/463/259/033/e6def570fde8465da2e9752ed888a16a.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=33259463",
-      "seller": "다나와 최저가",
-      "query": "스퀴시",
-      "group": "trend",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d1128841",
@@ -1092,40 +672,7 @@
       "seller": "다나와 최저가",
       "query": "화장지",
       "group": "daily",
-      "kc": "unknown"
-    },
-    {
-      "id": "d35308625",
-      "name": "돌앤돌스 디즈니 플러피 스트레스볼 키링 6cm_랏소- 캐릭터 봉제인형 장식소품",
-      "price": 11230,
-      "image": "https://img.danuri.io/catalog-image/625/308/035/9ff26977a65f44229b2a086a751c429a.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=35308625",
-      "seller": "다나와 최저가",
-      "query": "스트레스볼",
-      "group": "trend",
-      "kc": "unknown"
-    },
-    {
-      "id": "d21412811",
-      "name": "오로라월드 신비아파트4 미스터리팩3 신비캡슐",
-      "price": 11260,
-      "image": "https://img.danuri.io/catalog-image/811/412/021/05b03f1c8ee84d1b981fb045316dfa9a.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=21412811",
-      "seller": "다나와 최저가",
-      "query": "캡슐토이",
-      "group": "trend",
-      "kc": "unknown"
-    },
-    {
-      "id": "d21428300",
-      "name": "오로라월드 신비아파트4 미스터리팩3 주비캡슐",
-      "price": 11260,
-      "image": "https://img.danuri.io/catalog-image/300/428/021/d33f5a6d1fce4c5d915182cba8a7bee8.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=21428300",
-      "seller": "다나와 최저가",
-      "query": "캡슐토이",
-      "group": "trend",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d99292601",
@@ -1136,18 +683,7 @@
       "seller": "다나와 최저가",
       "query": "고무장갑",
       "group": "daily",
-      "kc": "unknown"
-    },
-    {
-      "id": "d25089743",
-      "name": "영실업 디즈니 100주년 서프라이즈 시리즈1 캡슐토이 14종 1개",
-      "price": 11280,
-      "image": "https://img.danuri.io/catalog-image/743/089/025/83218e3124594f31b72ab9cc5c802737.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=25089743",
-      "seller": "다나와 최저가",
-      "query": "캡슐토이",
-      "group": "trend",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d6522022",
@@ -1158,7 +694,7 @@
       "seller": "다나와 최저가",
       "query": "즉석밥",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d55791641",
@@ -1169,7 +705,7 @@
       "seller": "다나와 최저가",
       "query": "수세미",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d12119792",
@@ -1180,7 +716,7 @@
       "seller": "다나와 최저가",
       "query": "화장지",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d101705315",
@@ -1191,7 +727,7 @@
       "seller": "다나와 최저가",
       "query": "수세미",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d6065782",
@@ -1202,29 +738,7 @@
       "seller": "다나와 최저가",
       "query": "세탁세제",
       "group": "daily",
-      "kc": "unknown"
-    },
-    {
-      "id": "d21425297",
-      "name": "아이코닉스 데코데코 말캉말캉 종이 스퀴시 문구점",
-      "price": 12410,
-      "image": "https://img.danuri.io/catalog-image/297/425/021/0d1c2eed82034d91a92f38a955dc2883.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=21425297",
-      "seller": "다나와 최저가",
-      "query": "스퀴시",
-      "group": "trend",
-      "kc": "unknown"
-    },
-    {
-      "id": "d105184136",
-      "name": "아이코닉스 데코데코 말캉말캉 디저트 스퀴시북",
-      "price": 12420,
-      "image": "https://img.danuri.io/catalog-image/136/184/105/fffb667149b84123a1a89c39177eb6d6.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=105184136",
-      "seller": "다나와 최저가",
-      "query": "스퀴시",
-      "group": "trend",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d2101328",
@@ -1235,18 +749,7 @@
       "seller": "다나와 최저가",
       "query": "주방세제",
       "group": "daily",
-      "kc": "unknown"
-    },
-    {
-      "id": "d48402773",
-      "name": "영실업 시크릿아트 문구사장 챌린지 포용계 상점키트",
-      "price": 12816,
-      "image": "https://img.danuri.io/catalog-image/773/402/048/7c82c450629f469cb9ef2d6d20e5e4c8.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=48402773",
-      "seller": "다나와 최저가",
-      "query": "스퀴시",
-      "group": "trend",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d74331716",
@@ -1257,7 +760,7 @@
       "seller": "다나와 최저가",
       "query": "물티슈",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d68992124",
@@ -1268,7 +771,7 @@
       "seller": "다나와 최저가",
       "query": "밀폐용기",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d101703671",
@@ -1279,7 +782,7 @@
       "seller": "다나와 최저가",
       "query": "고무장갑",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d34400270",
@@ -1290,7 +793,7 @@
       "seller": "다나와 최저가",
       "query": "고무장갑",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d10154346",
@@ -1301,7 +804,7 @@
       "seller": "다나와 최저가",
       "query": "즉석밥",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d13184051",
@@ -1312,7 +815,7 @@
       "seller": "다나와 최저가",
       "query": "견과류",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d14383178",
@@ -1323,7 +826,7 @@
       "seller": "다나와 최저가",
       "query": "물티슈",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d90649016",
@@ -1334,7 +837,7 @@
       "seller": "다나와 최저가",
       "query": "세탁세제",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d3851375",
@@ -1345,7 +848,18 @@
       "seller": "다나와 최저가",
       "query": "참기름",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "d93639986",
+      "name": "포켓몬코리아 포켓몬카드 배틀마스터덱 테라스탈 리자몽 파오젠ex",
+      "price": 14360,
+      "image": "https://img.danuri.io/catalog-image/986/639/093/2bb72610ecf54c88875fcab859497f43.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=93639986",
+      "seller": "다나와 최저가",
+      "query": "포켓몬카드 배틀덱",
+      "group": "card",
+      "auth": "official"
     },
     {
       "id": "d12615080",
@@ -1356,7 +870,7 @@
       "seller": "다나와 최저가",
       "query": "샴푸",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d102024341",
@@ -1367,7 +881,7 @@
       "seller": "다나와 최저가",
       "query": "물티슈",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d14884409",
@@ -1378,7 +892,7 @@
       "seller": "다나와 최저가",
       "query": "세탁세제",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d55079543",
@@ -1389,18 +903,7 @@
       "seller": "다나와 최저가",
       "query": "물티슈",
       "group": "daily",
-      "kc": "unknown"
-    },
-    {
-      "id": "d74050775",
-      "name": "아트박스 산리오 스퀴시노트 헬로키티 레드(H80730)",
-      "price": 15200,
-      "image": "https://img.danuri.io/catalog-image/775/050/074/d9e1016f9c9645c5882222c9e4b608d5.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=74050775",
-      "seller": "다나와 최저가",
-      "query": "스퀴시",
-      "group": "trend",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d30474701",
@@ -1411,7 +914,7 @@
       "seller": "다나와 최저가",
       "query": "핸드크림",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d67511156",
@@ -1422,7 +925,7 @@
       "seller": "다나와 최저가",
       "query": "주방세제",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d12901097",
@@ -1433,7 +936,7 @@
       "seller": "다나와 최저가",
       "query": "조미김",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d14542325",
@@ -1444,7 +947,7 @@
       "seller": "다나와 최저가",
       "query": "화장지",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d5897182",
@@ -1455,7 +958,7 @@
       "seller": "다나와 최저가",
       "query": "화장지",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d11454321",
@@ -1466,7 +969,7 @@
       "seller": "다나와 최저가",
       "query": "건조나물",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d1973189",
@@ -1477,7 +980,7 @@
       "seller": "다나와 최저가",
       "query": "조미김",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d44400068",
@@ -1488,7 +991,7 @@
       "seller": "다나와 최저가",
       "query": "참기름",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d32702459",
@@ -1499,7 +1002,7 @@
       "seller": "다나와 최저가",
       "query": "들기름",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d9527415",
@@ -1510,7 +1013,7 @@
       "seller": "다나와 최저가",
       "query": "조미김",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d4693452",
@@ -1521,7 +1024,7 @@
       "seller": "다나와 최저가",
       "query": "들기름",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d32753282",
@@ -1532,7 +1035,7 @@
       "seller": "다나와 최저가",
       "query": "들기름",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d13424897",
@@ -1543,7 +1046,7 @@
       "seller": "다나와 최저가",
       "query": "견과류",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d12177107",
@@ -1554,7 +1057,7 @@
       "seller": "다나와 최저가",
       "query": "들기름",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d52256825",
@@ -1565,7 +1068,7 @@
       "seller": "다나와 최저가",
       "query": "조미김",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d13652930",
@@ -1576,7 +1079,7 @@
       "seller": "다나와 최저가",
       "query": "샴푸",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d19079102",
@@ -1587,7 +1090,7 @@
       "seller": "다나와 최저가",
       "query": "주방세제",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d12968810",
@@ -1598,7 +1101,7 @@
       "seller": "다나와 최저가",
       "query": "견과류",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d18775160",
@@ -1609,7 +1112,7 @@
       "seller": "다나와 최저가",
       "query": "세탁세제",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d18717164",
@@ -1620,7 +1123,7 @@
       "seller": "다나와 최저가",
       "query": "물티슈",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d1969651",
@@ -1631,7 +1134,7 @@
       "seller": "다나와 최저가",
       "query": "커피믹스",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d73609934",
@@ -1642,7 +1145,7 @@
       "seller": "다나와 최저가",
       "query": "주방세제",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d40119479",
@@ -1653,7 +1156,7 @@
       "seller": "다나와 최저가",
       "query": "참기름",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d114435653",
@@ -1664,7 +1167,7 @@
       "seller": "다나와 최저가",
       "query": "건조나물",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d76374677",
@@ -1675,18 +1178,51 @@
       "seller": "다나와 최저가",
       "query": "건조나물",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
-      "id": "d106748402",
-      "name": "뿌셔볼 왁뿌볼 말랑이",
-      "price": 19880,
-      "image": "https://img.danuri.io/catalog-image/402/748/106/c70bf390f77548febcb2831e0b34c2eb.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=106748402",
+      "id": "d123668797",
+      "name": "포켓몬코리아 포켓몬카드 스칼렛 바이올렛 강화확장팩 151 1팩",
+      "price": 19700,
+      "image": "https://img.danuri.io/catalog-image/797/668/123/e587a6d931ea4efaa46fab41146653c8.png",
+      "url": "https://prod.danawa.com/info/?pcode=123668797",
       "seller": "다나와 최저가",
-      "query": "왁뿌볼",
-      "group": "trend",
-      "kc": "unknown"
+      "query": "포켓몬 강화확장팩",
+      "group": "card",
+      "auth": "official"
+    },
+    {
+      "id": "d21411371",
+      "name": "포켓몬코리아 포켓몬카드 소드앤실드 하이클래스 덱 인텔리레온 VMAX",
+      "price": 19800,
+      "image": "https://img.danuri.io/catalog-image/371/411/021/a06ae402f5b849098720b0ebcb2ec795.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=21411371",
+      "seller": "다나와 최저가",
+      "query": "포켓몬카드 배틀덱",
+      "group": "card",
+      "auth": "official"
+    },
+    {
+      "id": "x9582371425",
+      "name": "핫 360개입 영어 포켓몬 TCG 소드 쉴드 에볼빙 스카이즈 부스터 박스 트레이딩 카드 36팩 즉시 배송 가능",
+      "price": 19840,
+      "image": "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/pd/v2/3/7/1/4/2/5/RHTuh/9582371425_B.webp",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=224989&cate_c4=225460&cmpny_c=TH201&link_prod_c=9582371425&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+%EB%B6%80%EC%8A%A4%ED%84%B0%EB%B0%95%EC%8A%A4&r=17879313027080&cate=1921074",
+      "seller": "다나와 중개",
+      "query": "포켓몬 카드 부스터박스",
+      "group": "card",
+      "auth": "unknown"
+    },
+    {
+      "id": "d21412550",
+      "name": "포켓몬코리아 포켓몬카드 소드앤실드 VSTAR & VMAX 하이클래스 덱 테오키스",
+      "price": 19900,
+      "image": "https://img.danuri.io/catalog-image/550/412/021/41c4988a1a264c5eb86df4991e513433.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=21412550",
+      "seller": "다나와 최저가",
+      "query": "포켓몬카드 배틀덱",
+      "group": "card",
+      "auth": "official"
     },
     {
       "id": "d3625675",
@@ -1697,7 +1233,7 @@
       "seller": "다나와 최저가",
       "query": "참기름",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d5775683",
@@ -1708,18 +1244,18 @@
       "seller": "다나와 최저가",
       "query": "핸드크림",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d6658819",
       "name": "쭝웬 G7 퓨어 블랙커피 200개입",
-      "price": 20790,
+      "price": 20850,
       "image": "https://img.danuri.io/catalog-image/819/658/006/2d860cc692034e198645eba784360c6a.jpg",
       "url": "https://prod.danawa.com/info/?pcode=6658819",
       "seller": "다나와 최저가",
       "query": "커피믹스",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d49107488",
@@ -1730,7 +1266,18 @@
       "seller": "다나와 최저가",
       "query": "수면양말",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "x9582335797",
+      "name": "재미있는 360장 포켓몬 카드 TCG 스칼렛 바이올렛 프리즘 에볼루션 151 36팩 부스터 박스 수집용 트레이딩",
+      "price": 21150,
+      "image": "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/pd/v2/3/3/5/7/9/7/IQJNm/9582335797_B.webp",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=224989&cate_c4=225460&cmpny_c=TH201&link_prod_c=9582335797&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+%EB%B6%80%EC%8A%A4%ED%84%B0%EB%B0%95%EC%8A%A4&r=17879313028354&cate=1921074",
+      "seller": "다나와 중개",
+      "query": "포켓몬 카드 부스터박스",
+      "group": "card",
+      "auth": "unknown"
     },
     {
       "id": "d109740539",
@@ -1741,7 +1288,7 @@
       "seller": "다나와 최저가",
       "query": "핸드크림",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d19353674",
@@ -1752,7 +1299,7 @@
       "seller": "다나와 최저가",
       "query": "건조나물",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d16391540",
@@ -1763,7 +1310,7 @@
       "seller": "다나와 최저가",
       "query": "핸드크림",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d30902420",
@@ -1774,7 +1321,7 @@
       "seller": "다나와 최저가",
       "query": "주방세제",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d102043088",
@@ -1785,7 +1332,7 @@
       "seller": "다나와 최저가",
       "query": "밀폐용기",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d93800837",
@@ -1796,7 +1343,7 @@
       "seller": "다나와 최저가",
       "query": "세탁세제",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d3734324",
@@ -1807,18 +1354,7 @@
       "seller": "다나와 최저가",
       "query": "조미김",
       "group": "daily",
-      "kc": "unknown"
-    },
-    {
-      "id": "d93387356",
-      "name": "트리코닉스 트리코엑스 탈모완화 볼륨 샴푸 500ml",
-      "price": 22980,
-      "image": "https://img.danuri.io/catalog-image/356/387/093/072c5303bfb04e9f92fc9e652f74724c.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=93387356",
-      "seller": "다나와 최저가",
-      "query": "샴푸",
-      "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d12224762",
@@ -1829,7 +1365,18 @@
       "seller": "다나와 최저가",
       "query": "전기포트",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "d93387356",
+      "name": "트리코닉스 트리코엑스 탈모완화 볼륨 샴푸 500ml",
+      "price": 23000,
+      "image": "https://img.danuri.io/catalog-image/356/387/093/072c5303bfb04e9f92fc9e652f74724c.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=93387356",
+      "seller": "다나와 최저가",
+      "query": "샴푸",
+      "group": "daily",
+      "auth": "unknown"
     },
     {
       "id": "d42894761",
@@ -1840,7 +1387,7 @@
       "seller": "다나와 최저가",
       "query": "수세미",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d121644004",
@@ -1851,7 +1398,18 @@
       "seller": "다나와 최저가",
       "query": "핸드크림",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "d5578113",
+      "name": "위팬 두산 베어스 어센틱 캡 2017",
+      "price": 23680,
+      "image": "https://img.danuri.io/catalog-image/113/578/005/c1e4507ce4b0405abe279ba2acc1b77b.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=5578113",
+      "seller": "다나와 최저가",
+      "query": "야구 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
     },
     {
       "id": "d12545234",
@@ -1862,7 +1420,7 @@
       "seller": "다나와 최저가",
       "query": "전기요",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d12358190",
@@ -1873,7 +1431,18 @@
       "seller": "다나와 최저가",
       "query": "즉석밥",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "x9582469499",
+      "name": "[해외] 대한민국 축구유니폼 2022카타르 월드컵 손흥민 황희찬 이강인 상하의세트 주니어 아동 유",
+      "price": 24090,
+      "image": "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/pd/v2/4/6/9/4/9/9/CiqQa/9582469499_B.jpg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=1822&cate_c2=228091&cate_c3=228550&cate_c4=0&cmpny_c=TH201&link_prod_c=9582469499&keyword=%EC%86%90%ED%9D%A5%EB%AF%BC+%EC%9C%A0%EB%8B%88%ED%8F%BC&r=17879313792410",
+      "seller": "다나와 중개",
+      "query": "손흥민 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
     },
     {
       "id": "d78355046",
@@ -1884,7 +1453,7 @@
       "seller": "다나와 최저가",
       "query": "밀폐용기",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d5586699",
@@ -1895,7 +1464,7 @@
       "seller": "다나와 최저가",
       "query": "견과류",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d3761794",
@@ -1906,7 +1475,18 @@
       "seller": "다나와 최저가",
       "query": "견과류",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "d21412574",
+      "name": "포켓몬코리아 포켓몬카드 소드앤실드 VSTAR & VMAX 하이클래스 덱 제라오라",
+      "price": 24700,
+      "image": "https://img.danuri.io/catalog-image/574/412/021/a45e070e87054810b49b5f058763d81c.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=21412574",
+      "seller": "다나와 최저가",
+      "query": "포켓몬카드 배틀덱",
+      "group": "card",
+      "auth": "official"
     },
     {
       "id": "d51675758",
@@ -1917,7 +1497,18 @@
       "seller": "다나와 최저가",
       "query": "들기름",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "d4704581",
+      "name": "아스토레 ASTR15UT01 게임 저지 축구 유니폼",
+      "price": 25050,
+      "image": "https://img.danuri.io/catalog-image/581/704/004/1bd1eb6ea2994bcabb11d8aaf199ed52.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=4704581",
+      "seller": "다나와 최저가",
+      "query": "축구 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
     },
     {
       "id": "d20656916",
@@ -1928,7 +1519,7 @@
       "seller": "다나와 최저가",
       "query": "밀폐용기",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d29887625",
@@ -1939,7 +1530,7 @@
       "seller": "다나와 최저가",
       "query": "즉석밥",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d16579466",
@@ -1950,7 +1541,7 @@
       "seller": "다나와 최저가",
       "query": "샴푸",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d4230059",
@@ -1961,7 +1552,7 @@
       "seller": "다나와 최저가",
       "query": "커피믹스",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d47125991",
@@ -1972,7 +1563,29 @@
       "seller": "다나와 최저가",
       "query": "수면양말",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "xF648311590",
+      "name": "토트넘 축구복 손흥민 케인 축구 유니폼 풋살 트레이닝복 팀복",
+      "price": 27600,
+      "image": "https://image.auction.co.kr/origin/59/67/16/59671627c6.jpg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=1825&cate_c2=221566&cate_c3=221578&cate_c4=221614&cmpny_c=EE715&link_prod_c=F648311590&keyword=%EC%86%90%ED%9D%A5%EB%AF%BC+%EC%9C%A0%EB%8B%88%ED%8F%BC&r=17879313791811&cate=13341785",
+      "seller": "다나와 중개",
+      "query": "손흥민 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
+    },
+    {
+      "id": "xV95911684074",
+      "name": "[해외] (7일이내항공배송) 2526 AT마드리드 이강인 축구 유니폼 상하의 세트 호환상품 노마킹 28(160)",
+      "price": 27900,
+      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/362d/d5e36c5b693aad19122fa522f8e8337122bf4020ef5a8ae589e41213df99.jpg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=0&cate_c2=0&cate_c3=0&cate_c4=0&cmpny_c=TP40F&link_prod_c=V95911684074&keyword=%EC%9C%A0%EB%8B%88%ED%8F%BC+%EB%A7%88%ED%82%B9&r=17879313869968",
+      "seller": "다나와 중개",
+      "query": "유니폼 마킹",
+      "group": "uniform",
+      "auth": "unknown"
     },
     {
       "id": "d62469830",
@@ -1983,7 +1596,7 @@
       "seller": "다나와 최저가",
       "query": "건조나물",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d6132257",
@@ -1994,7 +1607,7 @@
       "seller": "다나와 최저가",
       "query": "조미김",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d3318899",
@@ -2005,7 +1618,18 @@
       "seller": "다나와 최저가",
       "query": "핸드크림",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "xV95528567699",
+      "name": "[해외] 포켓몬 카드 게임 스칼렛 바이올렛 배틀 마스터 덱 파오젠ex 1개 24년5월17일",
+      "price": 29570,
+      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/b6f8/18d441b36dd69f2bbc0321f1ba5570ed2e8d8d4ec284ef98be19bc3b0de6.jpg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95528567699&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EB%B0%B0%ED%8B%80%EB%8D%B1&r=17879313041738&cate=16349280",
+      "seller": "다나와 중개",
+      "query": "포켓몬카드 배틀덱",
+      "group": "card",
+      "auth": "unknown"
     },
     {
       "id": "d12700799",
@@ -2016,7 +1640,7 @@
       "seller": "다나와 최저가",
       "query": "밀폐용기",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d27944036",
@@ -2027,7 +1651,7 @@
       "seller": "다나와 최저가",
       "query": "견과류",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d17482220",
@@ -2038,7 +1662,18 @@
       "seller": "다나와 최저가",
       "query": "즉석밥",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "d122898849",
+      "name": "아가방 미.키야구유니폼티셔츠 79T321102_CJ",
+      "price": 31290,
+      "image": "https://img.danuri.io/catalog-image/849/898/122/064e988e25fb4c43a7be7c4366bf998e.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=122898849",
+      "seller": "다나와 최저가",
+      "query": "야구 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
     },
     {
       "id": "d73322462",
@@ -2049,7 +1684,7 @@
       "seller": "다나와 최저가",
       "query": "조미김",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d4841663",
@@ -2060,7 +1695,18 @@
       "seller": "다나와 최저가",
       "query": "세탁세제",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "x9582486127",
+      "name": "[해외] 2526 토트넘 손흥민유니폼 완장 마킹 홈 어웨이 키즈 축구 유소년 성인 선수 저지 세트",
+      "price": 32430,
+      "image": "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/pd/v2/4/8/6/1/2/7/rFBdi/9582486127_B.jpg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=1822&cate_c2=228091&cate_c3=228550&cate_c4=0&cmpny_c=TH201&link_prod_c=9582486127&keyword=%EC%86%90%ED%9D%A5%EB%AF%BC+%EC%9C%A0%EB%8B%88%ED%8F%BC&r=17879313798183",
+      "seller": "다나와 중개",
+      "query": "손흥민 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
     },
     {
       "id": "d4858589",
@@ -2071,7 +1717,18 @@
       "seller": "다나와 최저가",
       "query": "견과류",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "x9582372267",
+      "name": "오리지널 포켓몬 트레이딩 카드 PTCG 일본어 버전 M2 메가 부스터 박스 생일 선물",
+      "price": 32890,
+      "image": "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/pd/v2/3/7/2/2/6/7/QvjlB/9582372267_B.webp",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=224989&cate_c4=225460&cmpny_c=TH201&link_prod_c=9582372267&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+%EB%B6%80%EC%8A%A4%ED%84%B0%EB%B0%95%EC%8A%A4&r=17879313021881&cate=1921074",
+      "seller": "다나와 중개",
+      "query": "포켓몬 카드 부스터박스",
+      "group": "card",
+      "auth": "unknown"
     },
     {
       "id": "d6356703",
@@ -2082,7 +1739,18 @@
       "seller": "다나와 최저가",
       "query": "전기포트",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "d106445585",
+      "name": "NBA 남녀공용 ALL STAR 농구 유니폼 메쉬 슬리브리스 N262TS440P",
+      "price": 34460,
+      "image": "https://img.danuri.io/catalog-image/585/445/106/a6e2b10d08f649ba99f52eeff7e85c6f.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=106445585",
+      "seller": "다나와 최저가",
+      "query": "농구 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
     },
     {
       "id": "d104626637",
@@ -2093,7 +1761,29 @@
       "seller": "다나와 최저가",
       "query": "들기름",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "xV93404117140",
+      "name": "[해외] BINEL LAFC손흥민유니폼 커스텀마킹 저지 원정 24 25 은하 로스앤젤레스 원정 XL",
+      "price": 34600,
+      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/266a/99e8ded548cb858788123bd6ae6a7b9bf6767406578a78fe2148247addaa.jpg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=1825&cate_c2=221566&cate_c3=0&cate_c4=0&cmpny_c=TP40F&link_prod_c=V93404117140&keyword=%EC%86%90%ED%9D%A5%EB%AF%BC+%EC%9C%A0%EB%8B%88%ED%8F%BC&r=17879313798598",
+      "seller": "다나와 중개",
+      "query": "손흥민 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
+    },
+    {
+      "id": "xI29052746920",
+      "name": "[해외] 포켓몬 카드 게임 TCG 메가 스타트 덱 100 배틀 컬렉션 박스 (일어판) 1개 단일",
+      "price": 34800,
+      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/4d3b/e97d297b90ad2701bd550dd2ccda09eb7ac679f2c68ab92201974a86a7cb.jpg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=I29052746920&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EB%B0%B0%ED%8B%80%EB%8D%B1&r=17879313044941&cate=16349280",
+      "seller": "다나와 중개",
+      "query": "포켓몬카드 배틀덱",
+      "group": "card",
+      "auth": "unknown"
     },
     {
       "id": "d98230421",
@@ -2104,7 +1794,7 @@
       "seller": "다나와 최저가",
       "query": "전기요",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d78175853",
@@ -2115,7 +1805,51 @@
       "seller": "다나와 최저가",
       "query": "전기요",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "d94107674",
+      "name": "키밍 농구 선수유니폼 선수티 라운드넥반팔 W692CC6",
+      "price": 35150,
+      "image": "https://img.danuri.io/catalog-image/674/107/094/5937b1f66b7f445887aa176371fa8e37.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=94107674",
+      "seller": "다나와 최저가",
+      "query": "농구 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
+    },
+    {
+      "id": "xV95840147446",
+      "name": "[당일출고] 26-28 대한민국 국가대표 어웨이 away 월드컵 유니폼 축구 유니폼 손흥민 이강인 어린이 키즈 유니폼 상하의 ",
+      "price": 35500,
+      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/6cde/a8a554ce0a937d1328568eb4105a4c681f2909a52ee067c74ee12799dffd.png",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=1825&cate_c2=221566&cate_c3=0&cate_c4=0&cmpny_c=TP40F&link_prod_c=V95840147446&keyword=%EC%86%90%ED%9D%A5%EB%AF%BC+%EC%9C%A0%EB%8B%88%ED%8F%BC&r=17879313798824",
+      "seller": "다나와 중개",
+      "query": "손흥민 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
+    },
+    {
+      "id": "xV95806532737",
+      "name": "[당일출고] 26-28 대한민국 국가대표 어웨이 away 월드컵 유니폼 축구 유니폼 손흥민 이강인 어린이 키즈 유니폼 상하의 ",
+      "price": 35500,
+      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/6cde/a8a554ce0a937d1328568eb4105a4c681f2909a52ee067c74ee12799dffd.png",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=1825&cate_c2=221566&cate_c3=0&cate_c4=0&cmpny_c=TP40F&link_prod_c=V95806532737&keyword=%EC%86%90%ED%9D%A5%EB%AF%BC+%EC%9C%A0%EB%8B%88%ED%8F%BC&r=17879313793803",
+      "seller": "다나와 중개",
+      "query": "손흥민 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
+    },
+    {
+      "id": "x9582522634",
+      "name": "[해외] 이강인 2022 카타르 월드컵 대한민국 축구 유니폼 SET 국가대표 이강인 손흥민 황희찬",
+      "price": 35600,
+      "image": "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/pd/v2/5/2/2/6/3/4/fhyhx/9582522634_B.jpg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=1822&cate_c2=228091&cate_c3=228550&cate_c4=0&cmpny_c=TH201&link_prod_c=9582522634&keyword=%EC%86%90%ED%9D%A5%EB%AF%BC+%EC%9C%A0%EB%8B%88%ED%8F%BC&r=17879313792767",
+      "seller": "다나와 중개",
+      "query": "손흥민 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
     },
     {
       "id": "d30842933",
@@ -2126,7 +1860,7 @@
       "seller": "다나와 최저가",
       "query": "수세미",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d35257802",
@@ -2137,7 +1871,7 @@
       "seller": "다나와 최저가",
       "query": "참기름",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d122718442",
@@ -2148,7 +1882,84 @@
       "seller": "다나와 최저가",
       "query": "전기포트",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "d108464156",
+      "name": "포켓몬코리아 포켓몬카드 MEGA 확장팩 니힐제로 30팩",
+      "price": 39360,
+      "image": "https://img.danuri.io/catalog-image/156/464/108/651e741321da42beba5594c60754f9de.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=108464156",
+      "seller": "다나와 최저가",
+      "query": "포켓몬 카드",
+      "group": "card",
+      "auth": "official"
+    },
+    {
+      "id": "d123318038",
+      "name": "NBA 뉴욕닉스 농구 메쉬 유니폼 상의 나시N262TS411",
+      "price": 39380,
+      "image": "https://img.danuri.io/catalog-image/038/318/123/2caac3bb9514439ab874e5f378c611e1.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=123318038",
+      "seller": "다나와 최저가",
+      "query": "농구 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
+    },
+    {
+      "id": "d123098172",
+      "name": "엔비에이 LA레이커스 농구 메쉬 유니폼 하의반바지262TP411",
+      "price": 39380,
+      "image": "https://img.danuri.io/catalog-image/172/098/123/c57aa4af23bd46ef8a071c3f8e4e5170.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=123098172",
+      "seller": "다나와 최저가",
+      "query": "농구 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
+    },
+    {
+      "id": "d123286978",
+      "name": "NBA 팀 어센틱 농구 유니폼 메쉬 슬리브리스 N262TS411P",
+      "price": 39380,
+      "image": "https://img.danuri.io/catalog-image/978/286/123/e3f9262fcb054745ba5e05841a4f1c42.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=123286978",
+      "seller": "다나와 최저가",
+      "query": "농구 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
+    },
+    {
+      "id": "d123032627",
+      "name": "타카라토미 포켓몬카드 스칼렛바이올렛 확장팩 블랙볼트 20팩",
+      "price": 39500,
+      "image": "https://img.danuri.io/catalog-image/627/032/123/17f9b701254546dab0fdc2cac1046ccd.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=123032627",
+      "seller": "다나와 최저가",
+      "query": "포켓몬 카드",
+      "group": "card",
+      "auth": "official"
+    },
+    {
+      "id": "d106728461",
+      "name": "포켓몬코리아 포켓몬카드 확장팩 화이트플레어 20팩",
+      "price": 39500,
+      "image": "https://img.danuri.io/catalog-image/461/728/106/51173e350eb9495c9fb89e1ac200a314.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=106728461",
+      "seller": "다나와 최저가",
+      "query": "포켓몬 카드",
+      "group": "card",
+      "auth": "official"
+    },
+    {
+      "id": "xV95828985922",
+      "name": "포켓몬카드 하이클래스팩 샤이니스타 V 1팩 1개 샤이니스타V (1팩)",
+      "price": 39900,
+      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/3ed5/b3982720517fd26fdf003e60c2d037de0d3e059ebc057e501d1c51ba3680.png",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95828985922&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%ED%95%98%EC%9D%B4%ED%81%B4%EB%9E%98%EC%8A%A4&r=17879313009755&cate=16349280",
+      "seller": "다나와 중개",
+      "query": "포켓몬카드 하이클래스",
+      "group": "card",
+      "auth": "unknown"
     },
     {
       "id": "d98766338",
@@ -2159,7 +1970,18 @@
       "seller": "다나와 최저가",
       "query": "전기포트",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "xI29056686664",
+      "name": "포켓몬카드 TCG [국내발송] [미개봉] 스타트 덱 100 배틀 컬렉션 일본판 60장 1박스 일본판 스타트덱",
+      "price": 42000,
+      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/9174/3bf2a4d4de9ace30409a1792ea69e1bf32714588f02b58b2cebe8527d616.png",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=I29056686664&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EB%B0%B0%ED%8B%80%EB%8D%B1&r=17879313045239&cate=16349280",
+      "seller": "다나와 중개",
+      "query": "포켓몬카드 배틀덱",
+      "group": "card",
+      "auth": "unknown"
     },
     {
       "id": "d3715364",
@@ -2170,7 +1992,51 @@
       "seller": "다나와 최저가",
       "query": "참기름",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "xLO2727521349",
+      "name": "[해외] 알파 포켓몬스터 카드 오리파 SAR 확정 랜덤팩",
+      "price": 43640,
+      "image": "https://contents.lotteon.com/itemimage/20260719234957/LO/27/27/52/13/49/_2/72/75/21/35/0/LO2727521349_2727521350_1.jpg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=57906&cate_c2=59497&cate_c3=60292&cate_c4=0&cmpny_c=EE309&link_prod_c=LO2727521349&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17879312933486&cate=14326814",
+      "seller": "다나와 중개",
+      "query": "포켓몬카드 오리파",
+      "group": "card",
+      "auth": "unknown"
+    },
+    {
+      "id": "d123437180",
+      "name": "포켓몬코리아 포켓몬카드 MEGA 확장팩 어비스아이 30팩",
+      "price": 44000,
+      "image": "https://img.danuri.io/catalog-image/180/437/123/1cccd1a3d50b4ea98c48b128adef7126.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=123437180",
+      "seller": "다나와 최저가",
+      "query": "포켓몬 카드",
+      "group": "card",
+      "auth": "official"
+    },
+    {
+      "id": "xI28303134688",
+      "name": "[해외] SAR AR VOL.01 [STELAB] 포켓몬 카드 포케카 오리파 부이즈 수록 이상 1장 봉입 1",
+      "price": 44450,
+      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/0f75/283db11b14d5b9a6ea6defa71de5dec72c3f315a134b56388922c5880d9a.jpg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=I28303134688&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17879312934303&cate=16349280",
+      "seller": "다나와 중개",
+      "query": "포켓몬카드 오리파",
+      "group": "card",
+      "auth": "unknown"
+    },
+    {
+      "id": "d122669470",
+      "name": "포켓몬코리아 포켓몬카드 MEGA 확장팩 닌자스피너 30팩",
+      "price": 44640,
+      "image": "https://img.danuri.io/catalog-image/470/669/122/8ba29b9cc68e42998e067b7eb60eb93d.png",
+      "url": "https://prod.danawa.com/info/?pcode=122669470",
+      "seller": "다나와 최저가",
+      "query": "포켓몬 카드",
+      "group": "card",
+      "auth": "official"
     },
     {
       "id": "d97902494",
@@ -2181,7 +2047,7 @@
       "seller": "다나와 최저가",
       "query": "건조나물",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d17586449",
@@ -2192,7 +2058,18 @@
       "seller": "다나와 최저가",
       "query": "전기포트",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "xF627983091",
+      "name": "[해외] 알파 포켓몬스터 카드 오리파 SAR 확정 랜덤팩 단품/미개봉 팩 받기",
+      "price": 46380,
+      "image": "https://image.auction.co.kr/origin/58/f6/90/58f69074f6.jpg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=224983&cate_c4=225436&cmpny_c=EE715&link_prod_c=F627983091&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17879312935932&cate=19337898",
+      "seller": "다나와 중개",
+      "query": "포켓몬카드 오리파",
+      "group": "card",
+      "auth": "unknown"
     },
     {
       "id": "d4698520",
@@ -2203,7 +2080,7 @@
       "seller": "다나와 최저가",
       "query": "커피믹스",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d27578393",
@@ -2214,7 +2091,7 @@
       "seller": "다나와 최저가",
       "query": "샴푸",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d11107383",
@@ -2225,7 +2102,7 @@
       "seller": "다나와 최저가",
       "query": "전기포트",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d2085488",
@@ -2236,7 +2113,84 @@
       "seller": "다나와 최저가",
       "query": "즉석밥",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "xV95729094528",
+      "name": "(No써치) 메가 스타터 100덱 배틀컬렉션 포켓몬 카드 한국판 100 스타트 덱MEGA 메가 1개 일본판",
+      "price": 50000,
+      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/cefc/f61afde5d7700cd59debcb860a85564a3adf0669bdf45b5f4f871d0a635d.jpg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222184&cate_c3=222223&cate_c4=222445&cmpny_c=TP40F&link_prod_c=V95729094528&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EB%B0%B0%ED%8B%80%EB%8D%B1&r=17879313042934&cate=16349370",
+      "seller": "다나와 중개",
+      "query": "포켓몬카드 배틀덱",
+      "group": "card",
+      "auth": "unknown"
+    },
+    {
+      "id": "d48822854",
+      "name": "NIGO 20AW 재킷 코트 가죽 야구 유니폼 NIGO15665 NIGO 20AW 재킷 코트 가죽",
+      "price": 50290,
+      "image": "https://img.danuri.io/catalog-image/854/822/048/f5d03b7a3e5b4655b4a3e8f6bce80dc4.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=48822854",
+      "seller": "다나와 최저가",
+      "query": "야구 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
+    },
+    {
+      "id": "d124012343",
+      "name": "포켓몬코리아 포켓몬카드 MEGA 확장팩 스톰 에메랄다 30팩",
+      "price": 50740,
+      "image": "https://img.danuri.io/catalog-image/343/012/124/84aa6f7098974eb3b87fd4de67b845e1.jpeg",
+      "url": "https://prod.danawa.com/info/?pcode=124012343",
+      "seller": "다나와 최저가",
+      "query": "포켓몬 카드",
+      "group": "card",
+      "auth": "official"
+    },
+    {
+      "id": "d5061877",
+      "name": "해태 타이거즈 원정 유니폼",
+      "price": 51160,
+      "image": "https://img.danuri.io/catalog-image/877/061/005/1b03a38bf5704e04b99e6ccb23759af4.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=5061877",
+      "seller": "다나와 최저가",
+      "query": "야구 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
+    },
+    {
+      "id": "d123360885",
+      "name": "엔비에이 N262TS411P 어센틱 농구 유니폼 메쉬 슬리브리스_US",
+      "price": 51580,
+      "image": "https://img.danuri.io/catalog-image/885/360/123/b0e62a6e040f438ba18c54bc0bee39f8.jpeg",
+      "url": "https://prod.danawa.com/info/?pcode=123360885",
+      "seller": "다나와 최저가",
+      "query": "농구 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
+    },
+    {
+      "id": "xF648688243",
+      "name": "포켓몬 카드 MEGA 하이클래스팩 메가 드림 EX",
+      "price": 51840,
+      "image": "https://image.auction.co.kr/origin/59/69/7d/59697d6ed6.jpg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=EE715&link_prod_c=F648688243&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%ED%95%98%EC%9D%B4%ED%81%B4%EB%9E%98%EC%8A%A4&r=17879313008253&cate=16349280",
+      "seller": "다나와 중개",
+      "query": "포켓몬카드 하이클래스",
+      "group": "card",
+      "auth": "unknown"
+    },
+    {
+      "id": "d107429135",
+      "name": "무센트 MUCENT 싸커 유니폼 풋볼 스포티 맨투맨 네이비 그레이 436862",
+      "price": 52940,
+      "image": "https://img.danuri.io/catalog-image/135/429/107/597687b62bdc4b769ac3c8f05a27751d.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=107429135",
+      "seller": "다나와 최저가",
+      "query": "축구 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
     },
     {
       "id": "d4717661",
@@ -2247,7 +2201,7 @@
       "seller": "다나와 최저가",
       "query": "커피믹스",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d3924195",
@@ -2258,7 +2212,7 @@
       "seller": "다나와 최저가",
       "query": "커피믹스",
       "group": "daily",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d15282644",
@@ -2269,7 +2223,29 @@
       "seller": "다나와 최저가",
       "query": "전기요",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "xI28303134574",
+      "name": "[해외] [SAR 111 VOL.01 확정] 포케카 오리파 소녀 수록 호화 포켓몬 카드 전 입 초보자",
+      "price": 58450,
+      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/7423/edddd71005582d939eca81b14442c8e72dcb01653044a011508e3c4a8a29.jpg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=I28303134574&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17879312934407&cate=16349280",
+      "seller": "다나와 중개",
+      "query": "포켓몬카드 오리파",
+      "group": "card",
+      "auth": "unknown"
+    },
+    {
+      "id": "d106730141",
+      "name": "포켓몬코리아 포켓몬카드 MEGA 확장팩 인페르노X 30팩",
+      "price": 58800,
+      "image": "https://img.danuri.io/catalog-image/141/730/106/d41a5dfe7f264e26b5b0b4b9bfae6c5e.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=106730141",
+      "seller": "다나와 최저가",
+      "query": "포켓몬 카드",
+      "group": "card",
+      "auth": "official"
     },
     {
       "id": "d28858856",
@@ -2280,7 +2256,7 @@
       "seller": "다나와 최저가",
       "query": "전기요",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d85669328",
@@ -2291,7 +2267,73 @@
       "seller": "다나와 최저가",
       "query": "전기포트",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "d123076825",
+      "name": "푸마 780339 01 2526 축구 유니폼 맨체스터 시티 홈 저지 맨시티 긴팔 78033901SG 1112982",
+      "price": 67600,
+      "image": "https://img.danuri.io/catalog-image/825/076/123/57548acce9b04041883f3242c08b6b05.webp",
+      "url": "https://prod.danawa.com/info/?pcode=123076825",
+      "seller": "다나와 최저가",
+      "query": "축구 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
+    },
+    {
+      "id": "d5941630",
+      "name": "아디다스 스페인 홈 레플리카 CX5355",
+      "price": 72780,
+      "image": "https://img.danuri.io/catalog-image/630/941/005/c91118438e2b44e9bd96bad33e83fe59.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=5941630",
+      "seller": "다나와 최저가",
+      "query": "레플리카 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
+    },
+    {
+      "id": "x9553118779",
+      "name": "재고 있음 100 포켓몬 카드 젬 팩 vol6 컬렉션 중국어 간체 6 부스터 박스 PTCG 선물",
+      "price": 73310,
+      "image": "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/product/9553118779/B.webp?517012518",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=224989&cate_c4=225460&cmpny_c=TH201&link_prod_c=9553118779&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+%EB%B6%80%EC%8A%A4%ED%84%B0%EB%B0%95%EC%8A%A4&r=17879313022025&cate=1921074",
+      "seller": "다나와 중개",
+      "query": "포켓몬 카드 부스터박스",
+      "group": "card",
+      "auth": "unknown"
+    },
+    {
+      "id": "d79560305",
+      "name": "SSG SSG랜더스 레플리카 홈 유니폼 FEMRUF01",
+      "price": 74400,
+      "image": "https://img.danuri.io/catalog-image/305/560/079/ad3752b34a1540cc8c3bb708cbc6203b.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=79560305",
+      "seller": "다나와 최저가",
+      "query": "레플리카 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
+    },
+    {
+      "id": "d79560380",
+      "name": "SSG SSG랜더스 레플리카 유니폼 FEMRUF03",
+      "price": 74630,
+      "image": "https://img.danuri.io/catalog-image/380/560/079/1b3fbdd832354dc3b459749ad1113f1d.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=79560380",
+      "seller": "다나와 최저가",
+      "query": "레플리카 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
+    },
+    {
+      "id": "d21410153",
+      "name": "포켓몬코리아 포켓몬카드 소드&실드 강화 확장팩 다크판타스마",
+      "price": 75700,
+      "image": "https://img.danuri.io/catalog-image/153/410/021/2b31c191db374264b8d93acbaae8c29d.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=21410153",
+      "seller": "다나와 최저가",
+      "query": "포켓몬 강화확장팩",
+      "group": "card",
+      "auth": "official"
     },
     {
       "id": "d103482137",
@@ -2302,7 +2344,7 @@
       "seller": "다나와 최저가",
       "query": "가습기",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d29757254",
@@ -2313,7 +2355,7 @@
       "seller": "다나와 최저가",
       "query": "전기요",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d122616732",
@@ -2324,7 +2366,40 @@
       "seller": "다나와 최저가",
       "query": "에어프라이어",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "d29895302",
+      "name": "포켓몬코리아 포켓몬카드 스칼렛 바이올렛 강화 확장팩 레이징서프 30팩",
+      "price": 80000,
+      "image": "https://img.danuri.io/catalog-image/302/895/029/3342e66c264949328d858930a6010a59.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=29895302",
+      "seller": "다나와 최저가",
+      "query": "포켓몬 카드",
+      "group": "card",
+      "auth": "official"
+    },
+    {
+      "id": "d101549315",
+      "name": "푸마 ltgt 맨시티 2526시즌 쇼츠 유니폼 780375 02 06 22 MCFC Shorts Replica 654694",
+      "price": 82800,
+      "image": "https://img.danuri.io/catalog-image/315/549/101/eef79f6d9ff74137bc7a5922760cee1e.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=101549315",
+      "seller": "다나와 최저가",
+      "query": "레플리카 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
+    },
+    {
+      "id": "xV95489370962",
+      "name": "포켓몬카드 스칼렛&바이올렛 강화확장팩 열풍의 아레나 30팩 미개봉 비닐밀봉 30팩 1박스 단일",
+      "price": 87610,
+      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/9f5d/0aa9a544d4751a4f2988727c4151baa6a7212c869dd4dd664d9693e0460a.JPG",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95489370962&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EA%B0%95%ED%99%94%ED%99%95%EC%9E%A5%ED%8C%A9&r=17879312984011&cate=16349280",
+      "seller": "다나와 중개",
+      "query": "포켓몬 강화확장팩",
+      "group": "card",
+      "auth": "unknown"
     },
     {
       "id": "d72816731",
@@ -2335,7 +2410,29 @@
       "seller": "다나와 최저가",
       "query": "에어프라이어",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "d61820171",
+      "name": "아디다스 AS 로마 홈 래플리카 유니폼 IT6058",
+      "price": 94760,
+      "image": "https://img.danuri.io/catalog-image/171/820/061/7fd2a25a1ba34d8eae4820bbaaf9f6f0.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=61820171",
+      "seller": "다나와 최저가",
+      "query": "레플리카 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
+    },
+    {
+      "id": "xV95953979269",
+      "name": "포켓몬 카드게임 TCG 테라스탈페스타ex 스칼렛&바이올렛 하이클래스팩 확장팩 1박스 미개봉 (10팩/한글판) one",
+      "price": 95050,
+      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/0aac/867da2ec2f91a16ba8ca3eca1d87f2e42aff308eff39c374b3b329e4a075.jpeg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95953979269&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%ED%95%98%EC%9D%B4%ED%81%B4%EB%9E%98%EC%8A%A4&r=17879313009708&cate=16349280",
+      "seller": "다나와 중개",
+      "query": "포켓몬카드 하이클래스",
+      "group": "card",
+      "auth": "unknown"
     },
     {
       "id": "d103482785",
@@ -2346,18 +2443,106 @@
       "seller": "다나와 최저가",
       "query": "커피머신",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d32156642",
       "name": "쿠쿠전자 CAF-E0810TW",
-      "price": 103450,
+      "price": 103440,
       "image": "https://img.danuri.io/catalog-image/642/156/032/cd45979e1b0d480a923118f0a0bf43c7.jpg",
       "url": "https://prod.danawa.com/info/?pcode=32156642",
       "seller": "다나와 최저가",
       "query": "에어프라이어",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "d105004988",
+      "name": "나이키 유스 바르셀로나 25-26 드라이 스타디움 홈 저지 유니폼 상의 축구유니폼 S/S HJ5287456",
+      "price": 104490,
+      "image": "https://img.danuri.io/catalog-image/988/004/105/48370196da3d4cd6975ec7ae5cb7c1a1.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=105004988",
+      "seller": "다나와 최저가",
+      "query": "축구 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
+    },
+    {
+      "id": "d106728467",
+      "name": "포켓몬코리아 포켓몬카드 하이클래스팩 MEGA 드림ex 10팩",
+      "price": 104740,
+      "image": "https://img.danuri.io/catalog-image/467/728/106/915f06ac485f452d923796e167612ecd.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=106728467",
+      "seller": "다나와 최저가",
+      "query": "포켓몬카드 하이클래스",
+      "group": "card",
+      "auth": "official"
+    },
+    {
+      "id": "d123761861",
+      "name": "푸마 저지 맨체스터 시티 26-27 어웨이 S/S 78433903 반팔 레플리카 축구유니폼",
+      "price": 104780,
+      "image": "https://img.danuri.io/catalog-image/861/761/123/8ff0301bcb1f461d86124684e122f5c8.webp",
+      "url": "https://prod.danawa.com/info/?pcode=123761861",
+      "seller": "다나와 최저가",
+      "query": "축구 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
+    },
+    {
+      "id": "d21413675",
+      "name": "포켓몬코리아 포켓몬카드 소드앤실드 강화확장팩 백열의 아르카나",
+      "price": 104900,
+      "image": "https://img.danuri.io/catalog-image/675/413/021/9b3e2ae52778454e832dc79b006f6a82.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=21413675",
+      "seller": "다나와 최저가",
+      "query": "포켓몬 강화확장팩",
+      "group": "card",
+      "auth": "official"
+    },
+    {
+      "id": "d123298546",
+      "name": "푸마 슈즈 도르트문트 홈 유니폼 BVB Home Jersey Replica 784088-01",
+      "price": 108380,
+      "image": "https://img.danuri.io/catalog-image/546/298/123/ec39901feada45f981370e0c3faf005f.webp",
+      "url": "https://prod.danawa.com/info/?pcode=123298546",
+      "seller": "다나와 최저가",
+      "query": "레플리카 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
+    },
+    {
+      "id": "d105335144",
+      "name": "바우프 싸커 엠블럼 유니폼 풋볼 져지 빈티지 핑크 1909190",
+      "price": 109200,
+      "image": "https://img.danuri.io/catalog-image/144/335/105/9115520328234ea5875d6aaae99e21d9.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=105335144",
+      "seller": "다나와 최저가",
+      "query": "축구 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
+    },
+    {
+      "id": "xI29058377904",
+      "name": "포켓몬카드 TCG [국내발송] [탑로더] 파이어 C (한국판) 환상 전설 드림 컬렉션 PSA MINT 9 (9등급) 1개 파이",
+      "price": 110000,
+      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/86d0/ebce158cbb458a31d9eaea1f04f21d0a5142d0b79bbdcc60927490a434a8.jpg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=I29058377904&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+PSA&r=17879313113641&cate=16349280",
+      "seller": "다나와 중개",
+      "query": "포켓몬 카드 PSA",
+      "group": "card",
+      "auth": "unknown"
+    },
+    {
+      "id": "x9579126931",
+      "name": "[해외] 포켓몬카드 에브이 ex SAR 풀아헤드 PK-SV8a-211",
+      "price": 113910,
+      "image": "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/product/9579126931/B.webp?367925739",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=0&cate_c4=0&cmpny_c=TH201&link_prod_c=9579126931&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+SAR&r=17879313065931",
+      "seller": "다나와 중개",
+      "query": "포켓몬카드 SAR",
+      "group": "card",
+      "auth": "unknown"
     },
     {
       "id": "d71974844",
@@ -2368,7 +2553,51 @@
       "seller": "다나와 최저가",
       "query": "가습기",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "xI29057078573",
+      "name": "포켓몬카드 메가가디안ex SAR (메가심포니아) 1개 정품",
+      "price": 115000,
+      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/8be2/071462a922721693fa877cb083255f2f4d4976b748737f8b29b620ce511b.png",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=I29057078573&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+SAR&r=17879313066819&cate=16349280",
+      "seller": "다나와 중개",
+      "query": "포켓몬카드 SAR",
+      "group": "card",
+      "auth": "unknown"
+    },
+    {
+      "id": "x9580821370",
+      "name": "[해외] 포켓몬카드 에리카의초대 SAR 풀아헤드 포켓몬카드게임",
+      "price": 116140,
+      "image": "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/pd/v2/8/2/1/3/7/0/oxwVc/9580821370_B.webp",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=0&cate_c4=0&cmpny_c=TH201&link_prod_c=9580821370&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+SAR&r=17879313061093",
+      "seller": "다나와 중개",
+      "query": "포켓몬카드 SAR",
+      "group": "card",
+      "auth": "unknown"
+    },
+    {
+      "id": "d122694138",
+      "name": "디아도라 크로셰 야구 유니폼 가디건 D6123LJK41GND",
+      "price": 117850,
+      "image": "https://img.danuri.io/catalog-image/138/694/122/b9ef129c7b1f430a8a1cdcc0ea88c88b.jpeg",
+      "url": "https://prod.danawa.com/info/?pcode=122694138",
+      "seller": "다나와 최저가",
+      "query": "야구 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
+    },
+    {
+      "id": "d122694119",
+      "name": "디아도라 크로셰 야구 유니폼 가디건 D6123LJK41IVS",
+      "price": 118030,
+      "image": "https://img.danuri.io/catalog-image/119/694/122/3efd6ffd115a404a8c75a9163f82502c.jpeg",
+      "url": "https://prod.danawa.com/info/?pcode=122694119",
+      "seller": "다나와 최저가",
+      "query": "야구 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
     },
     {
       "id": "d71504639",
@@ -2379,7 +2608,51 @@
       "seller": "다나와 최저가",
       "query": "에어프라이어",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "d107574464",
+      "name": "프로스펙스 농구국가대표 유니폼 상의정 PP3BB25M012",
+      "price": 120820,
+      "image": "https://img.danuri.io/catalog-image/464/574/107/f59223b64fc7428ba457a53714361e2b.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=107574464",
+      "seller": "다나와 최저가",
+      "query": "농구 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
+    },
+    {
+      "id": "x6a6afa49650d8a33b56315d5",
+      "name": "포켓몬 [해외] 포켓몬카드 TCG N의 레시라무 AR 배틀 파트너즈 일본판 PSA10",
+      "price": 122123,
+      "image": "https://img.croketglobal.net/item/thumbnail/cf1b11dc-c9f6-4039-9d22-535f58aaadda.webp?a=1024&f=jpeg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=0&cate_c4=0&cmpny_c=TZ7F7&link_prod_c=6a6afa49650d8a33b56315d5&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+PSA&r=17879313113747",
+      "seller": "다나와 중개",
+      "query": "포켓몬 카드 PSA",
+      "group": "card",
+      "auth": "unknown"
+    },
+    {
+      "id": "d60422522",
+      "name": "프로스펙스 농구국가대표팀 유니폼 상의 원정 PT3BB23M012",
+      "price": 123880,
+      "image": "https://img.danawa.com/prod_img/500000/522/422/img/60422522_1.jpg?shrink=130:130",
+      "url": "https://prod.danawa.com/info/?pcode=60422522",
+      "seller": "다나와 최저가",
+      "query": "농구 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
+    },
+    {
+      "id": "d106730159",
+      "name": "포켓몬코리아 포켓몬카드 하이클래스팩 테라스탈페스타ex 10팩",
+      "price": 124440,
+      "image": "https://img.danuri.io/catalog-image/159/730/106/99a057b6c70b43b69597c5fc5c78ff6f.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=106730159",
+      "seller": "다나와 최저가",
+      "query": "포켓몬카드 하이클래스",
+      "group": "card",
+      "auth": "official"
     },
     {
       "id": "d12502772",
@@ -2390,7 +2663,18 @@
       "seller": "다나와 최저가",
       "query": "전기요",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "x6a6afb8448d47f99d95998de",
+      "name": "포켓몬 [해외] 포켓몬카드 TCG 피카츄 25주년 기념 컬렉션 일본판 PSA10",
+      "price": 128913,
+      "image": "https://img.croketglobal.net/item/thumbnail/d1c61508-ae7e-41f3-9f4e-d58d0a6f9e91.webp?a=1024&f=jpeg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=0&cate_c4=0&cmpny_c=TZ7F7&link_prod_c=6a6afb8448d47f99d95998de&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+PSA&r=17879313115575",
+      "seller": "다나와 중개",
+      "query": "포켓몬 카드 PSA",
+      "group": "card",
+      "auth": "unknown"
     },
     {
       "id": "d37926632",
@@ -2401,7 +2685,51 @@
       "seller": "다나와 최저가",
       "query": "무선청소기",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "d33997487",
+      "name": "포켓몬코리아 포켓몬카드 스칼렛 바이올렛 하이클래스팩 샤이니트레저 ex 10팩",
+      "price": 129500,
+      "image": "https://img.danuri.io/catalog-image/487/997/033/c2d534973f144cbfa249d4ae1d7d235b.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=33997487",
+      "seller": "다나와 최저가",
+      "query": "포켓몬카드 하이클래스",
+      "group": "card",
+      "auth": "official"
+    },
+    {
+      "id": "xI29057067648",
+      "name": "포켓몬카드 제크로무ex SAR (블랙볼트) 1개 정품",
+      "price": 129500,
+      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/e298/4e750530013aec6bf9a1e4669ef6c22bf5297a0d53573b52a673d3c92240.png",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=I29057067648&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+SAR&r=17879313067752&cate=16349280",
+      "seller": "다나와 중개",
+      "query": "포켓몬카드 SAR",
+      "group": "card",
+      "auth": "unknown"
+    },
+    {
+      "id": "xF647171773",
+      "name": "[해외] 포켓몬카드게임 MEGA 확장팩 메가심포니아 BOX 부스터팩 TCG - 단일상품",
+      "price": 135600,
+      "image": "https://image.auction.co.kr/origin/59/60/52/5960520976.jpg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=EE715&link_prod_c=F647171773&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+%EB%B6%80%EC%8A%A4%ED%84%B0%EB%B0%95%EC%8A%A4&r=17879313024046&cate=16349280",
+      "seller": "다나와 중개",
+      "query": "포켓몬 카드 부스터박스",
+      "group": "card",
+      "auth": "unknown"
+    },
+    {
+      "id": "x4839852785",
+      "name": "[해외] 포켓몬카드게임 MEGA 확장팩 메가심포니아 BOX 부스터팩 TCG - 단일상품",
+      "price": 135600,
+      "image": "https://gdimg.gmarket.co.kr/4839852785/goodsimage?ver=38232624565",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=EE128&link_prod_c=4839852785&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+%EB%B6%80%EC%8A%A4%ED%84%B0%EB%B0%95%EC%8A%A4&r=17879313024331&cate=16349280",
+      "seller": "다나와 중개",
+      "query": "포켓몬 카드 부스터박스",
+      "group": "card",
+      "auth": "unknown"
     },
     {
       "id": "d9838569",
@@ -2412,18 +2740,51 @@
       "seller": "다나와 최저가",
       "query": "가습기",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d99479297",
       "name": "한미메리노 IoT 카키스트라이프 토퍼형 탄소매트 HD",
-      "price": 146040,
+      "price": 138000,
       "image": "https://img.danuri.io/catalog-image/297/479/099/5e4639a09eb747c79d5ba0aa03d63a37.jpg",
       "url": "https://prod.danawa.com/info/?pcode=99479297",
       "seller": "다나와 최저가",
       "query": "전기요",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "d122693941",
+      "name": "스파이더 울산웨일즈 홈 유니폼 노마킹 SWLPCNRS001MWHT",
+      "price": 139210,
+      "image": "https://img.danuri.io/catalog-image/941/693/122/b73b3b5fc5de4dc391cf7fe99157a61e.jpeg",
+      "url": "https://prod.danawa.com/info/?pcode=122693941",
+      "seller": "다나와 최저가",
+      "query": "유니폼 마킹",
+      "group": "uniform",
+      "auth": "unknown"
+    },
+    {
+      "id": "x13736975115",
+      "name": "[해외]아디다스 리버풀 써드 긴팔 유니폼 저지 26/27 선수 마킹 패치 KB8273",
+      "price": 146000,
+      "image": "https://pimg.danawa.com/proxy/shop1.phinf.naver.net/20260828_261/1787894699488VnY9x_PNG/122027534616234486_165733942.png?type=m450&shrink=130:130",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=1825&cate_c2=221566&cate_c3=221572&cate_c4=221593&cmpny_c=TY614F&link_prod_c=13736975115&keyword=%EC%9C%A0%EB%8B%88%ED%8F%BC+%EB%A7%88%ED%82%B9&r=17879313869874&cate=13342936",
+      "seller": "다나와 중개",
+      "query": "유니폼 마킹",
+      "group": "uniform",
+      "auth": "unknown"
+    },
+    {
+      "id": "d122693952",
+      "name": "스파이더 울산웨일즈 어웨이 유니폼 노마킹 SWLPCNRS001MBLK",
+      "price": 147120,
+      "image": "https://img.danuri.io/catalog-image/952/693/122/8284615a755842319822565875dbecb1.jpeg",
+      "url": "https://prod.danawa.com/info/?pcode=122693952",
+      "seller": "다나와 최저가",
+      "query": "유니폼 마킹",
+      "group": "uniform",
+      "auth": "unknown"
     },
     {
       "id": "d9574920",
@@ -2434,7 +2795,18 @@
       "seller": "다나와 최저가",
       "query": "전기밥솥",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "d122694351",
+      "name": "프로스펙스 야구대표팀 어센틱 유니폼 상의 홈 PP3KB25M011",
+      "price": 152820,
+      "image": "https://img.danuri.io/catalog-image/351/694/122/43a65e8a7b674d1ea3a3ec9e6d003018.jpeg",
+      "url": "https://prod.danawa.com/info/?pcode=122694351",
+      "seller": "다나와 최저가",
+      "query": "야구 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
     },
     {
       "id": "d18841001",
@@ -2445,7 +2817,7 @@
       "seller": "다나와 최저가",
       "query": "에어프라이어",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d62164070",
@@ -2456,18 +2828,40 @@
       "seller": "다나와 최저가",
       "query": "에어프라이어",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
-      "id": "d65920016",
-      "name": "APPLE 에어팟4 MXP63KH/A",
-      "price": 173130,
-      "image": "https://img.danuri.io/catalog-image/016/920/065/5d3b211724aa4b44952993596394004c.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=65920016",
+      "id": "d123806967",
+      "name": "나이키 아틀레티코 마드리드 26 27 홈 유니폼 반팔 저지 II1893-101",
+      "price": 166000,
+      "image": "https://img.danuri.io/catalog-image/967/806/123/e4c67ab951794f48b6006d014a30ae7d.jpeg",
+      "url": "https://prod.danawa.com/info/?pcode=123806967",
       "seller": "다나와 최저가",
-      "query": "에어팟",
-      "group": "prize",
-      "kc": "unknown"
+      "query": "유니폼 마킹",
+      "group": "uniform",
+      "auth": "unknown"
+    },
+    {
+      "id": "d21418091",
+      "name": "포켓몬코리아 포켓몬카드 소드앤실드 하이클래스팩 VSTAR 유니버스(한글판)",
+      "price": 170000,
+      "image": "https://img.danuri.io/catalog-image/091/418/021/3c8ac7efce2241f289c63cfa23a4e75a.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=21418091",
+      "seller": "다나와 최저가",
+      "query": "포켓몬카드 하이클래스",
+      "group": "card",
+      "auth": "official"
+    },
+    {
+      "id": "d122705357",
+      "name": "프로스펙스 KBO x MU:DS 야구 대표팀 까치 호랑이 레플리카 유니폼 PP3KB25M771",
+      "price": 173440,
+      "image": "https://img.danuri.io/catalog-image/357/705/122/b439a5911f2d457eb1572a0efca408b5.jpeg",
+      "url": "https://prod.danawa.com/info/?pcode=122705357",
+      "seller": "다나와 최저가",
+      "query": "야구 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
     },
     {
       "id": "d98919764",
@@ -2478,7 +2872,18 @@
       "seller": "다나와 최저가",
       "query": "가습기",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "d92042456",
+      "name": "푸마 25/26 맨체스터시티 레플리카 긴팔 홈 유니폼 세트 780339-01+780375-06",
+      "price": 174400,
+      "image": "https://img.danuri.io/catalog-image/456/042/092/6e2eec3b74334a61bf027bde7bce615f.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=92042456",
+      "seller": "다나와 최저가",
+      "query": "레플리카 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
     },
     {
       "id": "d13192118",
@@ -2489,7 +2894,40 @@
       "seller": "다나와 최저가",
       "query": "커피머신",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "xLO2727939374",
+      "name": "ALPHA [해외] ALPHA 포켓몬스터 카드 오리파 PSA 피카츄 시리즈 확정 랜덤팩",
+      "price": 180980,
+      "image": "https://contents.lotteon.com/itemimage/20260720125145/LO/27/27/93/93/74/_2/72/79/39/37/5/LO2727939374_2727939375_1.jpg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=22591&cate_c2=223531&cate_c3=223549&cate_c4=0&cmpny_c=EE309&link_prod_c=LO2727939374&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17879312931618",
+      "seller": "다나와 중개",
+      "query": "포켓몬카드 오리파",
+      "group": "card",
+      "auth": "unknown"
+    },
+    {
+      "id": "d63089702",
+      "name": "아디다스 맨체스터 유나이티드 오리지널스 트랙탑 IS6525",
+      "price": 184990,
+      "image": "https://img.danuri.io/catalog-image/702/089/063/bbffe0667c084a9a88fe63a2be4c16fe.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=63089702",
+      "seller": "다나와 최저가",
+      "query": "축구 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
+    },
+    {
+      "id": "x9551633900",
+      "name": "[해외] 오리지널 포켓몬 트레이딩 카드 PTCG 일본어 버전 M2 메가 카드 부스터 박스 어린이",
+      "price": 193770,
+      "image": "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/product/9551633900/B.jpg?811822383",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=22591&cate_c2=0&cate_c3=0&cate_c4=0&cmpny_c=TH201&link_prod_c=9551633900&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+%EB%B6%80%EC%8A%A4%ED%84%B0%EB%B0%95%EC%8A%A4&r=17879313022698",
+      "seller": "다나와 중개",
+      "query": "포켓몬 카드 부스터박스",
+      "group": "card",
+      "auth": "unknown"
     },
     {
       "id": "d122653631",
@@ -2500,7 +2938,29 @@
       "seller": "다나와 최저가",
       "query": "전기포트",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "d106851179",
+      "name": "아디다스 2026 LA FC 플레이어 어센틱 홈 S/S 저지 JL6807 손흥민유니폼 선수용 MLS 오피셜마킹 별도추가 CLI",
+      "price": 199000,
+      "image": "https://img.danuri.io/catalog-image/179/851/106/f1644a7fb6fc43ca99e8e91c990c7562.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=106851179",
+      "seller": "다나와 최저가",
+      "query": "손흥민 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
+    },
+    {
+      "id": "d75158741",
+      "name": "오일릴리 맨유 축구바람막이 유니폼 트레이닝 자켓 런닝 등산 외운동 윈드브레이커 풀집업 후드 아노락 281844",
+      "price": 207550,
+      "image": "https://img.danuri.io/catalog-image/741/158/075/4d657879d11d4a3987497a704b2e0953.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=75158741",
+      "seller": "다나와 최저가",
+      "query": "축구 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
     },
     {
       "id": "d106221236",
@@ -2511,7 +2971,7 @@
       "seller": "다나와 최저가",
       "query": "전기밥솥",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d123806849",
@@ -2522,7 +2982,51 @@
       "seller": "다나와 최저가",
       "query": "에어프라이어",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "x13736972534",
+      "name": "[해외]아디다스 리버풀 써드 어센틱 긴팔 유니폼 저지 26/27 선수 마킹 패치 KB8283",
+      "price": 215000,
+      "image": "https://pimg.danawa.com/proxy/shop1.phinf.naver.net/20260828_44/1787894299724jHju7_PNG/9287921716502090_604399036.png?type=m450&shrink=130:130",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=1825&cate_c2=221566&cate_c3=221572&cate_c4=221593&cmpny_c=TY614F&link_prod_c=13736972534&keyword=%EC%9C%A0%EB%8B%88%ED%8F%BC+%EB%A7%88%ED%82%B9&r=17879313869691&cate=13342936",
+      "seller": "다나와 중개",
+      "query": "유니폼 마킹",
+      "group": "uniform",
+      "auth": "unknown"
+    },
+    {
+      "id": "x6a828e195494cbc6066fc198",
+      "name": "포켓몬 [해외] 포켓몬카드 151 TCG 로손 프로모 피카츄 AR SV2a 173/165 PSA10 일본판",
+      "price": 218153,
+      "image": "https://img.croketglobal.net/item/thumbnail/f4c306e9-9acd-462c-a55e-a06e5fc43e7a.webp?a=1024&f=jpeg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=0&cate_c4=0&cmpny_c=TZ7F7&link_prod_c=6a828e195494cbc6066fc198&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+psa10&r=17879313084562",
+      "seller": "다나와 중개",
+      "query": "포켓몬 카드 psa10",
+      "group": "card",
+      "auth": "unknown"
+    },
+    {
+      "id": "x9580841213",
+      "name": "[해외] 포켓몬카드 님피아 ex SAR 풀헤드 SV8a 212",
+      "price": 220330,
+      "image": "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/pd/v2/8/4/1/2/1/3/WtqCy/9580841213_B.webp",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=0&cate_c4=0&cmpny_c=TH201&link_prod_c=9580841213&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+SAR&r=17879313065383",
+      "seller": "다나와 중개",
+      "query": "포켓몬카드 SAR",
+      "group": "card",
+      "auth": "unknown"
+    },
+    {
+      "id": "xV95722897980",
+      "name": "[해외] 일본판 샤이니트레져ex 강화확장팩 겉비닐 미개봉 1박스 포켓몬카드 일반국제배송(7~8일소요예정)",
+      "price": 226490,
+      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/2093/00231977e58e372d4d5b60b2fd7453236fbb6da8197d5501ebe1470e2609.jpg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95722897980&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EA%B0%95%ED%99%94%ED%99%95%EC%9E%A5%ED%8C%A9&r=17879312986549&cate=16349280",
+      "seller": "다나와 중개",
+      "query": "포켓몬 강화확장팩",
+      "group": "card",
+      "auth": "unknown"
     },
     {
       "id": "d106045433",
@@ -2533,18 +3037,7 @@
       "seller": "다나와 최저가",
       "query": "가습기",
       "group": "home",
-      "kc": "unknown"
-    },
-    {
-      "id": "d65919884",
-      "name": "APPLE 에어팟4 액티브 노이즈 캔슬링 MXP93KH/A",
-      "price": 229930,
-      "image": "https://img.danuri.io/catalog-image/884/919/065/c05852c1218545ad93c32797dfe43ff7.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=65919884",
-      "seller": "다나와 최저가",
-      "query": "에어팟",
-      "group": "prize",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d106755113",
@@ -2555,40 +3048,51 @@
       "seller": "다나와 최저가",
       "query": "커피머신",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
-      "id": "d15463181",
-      "name": "APPLE 에어팟3 맥세이프 MME73KH/A",
-      "price": 234490,
-      "image": "https://img.danuri.io/catalog-image/181/463/015/5087de5f23fe4f5fb4094c2269f42b69.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=15463181",
-      "seller": "다나와 최저가",
-      "query": "에어팟",
-      "group": "prize",
-      "kc": "unknown"
+      "id": "x9455474013",
+      "name": "[해외] 포켓몬 카드 게임 스칼렛 바이올렛 확장팩 스텔라 미라클 부스터 박스 (일본어판)",
+      "price": 232190,
+      "image": "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/product/9455474013/B.webp?513862434",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=22591&cate_c2=0&cate_c3=0&cate_c4=0&cmpny_c=TH201&link_prod_c=9455474013&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+%EB%B6%80%EC%8A%A4%ED%84%B0%EB%B0%95%EC%8A%A4&r=17879313024212",
+      "seller": "다나와 중개",
+      "query": "포켓몬 카드 부스터박스",
+      "group": "card",
+      "auth": "unknown"
+    },
+    {
+      "id": "x6a6afcbd48d47f99d959be0d",
+      "name": "포켓몬 [해외] 포켓몬카드 TCG 뮤츠 클래식 일본판 PSA10",
+      "price": 248223,
+      "image": "https://img.croketglobal.net/item/thumbnail/365fc69a-3769-4fbb-a3f5-b92f129950e3.webp?a=1024&f=jpeg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=0&cate_c4=0&cmpny_c=TZ7F7&link_prod_c=6a6afcbd48d47f99d959be0d&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+psa10&r=17879313087067",
+      "seller": "다나와 중개",
+      "query": "포켓몬 카드 psa10",
+      "group": "card",
+      "auth": "unknown"
     },
     {
       "id": "d123682936",
       "name": "쿠쿠전자 CRP-DHPNL0615FGG",
-      "price": 248280,
+      "price": 248270,
       "image": "https://img.danuri.io/catalog-image/936/682/123/18a3d595f3074ce88b2c422799d5f17f.jpeg",
       "url": "https://prod.danawa.com/info/?pcode=123682936",
       "seller": "다나와 최저가",
       "query": "전기밥솥",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d15463106",
       "name": "조지루시 EE-DCH35K",
-      "price": 248360,
+      "price": 248320,
       "image": "https://img.danuri.io/catalog-image/106/463/015/a50d98d5ff6b4c83aeb7205c2fb38bc0.jpg",
       "url": "https://prod.danawa.com/info/?pcode=15463106",
       "seller": "다나와 최저가",
       "query": "가습기",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d123670007",
@@ -2599,18 +3103,29 @@
       "seller": "다나와 최저가",
       "query": "전기밥솥",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d7280086",
       "name": "쿠쿠전자 CRP-CHP1010FD",
-      "price": 252350,
+      "price": 252330,
       "image": "https://img.danuri.io/catalog-image/086/280/007/f39b8b249a854986865abf425278b220.jpeg",
       "url": "https://prod.danawa.com/info/?pcode=7280086",
       "seller": "다나와 최저가",
       "query": "전기밥솥",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "d25964462",
+      "name": "포켓몬코리아 포켓몬카드 스칼렛 바이올렛 강화확장팩 151 20팩",
+      "price": 252580,
+      "image": "https://img.danuri.io/catalog-image/462/964/025/2e7be66fa43c4981855a568a6ebd344e.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=25964462",
+      "seller": "다나와 최저가",
+      "query": "포켓몬 강화확장팩",
+      "group": "card",
+      "auth": "official"
     },
     {
       "id": "d76463927",
@@ -2621,18 +3136,40 @@
       "seller": "다나와 최저가",
       "query": "무선청소기",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
-      "id": "d15616310",
-      "name": "APPLE 에어팟 프로1 맥세이프 MLWK3KH/A",
-      "price": 280000,
-      "image": "https://img.danuri.io/catalog-image/310/616/015/23da005ae2c14f66a673ac741bbc9392.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=15616310",
+      "id": "d27487283",
+      "name": "아디다스 Real Madrid 레프리카 홈 유니폼 커스터마이징 IA5139",
+      "price": 269000,
+      "image": "https://img.danuri.io/catalog-image/283/487/027/268872d86c3b42aaaa11ac1ebf061f97.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=27487283",
       "seller": "다나와 최저가",
-      "query": "에어팟",
-      "group": "prize",
-      "kc": "unknown"
+      "query": "레플리카 유니폼",
+      "group": "uniform",
+      "auth": "unknown"
+    },
+    {
+      "id": "d21396146",
+      "name": "포켓몬코리아 포켓몬카드 소드앤실드 강화확장팩 이브이 히어로즈",
+      "price": 272410,
+      "image": "https://img.danuri.io/catalog-image/146/396/021/b1625a3f1f5b43559b60a0d0ec0b6977.jpg",
+      "url": "https://prod.danawa.com/info/?pcode=21396146",
+      "seller": "다나와 최저가",
+      "query": "포켓몬 강화확장팩",
+      "group": "card",
+      "auth": "official"
+    },
+    {
+      "id": "xV95462615640",
+      "name": "[해외] 포켓몬 카드 게임 피카츄 ex 스타트덱 100 코로챠오 006/023 PSA 10등급 카드 일반국제배송(7~8일소요예",
+      "price": 273150,
+      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/d5e6/56d9ed7903b6157fb6f30c46c8f0d4f8a1ab15ac3d97662b1962172ab86f.jpg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95462615640&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+psa10&r=17879313085918&cate=16349280",
+      "seller": "다나와 중개",
+      "query": "포켓몬 카드 psa10",
+      "group": "card",
+      "auth": "unknown"
     },
     {
       "id": "d28461182",
@@ -2643,18 +3180,29 @@
       "seller": "다나와 최저가",
       "query": "가습기",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d9693393",
       "name": "쿠쿠전자 트윈프레셔 CRP-KHTS1060FD",
-      "price": 285120,
+      "price": 284790,
       "image": "https://img.danuri.io/catalog-image/393/693/009/6169625e95bf49ce8c54cea4764d1b02.jpg",
       "url": "https://prod.danawa.com/info/?pcode=9693393",
       "seller": "다나와 최저가",
       "query": "전기밥솥",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "xI28960756980",
+      "name": "[해외] 오리파 포켓몬 카드 박스 1개 + PSA10 + 싱글 카드 럭키백 아키하바라 상세설명 참조",
+      "price": 288110,
+      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/24ce/ca5ac8dd3402b549d0f3f03dc042062da65d7499d8bd0bace0b4566d9a9e.jpg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=I28960756980&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17879312932856&cate=16349280",
+      "seller": "다나와 중개",
+      "query": "포켓몬카드 오리파",
+      "group": "card",
+      "auth": "unknown"
     },
     {
       "id": "d106712843",
@@ -2665,7 +3213,7 @@
       "seller": "다나와 최저가",
       "query": "음식물처리기",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d9401703",
@@ -2676,7 +3224,29 @@
       "seller": "다나와 최저가",
       "query": "전기밥솥",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "x9514924458",
+      "name": "[해외] 메가 포켓몬 미스터리 박스 - PSA 등급 카드 정품 오리지널 빈티지",
+      "price": 300430,
+      "image": "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/pd/v2/9/2/4/4/5/8/AGyzu/9514924458_B.webp",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=22591&cate_c2=0&cate_c3=0&cate_c4=0&cmpny_c=TH201&link_prod_c=9514924458&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+PSA&r=17879313115055",
+      "seller": "다나와 중개",
+      "query": "포켓몬 카드 PSA",
+      "group": "card",
+      "auth": "unknown"
+    },
+    {
+      "id": "d123807015",
+      "name": "나이키 아틀레티코 마드리드 26 27 홈 유니폼 이강인 7번 마킹 저지 II1893-101",
+      "price": 303801,
+      "image": "https://img.danuri.io/catalog-image/015/807/123/e24c0bad8afe4574a9c97e129bb244ad.jpeg",
+      "url": "https://prod.danawa.com/info/?pcode=123807015",
+      "seller": "다나와 최저가",
+      "query": "유니폼 마킹",
+      "group": "uniform",
+      "auth": "unknown"
     },
     {
       "id": "d122694803",
@@ -2687,29 +3257,51 @@
       "seller": "다나와 최저가",
       "query": "음식물처리기",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
-      "id": "d97405013",
-      "name": "APPLE 에어팟 프로3 MFHP4KH/A",
-      "price": 309540,
-      "image": "https://img.danuri.io/catalog-image/013/405/097/23a26ad29fab47059f63290ab9b10b9f.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=97405013",
-      "seller": "다나와 최저가",
-      "query": "에어팟",
-      "group": "prize",
-      "kc": "unknown"
+      "id": "xV95645415744",
+      "name": "[해외] 포켓몬 카드 게임 포켓몬 GO 일본판 확장팩 잉어킹 021/071 PSA 10등급 카드 일반국제배송(7~8일소요예정)",
+      "price": 309170,
+      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/d99a/b380f8ed2004a0d0b81b7b3fdcab14762b17fc09d3be978921280a1cf2c5.jpeg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95645415744&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+psa10&r=17879313088742&cate=16349280",
+      "seller": "다나와 중개",
+      "query": "포켓몬 카드 psa10",
+      "group": "card",
+      "auth": "unknown"
     },
     {
-      "id": "d28208783",
-      "name": "APPLE 에어팟 프로2 맥세이프 USB-C MTJV3KH/A",
-      "price": 315760,
-      "image": "https://img.danuri.io/catalog-image/783/208/028/1fc6ec745d044fbdab210da127b69eca.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=28208783",
-      "seller": "다나와 최저가",
-      "query": "에어팟",
-      "group": "prize",
-      "kc": "unknown"
+      "id": "xV95462617388",
+      "name": "[해외] 포켓몬 카드 게임 따라큐 V 미미큐 233/184 CSR PSA 10등급 카드 일반국제배송(7~8일소요예정)",
+      "price": 313740,
+      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/58a5/510d29ea64efea038fafa31cf86928206a1ef5c64f0e976346fe45d184b4.jpeg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95462617388&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+psa10&r=17879313089353&cate=16349280",
+      "seller": "다나와 중개",
+      "query": "포켓몬 카드 psa10",
+      "group": "card",
+      "auth": "unknown"
+    },
+    {
+      "id": "xI28303149707",
+      "name": "[해외] 포케카 오리파 psa10 확정 포켓몬 카드 오리파 우량",
+      "price": 319280,
+      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/34d8/aa7a2484011434976a2b035e68d7cf67ca7747993060f172e73a39fea8e7.jpg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=I28303149707&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17879312931270&cate=16349280",
+      "seller": "다나와 중개",
+      "query": "포켓몬카드 오리파",
+      "group": "card",
+      "auth": "unknown"
+    },
+    {
+      "id": "x7879748351",
+      "name": "[해외] 포켓몬 트레이딩 카드 게임 스칼렛 바이올렛 하이 클래스팩 샤이니 트레저 ex BOX",
+      "price": 321660,
+      "image": "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/product/7879748351/B.jpg?28000000",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=1985&cate_c2=226099&cate_c3=226126&cate_c4=0&cmpny_c=TH201&link_prod_c=7879748351&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%ED%95%98%EC%9D%B4%ED%81%B4%EB%9E%98%EC%8A%A4&r=17879313005828&cate=15241655",
+      "seller": "다나와 중개",
+      "query": "포켓몬카드 하이클래스",
+      "group": "card",
+      "auth": "unknown"
     },
     {
       "id": "d108365732",
@@ -2720,18 +3312,18 @@
       "seller": "다나와 최저가",
       "query": "에어프라이어",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d99837338",
       "name": "필립스 1200시리즈 라떼클래식 EP1220/19",
-      "price": 333630,
+      "price": 333600,
       "image": "https://img.danuri.io/catalog-image/338/837/099/c60f000801b94f9f93357c3ebf2730a6.jpg",
       "url": "https://prod.danawa.com/info/?pcode=99837338",
       "seller": "다나와 최저가",
       "query": "커피머신",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d89612621",
@@ -2742,7 +3334,7 @@
       "seller": "다나와 최저가",
       "query": "음식물처리기",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d20602937",
@@ -2753,7 +3345,18 @@
       "seller": "다나와 최저가",
       "query": "전기밥솥",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "xV95941926280",
+      "name": "[해외] ALPHA 포켓몬스터 카드 오리파 PSA 피카츄 시리즈 확정 랜덤팩 PSA10 확정 1개",
+      "price": 346400,
+      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/4c5f/a4a8c7cdb5863e53c7df9f3dc155039c1d0ac996dbd34a0bd40f7f0286b8.jpg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=224983&cate_c4=0&cmpny_c=TP40F&link_prod_c=V95941926280&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17879312938948&cate=1921053",
+      "seller": "다나와 중개",
+      "query": "포켓몬카드 오리파",
+      "group": "card",
+      "auth": "unknown"
     },
     {
       "id": "d63032378",
@@ -2764,18 +3367,7 @@
       "seller": "다나와 최저가",
       "query": "무선청소기",
       "group": "home",
-      "kc": "unknown"
-    },
-    {
-      "id": "d123730981",
-      "name": "휴롬 FD-B05",
-      "price": 369000,
-      "image": "https://img.danuri.io/catalog-image/981/730/123/e1ad7ad0a462471fa75806a8ec421d6d.jpeg",
-      "url": "https://prod.danawa.com/info/?pcode=123730981",
-      "seller": "다나와 최저가",
-      "query": "음식물처리기",
-      "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d123803664",
@@ -2786,51 +3378,29 @@
       "seller": "다나와 최저가",
       "query": "무선청소기",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d103483682",
       "name": "스마트카라 스톤 SC-S0201",
-      "price": 370540,
+      "price": 370530,
       "image": "https://img.danuri.io/catalog-image/682/483/103/1e3a811515644a4f98bc529f6060dabc.jpg",
       "url": "https://prod.danawa.com/info/?pcode=103483682",
       "seller": "다나와 최저가",
       "query": "음식물처리기",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d108412286",
       "name": "샤크닌자 샤크 에보파워 시스템 STD+ CS151KRGDAE",
-      "price": 379050,
+      "price": 379000,
       "image": "https://img.danuri.io/catalog-image/286/412/108/58fc0ddc3bf040ebb8709955b18df0c3.jpg",
       "url": "https://prod.danawa.com/info/?pcode=108412286",
       "seller": "다나와 최저가",
       "query": "무선청소기",
       "group": "home",
-      "kc": "unknown"
-    },
-    {
-      "id": "d75992498",
-      "name": "다이슨 에어랩 오리진+ 멀티 스타일러 앤 드라이어",
-      "price": 389290,
-      "image": "https://img.danuri.io/catalog-image/498/992/075/138683dbc30441bc94d393d2d4242ee9.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=75992498",
-      "seller": "다나와 최저가",
-      "query": "다이슨 에어랩",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d49164593",
-      "name": "다이슨 에어랩 오리진 멀티 스타일러 앤 드라이어",
-      "price": 395550,
-      "image": "https://img.danuri.io/catalog-image/593/164/049/b050884b1b08442bb5c7da3bafb36c81.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=49164593",
-      "seller": "다나와 최저가",
-      "query": "다이슨 에어랩",
-      "group": "prize",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d122621378",
@@ -2841,7 +3411,18 @@
       "seller": "다나와 최저가",
       "query": "음식물처리기",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "d123730981",
+      "name": "휴롬 FD-B05",
+      "price": 399000,
+      "image": "https://img.danuri.io/catalog-image/981/730/123/e1ad7ad0a462471fa75806a8ec421d6d.jpeg",
+      "url": "https://prod.danawa.com/info/?pcode=123730981",
+      "seller": "다나와 최저가",
+      "query": "음식물처리기",
+      "group": "home",
+      "auth": "unknown"
     },
     {
       "id": "d123670051",
@@ -2852,29 +3433,51 @@
       "seller": "다나와 최저가",
       "query": "무선청소기",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
-      "id": "d14678867",
-      "name": "Nintendo 닌텐도 스위치 OLED",
-      "price": 436990,
-      "image": "https://img.danuri.io/catalog-image/867/678/014/496cd075095b4190a96e20e72e5451b7.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=14678867",
-      "seller": "다나와 최저가",
-      "query": "닌텐도 스위치",
-      "group": "prize",
-      "kc": "unknown"
+      "id": "xV95462616213",
+      "name": "[해외] 포켓몬 카드 게임 피카츄 포켓몬 GO 028/071 R PSA 10등급 카드 일반국제배송(7~8일소요예정)",
+      "price": 440500,
+      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/8c6a/23c7cefb394bd355957e401e9ebd3a8cad0506d656e228f010a01198d5c0.jpeg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95462616213&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+psa10&r=17879313086906&cate=16349280",
+      "seller": "다나와 중개",
+      "query": "포켓몬 카드 psa10",
+      "group": "card",
+      "auth": "unknown"
     },
     {
       "id": "d101071457",
       "name": "미닉스 더 플렌더 Max MNFD-200G",
-      "price": 450800,
+      "price": 445990,
       "image": "https://img.danuri.io/catalog-image/457/071/101/c8f0055dd8254299ac003fa73b645b6f.jpg",
       "url": "https://prod.danawa.com/info/?pcode=101071457",
       "seller": "다나와 최저가",
       "query": "음식물처리기",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
+    },
+    {
+      "id": "xV95632693711",
+      "name": "[해외] 포켓몬 카드 스칼렛&바이올렛 강화 확장팩 리자몽 ex 185/165 PSA10 등급 카드 일반국제배송(7~8일)",
+      "price": 448170,
+      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/190d/8aec42da861cdb8a559e0ef73411cf55a6ec1648c55dda194a365dc282eb.jpeg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95632693711&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EB%A6%AC%EC%9E%90%EB%AA%BD+psa&r=17879313092677&cate=16349280",
+      "seller": "다나와 중개",
+      "query": "포켓몬 리자몽 psa",
+      "group": "card",
+      "auth": "unknown"
+    },
+    {
+      "id": "x9579129690",
+      "name": "[해외] 포켓몬카드 피카츄 ex SAR 풀아헤드 PK-M2a-234",
+      "price": 451270,
+      "image": "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/product/9579129690/B.webp?449193440",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=0&cate_c4=0&cmpny_c=TH201&link_prod_c=9579129690&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+SAR&r=17879313067414",
+      "seller": "다나와 중개",
+      "query": "포켓몬카드 SAR",
+      "group": "card",
+      "auth": "unknown"
     },
     {
       "id": "d15690866",
@@ -2885,18 +3488,29 @@
       "seller": "다나와 최저가",
       "query": "커피머신",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
-      "id": "d96057359",
-      "name": "다이슨 에어랩 오리진+ 멀티 스타일러 앤 드라이어 볼륨 에디션",
-      "price": 497000,
-      "image": "https://img.danuri.io/catalog-image/359/057/096/a02305b64156434390e829d58a67fa40.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=96057359",
-      "seller": "다나와 최저가",
-      "query": "다이슨 에어랩",
-      "group": "prize",
-      "kc": "unknown"
+      "id": "xV95620451298",
+      "name": "[해외] 포켓몬 카드 게임 2022년 일본 포켓몬 GO 확장팩 PSA 10등급 카드 4종 선택가능 레디언트 리자몽 단품(+16",
+      "price": 494500,
+      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/0817/360b0129a13277c1d08b7a675c75c1e3cc2f474d89842aad22e60f90b60d.jpeg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95620451298&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+psa10&r=17879313082169&cate=16349280",
+      "seller": "다나와 중개",
+      "query": "포켓몬 카드 psa10",
+      "group": "card",
+      "auth": "unknown"
+    },
+    {
+      "id": "x9533766525",
+      "name": "[해외] 포켓몬 TCG/ 카드 묶음 (PSA 가치 있는 NM-M 등급 빈티지 홀로 일부 포함)",
+      "price": 499790,
+      "image": "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/pd/v2/7/6/6/5/2/5/ZOaXi/9533766525_B.webp",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=22591&cate_c2=0&cate_c3=0&cate_c4=0&cmpny_c=TH201&link_prod_c=9533766525&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+PSA&r=17879313118149",
+      "seller": "다나와 중개",
+      "query": "포켓몬 카드 PSA",
+      "group": "card",
+      "auth": "unknown"
     },
     {
       "id": "d4808917",
@@ -2907,18 +3521,7 @@
       "seller": "다나와 최저가",
       "query": "커피머신",
       "group": "home",
-      "kc": "unknown"
-    },
-    {
-      "id": "d123683349",
-      "name": "LG전자 트롬 F9WTBQ",
-      "price": 510000,
-      "image": "https://img.danuri.io/catalog-image/349/683/123/a208f4549537481bbbe1e4970d5944c3.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=123683349",
-      "seller": "다나와 최저가",
-      "query": "드럼세탁기",
-      "group": "prize",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d18073973",
@@ -2929,95 +3532,95 @@
       "seller": "다나와 최저가",
       "query": "커피머신",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
-      "id": "d65920895",
-      "name": "APPLE 에어팟 맥스 USB-C",
-      "price": 533200,
-      "image": "https://img.danuri.io/catalog-image/895/920/065/5415d32153644d7cbf6bc33592ff7e12.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=65920895",
-      "seller": "다나와 최저가",
-      "query": "에어팟",
-      "group": "prize",
-      "kc": "unknown"
+      "id": "xV94873912856",
+      "name": "포켓몬카드 피카츄 25th ANNIVERSARY COLLECTION PSA 10등급 일반국제배송(7~8일)",
+      "price": 552240,
+      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/5faa/0c8365053bf1f313e1a9a8a928a889da2f6240db2396044abdf69a19bbd5.jpeg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V94873912856&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EC%B9%B4%EB%93%9C+psa10&r=17879313086102&cate=16349280",
+      "seller": "다나와 중개",
+      "query": "포켓몬 카드 psa10",
+      "group": "card",
+      "auth": "unknown"
     },
     {
-      "id": "d67372553",
-      "name": "다이슨 에어랩 i.d. 멀티 스타일러 앤 드라이어",
-      "price": 547200,
-      "image": "https://img.danuri.io/catalog-image/553/372/067/b003fbf85df742e68589f66fbde7e683.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=67372553",
-      "seller": "다나와 최저가",
-      "query": "다이슨 에어랩",
-      "group": "prize",
-      "kc": "unknown"
+      "id": "xV95632693603",
+      "name": "[해외] 포켓몬 카드 게임 2022 포켓몬 찬란한 리자몽 연번 PSA 10등급 카드 일반국제배송(7~8일소요예정)",
+      "price": 564000,
+      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/1b13/41867571cbe506d51c2fe913dfe00435c26bc10bb3e037568b133ad55591.jpeg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95632693603&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EB%A6%AC%EC%9E%90%EB%AA%BD+psa&r=17879313091468&cate=16349280",
+      "seller": "다나와 중개",
+      "query": "포켓몬 리자몽 psa",
+      "group": "card",
+      "auth": "unknown"
     },
     {
-      "id": "d122638042",
-      "name": "모바 P70 Pro Ultra",
-      "price": 549000,
-      "image": "https://img.danuri.io/catalog-image/042/638/122/7c4298727a5e43acb27278f8e12d4fa8.jpeg",
-      "url": "https://prod.danawa.com/info/?pcode=122638042",
-      "seller": "다나와 최저가",
-      "query": "로봇청소기",
-      "group": "prize",
-      "kc": "unknown"
+      "id": "x9548756808",
+      "name": "[해외] 포켓몬 TCG 메가 리자몽 UPC 프로모션 카드 PSA 10 오리코리오",
+      "price": 571510,
+      "image": "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/pd/v2/7/5/6/8/0/8/HSitZ/9548756808_B.webp",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=22591&cate_c2=0&cate_c3=0&cate_c4=0&cmpny_c=TH201&link_prod_c=9548756808&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EB%A6%AC%EC%9E%90%EB%AA%BD+psa&r=17879313093676",
+      "seller": "다나와 중개",
+      "query": "포켓몬 리자몽 psa",
+      "group": "card",
+      "auth": "unknown"
     },
     {
-      "id": "d77015579",
-      "name": "LG전자 트롬 FY9WT",
-      "price": 581130,
-      "image": "https://img.danuri.io/catalog-image/579/015/077/0e9277cc3ba345faa06718f4af55df52.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=77015579",
-      "seller": "다나와 최저가",
-      "query": "드럼세탁기",
-      "group": "prize",
-      "kc": "unknown"
+      "id": "x13683393827",
+      "name": "[PSA9] 리자몽vmax SSR 308 / 일본판 포켓몬 카드 게임 등급 카드 흑자몽",
+      "price": 580000,
+      "image": "https://pimg.danawa.com/proxy/shop1.phinf.naver.net/20260726_154/1785066495506YJzvk_JPEG/39688233474040090_898041246.jpg?type=m450&shrink=130:130",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TXA16A&link_prod_c=13683393827&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EB%A6%AC%EC%9E%90%EB%AA%BD+psa&r=17879313094109&cate=16349280",
+      "seller": "다나와 중개",
+      "query": "포켓몬 리자몽 psa",
+      "group": "card",
+      "auth": "unknown"
+    },
+    {
+      "id": "x9580832926",
+      "name": "[해외] 포켓몬카드 리자몽ex SAR 풀아헤드 PK-SV3-134",
+      "price": 584890,
+      "image": "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/pd/v2/8/3/2/9/2/6/ZNfSE/9580832926_B.webp",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=0&cate_c4=0&cmpny_c=TH201&link_prod_c=9580832926&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+SAR&r=17879313061964",
+      "seller": "다나와 중개",
+      "query": "포켓몬카드 SAR",
+      "group": "card",
+      "auth": "unknown"
+    },
+    {
+      "id": "xV95632694506",
+      "name": "[해외] 포켓몬 카드 스페셜 덱 세트 ex 이상해꽃 & 리자몽 & 거북왕 연번 PSA10 등급 카드 일반국제배송(7~8일소요예",
+      "price": 586110,
+      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/acfc/81fc5454ba26e0e3a3d6c6a5776dae727c88ba2c2a73343fd0e2e4c1ed81.jpeg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95632694506&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EB%A6%AC%EC%9E%90%EB%AA%BD+psa&r=17879313099442&cate=16349280",
+      "seller": "다나와 중개",
+      "query": "포켓몬 리자몽 psa",
+      "group": "card",
+      "auth": "unknown"
+    },
+    {
+      "id": "xV95620450856",
+      "name": "[해외] 포켓몬 카드 리자몽 VSTAR SAR 212/172 PSA10 등급 카드 일반국제배송(7~8일)",
+      "price": 587160,
+      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/cebc/bfeebea7e9ada4d9b26d3141a5fefd1234b26ff998f60952a6a085b000b3.jpeg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95620450856&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EB%A6%AC%EC%9E%90%EB%AA%BD+psa&r=17879313093866&cate=16349280",
+      "seller": "다나와 중개",
+      "query": "포켓몬 리자몽 psa",
+      "group": "card",
+      "auth": "unknown"
     },
     {
       "id": "d123774957",
       "name": "LG전자 오브제컬렉션 코드제로 A7 Core A720WA",
-      "price": 594627,
+      "price": 596340,
       "image": "https://img.danuri.io/catalog-image/957/774/123/be81201e13fe49e99de8e18820de4253.jpeg",
       "url": "https://prod.danawa.com/info/?pcode=123774957",
       "seller": "다나와 최저가",
       "query": "무선청소기",
       "group": "home",
-      "kc": "unknown"
-    },
-    {
-      "id": "d6517468",
-      "name": "다이슨 에어랩 스타일러 컴플리트",
-      "price": 598000,
-      "image": "https://img.danuri.io/catalog-image/468/517/006/8394494020b54a4db81bd6d255636f17.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=6517468",
-      "seller": "다나와 최저가",
-      "query": "다이슨 에어랩",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d72340532",
-      "name": "다이슨 에어랩 오리진+ 멀티 스타일러 앤 드라이어 트래블패키지",
-      "price": 599000,
-      "image": "https://img.danuri.io/catalog-image/532/340/072/045a2017a7bd4224b4c747a13772f7ae.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=72340532",
-      "seller": "다나와 최저가",
-      "query": "다이슨 에어랩",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d77313098",
-      "name": "APPLE 2025 iPad A16 11세대",
-      "price": 619890,
-      "image": "https://img.danuri.io/catalog-image/098/313/077/3eeddf9d1d964654ae86227fb21542f8.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=77313098",
-      "seller": "다나와 최저가",
-      "query": "아이패드",
-      "group": "prize",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d122715333",
@@ -3028,7 +3631,7 @@
       "seller": "다나와 최저가",
       "query": "무선청소기",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d99554174",
@@ -3039,7 +3642,7 @@
       "seller": "다나와 최저가",
       "query": "가습기",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d18155051",
@@ -3050,40 +3653,7 @@
       "seller": "다나와 최저가",
       "query": "커피머신",
       "group": "home",
-      "kc": "unknown"
-    },
-    {
-      "id": "d91497569",
-      "name": "Nintendo 닌텐도 스위치 2",
-      "price": 648000,
-      "image": "https://img.danuri.io/catalog-image/569/497/091/8d9b2478905549fd8ef7525c2b601df3.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=91497569",
-      "seller": "다나와 최저가",
-      "query": "닌텐도 스위치",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d2928197",
-      "name": "LG전자 트롬 스타일러 S3BF",
-      "price": 679000,
-      "image": "https://img.danuri.io/catalog-image/197/928/002/eb02c336ae534564be042301eb0ea15d.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=2928197",
-      "seller": "다나와 최저가",
-      "query": "스타일러",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d123683347",
-      "name": "LG전자 트롬 F12WVAR",
-      "price": 680050,
-      "image": "https://img.danuri.io/catalog-image/347/683/123/94de8e532dc241719e84deeca6bcea39.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=123683347",
-      "seller": "다나와 최저가",
-      "query": "드럼세탁기",
-      "group": "prize",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
       "id": "d68687975",
@@ -3094,612 +3664,40 @@
       "seller": "다나와 최저가",
       "query": "음식물처리기",
       "group": "home",
-      "kc": "unknown"
+      "auth": "unknown"
     },
     {
-      "id": "d12877895",
-      "name": "APPLE 에어팟 맥스",
-      "price": 692860,
-      "image": "https://img.danuri.io/catalog-image/895/877/012/7efdabcf96034624a8b68e7cc73e1229.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=12877895",
-      "seller": "다나와 최저가",
-      "query": "에어팟",
-      "group": "prize",
-      "kc": "unknown"
+      "id": "xI28896401883",
+      "name": "[해외] 포켓몬 TCG 메가 리자몽 UPC 프로모션 카드 PSA 10 오리코리오 1개",
+      "price": 688600,
+      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/f56c/33845d790c4d8257a56a1c2d54e02006a0338c8494502ad1fcea9b7f8db8.jpg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=224974&cate_c4=225358&cmpny_c=TP40F&link_prod_c=I28896401883&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EB%A6%AC%EC%9E%90%EB%AA%BD+psa&r=17879313095328&cate=1939252",
+      "seller": "다나와 중개",
+      "query": "포켓몬 리자몽 psa",
+      "group": "card",
+      "auth": "unknown"
     },
     {
-      "id": "d89603426",
-      "name": "다이슨 에어랩 코안다2x 멀티 스타일러 앤 드라이어",
-      "price": 731200,
-      "image": "https://img.danuri.io/catalog-image/426/603/089/b95acdc471e742c582085276d6b11676.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=89603426",
-      "seller": "다나와 최저가",
-      "query": "다이슨 에어랩",
-      "group": "prize",
-      "kc": "unknown"
+      "id": "x9580836813",
+      "name": "[해외] 포켓몬카드 뮤 ex SAR 풀헤드 PK-SV4a 347 슬리브",
+      "price": 1037940,
+      "image": "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/pd/v2/8/3/6/8/1/3/qqDeP/9580836813_B.webp",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=0&cate_c4=0&cmpny_c=TH201&link_prod_c=9580836813&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+SAR&r=17879313063336",
+      "seller": "다나와 중개",
+      "query": "포켓몬카드 SAR",
+      "group": "card",
+      "auth": "unknown"
     },
     {
-      "id": "d123683302",
-      "name": "삼성전자 그랑데 WF21T6000KW",
-      "price": 767250,
-      "image": "https://img.danuri.io/catalog-image/302/683/123/9c86d8cce2644a3f99cdff811bb0a05f.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=123683302",
-      "seller": "다나와 최저가",
-      "query": "드럼세탁기",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d122704759",
-      "name": "Nintendo 닌텐도 스위치 2 포켓몬 포코피아 세트",
-      "price": 796180,
-      "image": "https://img.danuri.io/catalog-image/759/704/122/ae6a8cbfcd3846fc8439fe67090c4679.jpeg",
-      "url": "https://prod.danawa.com/info/?pcode=122704759",
-      "seller": "다나와 최저가",
-      "query": "닌텐도 스위치",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d122707224",
-      "name": "다이슨 NEW 에어랩 코안다2x 멀티 스타일러 앤 드라이어",
-      "price": 818990,
-      "image": "https://img.danuri.io/catalog-image/224/707/122/9bcff400ddfc4e51a0564eecf0ca68c6.jpeg",
-      "url": "https://prod.danawa.com/info/?pcode=122707224",
-      "seller": "다나와 최저가",
-      "query": "다이슨 에어랩",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d93015251",
-      "name": "Nintendo 닌텐도 스위치 2 마리오 카트 월드 세트",
-      "price": 827860,
-      "image": "https://img.danuri.io/catalog-image/251/015/093/e071d1ecd3ad49f6b717a5e4167a47dd.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=93015251",
-      "seller": "다나와 최저가",
-      "query": "닌텐도 스위치",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d123683344",
-      "name": "LG전자 트롬 F17ITPR",
-      "price": 829820,
-      "image": "https://img.danuri.io/catalog-image/344/683/123/aa5fb0da13ae4e6e9c301208b4540eb9.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=123683344",
-      "seller": "다나와 최저가",
-      "query": "드럼세탁기",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d103752161",
-      "name": "로보락 Qrevo Curv 2 Flow",
-      "price": 848000,
-      "image": "https://img.danuri.io/catalog-image/161/752/103/8aeb6efc054340f1bfa455dfbc9806e7.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=103752161",
-      "seller": "다나와 최저가",
-      "query": "로봇청소기",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d104966723",
-      "name": "ASUS 비보북 16 M1605NAQ-MB012 WIN11",
-      "price": 848990,
-      "image": "https://img.danuri.io/catalog-image/723/966/104/2b1aa4044e074b898adea5d80050c71c.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=104966723",
-      "seller": "다나와 최저가",
-      "query": "노트북",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d123693308",
-      "name": "삼성전자 김치플러스 RP22C3111Z1",
-      "price": 859000,
-      "image": "https://img.danuri.io/catalog-image/308/693/123/bdc685a2df114af0ba7a68834f76f4d2.jpeg",
-      "url": "https://prod.danawa.com/info/?pcode=123693308",
-      "seller": "다나와 최저가",
-      "query": "김치냉장고",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d123032647",
-      "name": "LG전자 디오스 김치톡톡 K225SS131",
-      "price": 860000,
-      "image": "https://img.danuri.io/catalog-image/647/032/123/5d890e849b7143558274ddb0c2e18b23.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=123032647",
-      "seller": "다나와 최저가",
-      "query": "김치냉장고",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d106716974",
-      "name": "LG전자 트롬 F21WDSPR",
-      "price": 874090,
-      "image": "https://img.danuri.io/catalog-image/974/716/106/4354eadff8e94d35b605039fb10c5540.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=106716974",
-      "seller": "다나와 최저가",
-      "query": "드럼세탁기",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d71155355",
-      "name": "APPLE 2024 iPad mini A17 Pro 7세대",
-      "price": 889110,
-      "image": "https://img.danuri.io/catalog-image/355/155/071/59175cec23dd4650a48711dba5f0b2f7.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=71155355",
-      "seller": "다나와 최저가",
-      "query": "아이패드",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d107991857",
-      "name": "드리미 X60 Ultra",
-      "price": 990000,
-      "image": "https://img.danuri.io/catalog-image/857/991/107/95404236726b45a7a535d58c6c687b99.jpeg",
-      "url": "https://prod.danawa.com/info/?pcode=107991857",
-      "seller": "다나와 최저가",
-      "query": "로봇청소기",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d123696892",
-      "name": "LG전자 오브제컬렉션 뉴 스타일러 SC3GVE",
-      "price": 1004970,
-      "image": "https://img.danuri.io/catalog-image/892/696/123/edc90f98e0a84cbbb3e7b78503ade88d.jpeg",
-      "url": "https://prod.danawa.com/info/?pcode=123696892",
-      "seller": "다나와 최저가",
-      "query": "스타일러",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d106746428",
-      "name": "APPLE 2026 iPad Air 11 M4",
-      "price": 1019950,
-      "image": "https://img.danuri.io/catalog-image/428/746/106/241a059db8654cfcbf8a213d01e810d2.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=106746428",
-      "seller": "다나와 최저가",
-      "query": "아이패드",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d123032480",
-      "name": "LG전자 오브제컬렉션 Z323MEF",
-      "price": 1028200,
-      "image": "https://img.danuri.io/catalog-image/480/032/123/fe3e582841a842c49a513a6746bfece7.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=123032480",
-      "seller": "다나와 최저가",
-      "query": "김치냉장고",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d104547293",
-      "name": "LG전자 그램북 15UD50U-GX5JK WIN11 16GB램",
-      "price": 1039450,
-      "image": "https://img.danuri.io/catalog-image/293/547/104/238272668a9d4ed196b6f50dbddb55c1.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=104547293",
-      "seller": "다나와 최저가",
-      "query": "노트북",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d123683363",
-      "name": "삼성전자 비스포크 그랑데AI WF80H21BDS",
-      "price": 1067900,
-      "image": "https://img.danuri.io/catalog-image/363/683/123/41adbfb8920e4da9a1424132d9280bce.jpeg",
-      "url": "https://prod.danawa.com/info/?pcode=123683363",
-      "seller": "다나와 최저가",
-      "query": "드럼세탁기",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d107723801",
-      "name": "드리미 X60 Master 직배수",
-      "price": 1090000,
-      "image": "https://img.danuri.io/catalog-image/801/723/107/11641344a4fc43d5bd8b8ee69560780e.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=107723801",
-      "seller": "다나와 최저가",
-      "query": "로봇청소기",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d45314609",
-      "name": "LG전자 올레드 OLED55B4KNA",
-      "price": 1136220,
-      "image": "https://img.danuri.io/catalog-image/609/314/045/3ec9532c568e468887a64dfb6df4c9a6.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=45314609",
-      "seller": "다나와 최저가",
-      "query": "OLED TV",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d68788922",
-      "name": "삼성전자 비스포크 김치플러스 RQ33DG71J2ET",
-      "price": 1278950,
-      "image": "https://img.danuri.io/catalog-image/922/788/068/ba8ec5e71de94256938f090771e7d118.jpeg",
-      "url": "https://prod.danawa.com/info/?pcode=68788922",
-      "seller": "다나와 최저가",
-      "query": "김치냉장고",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d123696888",
-      "name": "LG전자 오브제컬렉션 뉴 스타일러 SC5MBR4ES",
-      "price": 1282870,
-      "image": "https://img.danuri.io/catalog-image/888/696/123/1a60c11193d846ff8db0124b6702eaa5.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=123696888",
-      "seller": "다나와 최저가",
-      "query": "스타일러",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d109483655",
-      "name": "LG전자 오브제컬렉션 뉴 스타일러 SC5MSR41S",
-      "price": 1298620,
-      "image": "https://img.danuri.io/catalog-image/655/483/109/7c49c7d9b09e4c39b953a7b3205aa8e4.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=109483655",
-      "seller": "다나와 최저가",
-      "query": "스타일러",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d106746593",
-      "name": "APPLE 2026 iPad Air 13 M4",
-      "price": 1332000,
-      "image": "https://img.danuri.io/catalog-image/593/746/106/ff273688f5a84c9dba87170891fde1cc.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=106746593",
-      "seller": "다나와 최저가",
-      "query": "아이패드",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d99477830",
-      "name": "LG전자 트롬 오브제컬렉션 FX25EF",
-      "price": 1446750,
-      "image": "https://img.danuri.io/catalog-image/830/477/099/2c5947e0380b4b688c87933f43ac6dfe.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=99477830",
-      "seller": "다나와 최저가",
-      "query": "드럼세탁기",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d123436415",
-      "name": "LG전자 오브제컬렉션 김치톡톡 Z330MEEF11",
-      "price": 1480000,
-      "image": "https://img.danuri.io/catalog-image/415/436/123/8360eb011eea4ff3a269e72a30872d93.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=123436415",
-      "seller": "다나와 최저가",
-      "query": "김치냉장고",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d123589310",
-      "name": "LG전자 오브제컬렉션 뉴 스타일러 SC5MBR5ES",
-      "price": 1480220,
-      "image": "https://img.danuri.io/catalog-image/310/589/123/7ea085ed131b423290508477c2bc5d7d.jpeg",
-      "url": "https://prod.danawa.com/info/?pcode=123589310",
-      "seller": "다나와 최저가",
-      "query": "스타일러",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d123696890",
-      "name": "LG전자 오브제컬렉션 뉴 스타일러 SC5GMR5ES",
-      "price": 1506320,
-      "image": "https://img.danuri.io/catalog-image/890/696/123/577c165019534e66a9b6808f21d8d94a.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=123696890",
-      "seller": "다나와 최저가",
-      "query": "스타일러",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d92367503",
-      "name": "LG전자 올레드 evo AI OLED55C5ENA",
-      "price": 1544390,
-      "image": "https://img.danuri.io/catalog-image/503/367/092/2ae19a78387743e1a7242a23ed563dcf.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=92367503",
-      "seller": "다나와 최저가",
-      "query": "OLED TV",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d99051092",
-      "name": "APPLE 2025 iPad Pro 11 M5",
-      "price": 1648180,
-      "image": "https://img.danuri.io/catalog-image/092/051/099/a0d10d4b825b4559bc4d40b6a4b2d6e5.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=99051092",
-      "seller": "다나와 최저가",
-      "query": "아이패드",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d108229415",
-      "name": "삼성전자 비스포크 AI 스팀 울트라 VR90F01AAG",
-      "price": 1649390,
-      "image": "https://img.danuri.io/catalog-image/415/229/108/53de2cd1a4e94246be36db528e1f7a68.jpeg",
-      "url": "https://prod.danawa.com/info/?pcode=108229415",
-      "seller": "다나와 최저가",
-      "query": "로봇청소기",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d122641367",
-      "name": "LG전자 올레드 evo AI OLED42C6KNA",
-      "price": 1658150,
-      "image": "https://img.danuri.io/catalog-image/367/641/122/5133572033ff478c95305de7a3ab8b36.jpeg",
-      "url": "https://prod.danawa.com/info/?pcode=122641367",
-      "seller": "다나와 최저가",
-      "query": "OLED TV",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d106736861",
-      "name": "로보락 S10 MaxV Ultra",
-      "price": 1690000,
-      "image": "https://img.danuri.io/catalog-image/861/736/106/84a38533f40345909a71bfb0aafe8bcc.jpeg",
-      "url": "https://prod.danawa.com/info/?pcode=106736861",
-      "seller": "다나와 최저가",
-      "query": "로봇청소기",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d108367196",
-      "name": "삼성전자 비스포크 AI 스팀 울트라 직배수 VR90F01SAG",
-      "price": 1707800,
-      "image": "https://img.danuri.io/catalog-image/196/367/108/4e6becf758614566be6ab52e86ff6d81.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=108367196",
-      "seller": "다나와 최저가",
-      "query": "로봇청소기",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d108402053",
-      "name": "LG전자 올레드 evo AI OLED48C6KNA",
-      "price": 1768310,
-      "image": "https://img.danuri.io/catalog-image/053/402/108/0516999d793b4cdda53722feda7a1839.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=108402053",
-      "seller": "다나와 최저가",
-      "query": "OLED TV",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d122697996",
-      "name": "삼성전자 갤럭시북6 NT760VJT-A51A",
-      "price": 1789990,
-      "image": "https://img.danuri.io/catalog-image/996/697/122/25ee4bc0691c431d9708920073b4e03c.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=122697996",
-      "seller": "다나와 최저가",
-      "query": "노트북",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d106734668",
-      "name": "로보락 S10 MaxV Ultra 직배수",
-      "price": 1790000,
-      "image": "https://img.danuri.io/catalog-image/668/734/106/6c47711b17074863acd8026cf302fe8d.jpeg",
-      "url": "https://prod.danawa.com/info/?pcode=106734668",
-      "seller": "다나와 최저가",
-      "query": "로봇청소기",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d123235224",
-      "name": "LG전자 오브제컬렉션 Z509MPSF13",
-      "price": 1815390,
-      "image": "https://img.danuri.io/catalog-image/224/235/123/f518401f2e3e475e90479c1e6886bb4d.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=123235224",
-      "seller": "다나와 최저가",
-      "query": "김치냉장고",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d123436452",
-      "name": "LG전자 오브제컬렉션 김치톡톡 Z490MPSF11",
-      "price": 2000000,
-      "image": "https://img.danuri.io/catalog-image/452/436/123/710a5db7ed0c4483a8429af8fd0c8020.jpeg",
-      "url": "https://prod.danawa.com/info/?pcode=123436452",
-      "seller": "다나와 최저가",
-      "query": "김치냉장고",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d59915246",
-      "name": "APPLE 2024 iPad Pro 11 M4+애플펜슬 프로",
-      "price": 2065270,
-      "image": "https://img.danuri.io/catalog-image/246/915/059/8a2de2d230624f4da8344d32bc429731.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=59915246",
-      "seller": "다나와 최저가",
-      "query": "아이패드",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d103451483",
-      "name": "LG전자 2026 그램 프로16 16Z95U-GS5WK",
-      "price": 2101790,
-      "image": "https://img.danuri.io/catalog-image/483/451/103/280fb649a9c8407c90c9aa52c2df7367.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=103451483",
-      "seller": "다나와 최저가",
-      "query": "노트북",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d99051176",
-      "name": "APPLE 2025 iPad Pro 13 M5",
-      "price": 2168910,
-      "image": "https://img.danuri.io/catalog-image/176/051/099/d2ff75d984794877bacaa35e72afe692.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=99051176",
-      "seller": "다나와 최저가",
-      "query": "아이패드",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d123539377",
-      "name": "LG전자 오브제컬렉션 Z509MHHF23",
-      "price": 2250000,
-      "image": "https://img.danuri.io/catalog-image/377/539/123/070269ae382442218a6b98426dc4c191.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=123539377",
-      "seller": "다나와 최저가",
-      "query": "김치냉장고",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d92886116",
-      "name": "ASUS TUF Gaming A14 FA401UM-RG007",
-      "price": 2469000,
-      "image": "https://img.danuri.io/catalog-image/116/886/092/3dac4766aaba46e5a2373986ca137cd9.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=92886116",
-      "seller": "다나와 최저가",
-      "query": "노트북",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d123696893",
-      "name": "LG전자 오브제컬렉션 뉴 스타일러 SC5MBR80S",
-      "price": 2510000,
-      "image": "https://img.danuri.io/catalog-image/893/696/123/193d6c5aeaa1497199a6a31b4c2904bc.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=123696893",
-      "seller": "다나와 최저가",
-      "query": "스타일러",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d122636630",
-      "name": "LG전자 올레드 evo AI OLED65C6FNA",
-      "price": 2562340,
-      "image": "https://img.danuri.io/catalog-image/630/636/122/7f2795e1702e45cfa47682a1a5bed72f.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=122636630",
-      "seller": "다나와 최저가",
-      "query": "OLED TV",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d123696887",
-      "name": "LG전자 오브제컬렉션 뉴 스타일러 SC5GMR80S",
-      "price": 2610000,
-      "image": "https://img.danuri.io/catalog-image/887/696/123/eb5b485043b847aeb868b73a037151b7.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=123696887",
-      "seller": "다나와 최저가",
-      "query": "스타일러",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d99051263",
-      "name": "APPLE 2025 iPad Pro 13 M5 Cellular",
-      "price": 2621070,
-      "image": "https://img.danuri.io/catalog-image/263/051/099/d88280dbf6b04b2ea2fe265a2ad8aa2c.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=99051263",
-      "seller": "다나와 최저가",
-      "query": "아이패드",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d96313874",
-      "name": "MSI 벡터 A16 HX A8WHG-R9 QHD+",
-      "price": 2699000,
-      "image": "https://img.danuri.io/catalog-image/874/313/096/74eae385059d46c8ad9507d520269459.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=96313874",
-      "seller": "다나와 최저가",
-      "query": "노트북",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d106749749",
-      "name": "레노버 요가 Slim 7i Ultra Aura Edition 83QK001JKR",
-      "price": 2798000,
-      "image": "https://img.danuri.io/catalog-image/749/749/106/421c8dbfe7db4eb4a3228e1a88536850.jpeg",
-      "url": "https://prod.danawa.com/info/?pcode=106749749",
-      "seller": "다나와 최저가",
-      "query": "노트북",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d108401444",
-      "name": "LG전자 올레드 evo AI OLED65C6SNA",
-      "price": 2958990,
-      "image": "https://img.danuri.io/catalog-image/444/401/108/14cadc3746ad43e09bea6ca7bcc16b07.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=108401444",
-      "seller": "다나와 최저가",
-      "query": "OLED TV",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d103453760",
-      "name": "LG전자 2026 그램 프로16 16Z90U-KU7WK",
-      "price": 3288380,
-      "image": "https://img.danuri.io/catalog-image/760/453/103/06dae078dfc84650b09970ac3db9963a.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=103453760",
-      "seller": "다나와 최저가",
-      "query": "노트북",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d108406814",
-      "name": "LG전자 올레드 evo AI OLED65G6KNA",
-      "price": 3459010,
-      "image": "https://img.danuri.io/catalog-image/814/406/108/39e7f3ef9aa041d5a89ef4ebc1c12d16.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=108406814",
-      "seller": "다나와 최저가",
-      "query": "OLED TV",
-      "group": "prize",
-      "kc": "unknown"
-    },
-    {
-      "id": "d122636647",
-      "name": "LG전자 올레드 evo AI OLED77C6FNA",
-      "price": 3879830,
-      "image": "https://img.danuri.io/catalog-image/647/636/122/61037e7376774fea98af2857b591447e.jpg",
-      "url": "https://prod.danawa.com/info/?pcode=122636647",
-      "seller": "다나와 최저가",
-      "query": "OLED TV",
-      "group": "prize",
-      "kc": "unknown"
+      "id": "xV94864652337",
+      "name": "포켓몬 카드 메가리자몽X EX InfernoX PSA 10등급 일반국제배송(7~8일)",
+      "price": 1332810,
+      "image": "https://img1a.coupangcdn.com/image/vendor_inventory/d5ca/6ba4ac4b3166f2f9ea8b132a424bee58743e392bdbe4743f3081ebe8380d.jpeg",
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V94864652337&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EB%A6%AC%EC%9E%90%EB%AA%BD+psa&r=17879313092389&cate=16349280",
+      "seller": "다나와 중개",
+      "query": "포켓몬 리자몽 psa",
+      "group": "card",
+      "auth": "unknown"
     }
   ]
 }

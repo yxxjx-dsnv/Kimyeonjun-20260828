@@ -13,7 +13,7 @@
 import { writeFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { danawaSearch, flatten, isJunk, kcOf } from '../api/_sources.js'
+import { danawaSearch, flatten, isJunk, authOf } from '../api/_sources.js'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 
@@ -25,31 +25,54 @@ const MIN_PRICE = 2000
 const G = (q, group, min, max, per = 8) => ({ q, group, min, max, per })
 
 const QUERIES = [
-  // 컬처 시그널 — 이 제품의 출발점. 하위 티어의 주인공이다.
-  G('말랑이', 'trend', 2000, 20000),
-  G('슬랑이', 'trend', 2000, 20000),
-  G('왁뿌볼', 'trend', 2000, 20000),
-  G('스퀴시', 'trend', 2000, 20000),
-  G('뿌셔볼', 'trend', 2000, 20000),
-  G('피젯토이', 'trend', 2000, 20000),
-  G('스트레스볼', 'trend', 2000, 20000),
-  G('캡슐토이', 'trend', 2000, 20000),
+  // 컬처 시그널 — 포켓몬 카드. 상위 등급의 주인공이다.
+  // 오리파(オリパ, 오리지널 팩)는 카드숍이 내용물을 직접 구성해 무작위로 파는
+  // 확률형 상품인데, 실물 판매로 분류돼 확률형 아이템 규제도 사행성 심의도
+  // 받지 않는다. 그 상품이 실제로 커머스에 올라와 있다는 것을 데이터로 남긴다.
+  G('포켓몬카드 오리파', 'card', 20000, 400000),
+  G('포켓몬 카드', 'card', 5000, 200000),
+  G('포켓몬 강화확장팩', 'card', 5000, 400000),
+  G('포켓몬카드 하이클래스', 'card', 30000, 600000),
+  G('포켓몬 카드 부스터박스', 'card', 15000, 400000),
+  G('포켓몬카드 배틀덱', 'card', 5000, 60000),
+  G('포켓몬카드 SAR', 'card', 100000, 1400000),
+  G('포켓몬 카드 psa10', 'card', 200000, 1800000),
+  G('포켓몬 리자몽 psa', 'card', 300000, 2200000),
+  G('포켓몬 카드 PSA', 'card', 100000, 900000),
 
-  // 생필품 — 45~65세 여성이 실제로 반복 구매하는 것. 하한 티어의 신뢰를 만든다.
+  // 기본 등급 — 45~65세 여성이 실제로 반복 구매하는 것.
+  // 오리파는 꽝이면 쓸모없는 카드가 남지만, 올박스는 최소한 참기름이 온다.
   ...['참기름', '들기름', '즉석밥', '조미김', '물티슈', '주방세제', '세탁세제', '화장지',
     '핸드크림', '밀폐용기', '샴푸', '치약', '견과류', '수면양말', '고무장갑', '수세미',
     '커피믹스', '건조나물'].map((q) => G(q, 'daily', 2000, 60000)),
 
-  // 중간 티어 — 소형가전·생활가전
+  // 중간 등급 — 소형가전·생활가전
   ...['전기포트', '에어프라이어', '가습기', '전기밥솥', '무선청소기', '커피머신',
     '전기요', '음식물처리기'].map((q) => G(q, 'home', 20000, 700000)),
 
-  // 상위 티어(S/A) — 박스의 얼굴이 되는 상품
-  ...['아이패드', '닌텐도 스위치', '에어팟', '다이슨 에어랩', '로봇청소기', '노트북',
-    'OLED TV', '김치냉장고', '드럼세탁기', '스타일러'].map((q) => G(q, 'prize', 150000, 4000000)),
+  // 공동구매형 대상 — 상품이 확정이고 확률은 '얼마를 내는가'에만 작동한다.
+  // 유니폼은 사이즈·마킹 때문에 원래도 여럿이 모여 한 번에 주문하는 품목이라
+  // 팀구매와 궁합이 좋다.
+  ...['축구 유니폼', '야구 유니폼', '손흥민 유니폼', '레플리카 유니폼',
+    '농구 유니폼', '유니폼 마킹'].map((q) => G(q, 'uniform', 20000, 500000)),
 ]
 
 const pause = (ms) => new Promise((r) => setTimeout(r, ms))
+
+/**
+ * 다나와는 짧은 간격으로 계속 부르면 **에러가 아니라 빈 목록**을 돌려준다.
+ * HTTP 200에 결과 0건이라 실패로 잡히지 않고 조용히 데이터만 사라진다
+ * (직전 과제의 "200 OK가 성공이 아니었다"와 같은 함정이다).
+ * 그래서 빈 응답을 재시도 신호로 취급하고, 간격을 넉넉히 둔다.
+ */
+async function fetchWithBackoff(q, tries = 3) {
+  for (let i = 0; i < tries; i++) {
+    const rows = await danawaSearch(q, 40, 15000)
+    if (rows.length) return rows
+    await pause(2500 * (i + 1))
+  }
+  return []
+}
 
 const seen = new Set()
 const items = []
@@ -58,10 +81,10 @@ const failed = []
 for (const { q, group, min, max, per } of QUERIES) {
   let rows = []
   try {
-    rows = await danawaSearch(q, 40, 12000)
+    rows = await fetchWithBackoff(q)
   } catch (e) {
     failed.push(`${q}: ${e.message}`)
-    await pause(300)
+    await pause(1200)
     continue
   }
   let kept = 0
@@ -82,11 +105,11 @@ for (const { q, group, min, max, per } of QUERIES) {
       seller: r.seller,
       query: q,
       group,
-      kc: kcOf(r.rawTitle),
+      auth: authOf(r.rawTitle, r.seller),
     })
   }
-  console.log(`${q.padEnd(12)} ${String(rows.length).padStart(3)}건 조회 → ${kept}건 채택`)
-  await pause(300)
+  console.log(`${q.padEnd(14)} ${String(rows.length).padStart(3)}건 조회 → ${kept}건 채택${rows.length ? '' : '  ⚠ 빈 응답'}`)
+  await pause(1200)
 }
 
 const pool = {
@@ -109,7 +132,7 @@ const prices = items.map((i) => i.price)
 console.log('\n─────────── 수집 결과 ───────────')
 console.log(`총 ${items.length}건 · 검색어 ${QUERIES.length}개 · 실패 ${failed.length}건`)
 console.log('그룹별 :', by('group'))
-console.log('KC표기 :', by('kc'))
+console.log('정품표기 :', by('auth'))
 console.log(`가격대 : ${prices[0].toLocaleString()}원 ~ ${prices.at(-1).toLocaleString()}원`)
 console.log(`이미지 : ${items.filter((i) => i.image).length}건 확보`)
 if (failed.length) console.log('실패   :', failed.join(' / '))
