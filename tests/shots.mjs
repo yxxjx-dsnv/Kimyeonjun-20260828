@@ -30,7 +30,7 @@ await page.goto(BASE, { waitUntil: 'networkidle' })
 await page.waitForSelector('.bcard', { timeout: 20000 })
 await shot(page, 'ob1_list', 720)                     // ① 박스 3종
 
-await page.click('.bcard:nth-child(2) , .blist li:nth-child(2) .bcard')
+await page.click('.blist li:nth-child(2) .bcard')  // 리자몽 올박스
 await page.waitForSelector('.curve__svg')
 await page.waitForTimeout(500)
 await shot(page, 'ob2_curve', 700)                    // ② 확률 곡선 (혼자)
@@ -71,6 +71,21 @@ await page.waitForSelector('.otable')
 await page.evaluate(() => document.querySelector('.more').scrollIntoView({ block: 'start' }))
 await page.waitForTimeout(300)
 await shot(page, 'ob8_table', 640)                    // ⑧ 1~10명 확률표
+
+// 공동구매형 — 상품 확정, 확률은 '얼마를 내는가'에만
+await page.goto(BASE, { waitUntil: 'networkidle' })
+await page.waitForSelector('.gbcard')
+await shot(page, 'ob10_list2', 900)                   // ⑩ 목록 전체(박스 + 공동구매)
+await page.click('.gbcard')
+await page.waitForSelector('.gbnow')
+await page.focus('.gbslider input')
+for (let i = 0; i < 25; i++) await page.keyboard.press('ArrowRight')  // 20 → 45명
+await page.waitForTimeout(500)
+await shot(page, 'ob11_group', 880)                   // ⑪ 45명 · 42.9% 할인 · 5명 무료
+await page.click('.btn--go')
+await page.waitForSelector('.rvlist', { timeout: 30000 })
+await page.waitForTimeout(500)
+await shot(page, 'ob12_order', 760)                   // ⑫ 발주 결과 — 누가 무료인지
 
 // 데스크톱 — 설계 근거 사이드 레일
 const wide = await browser.newContext({ viewport: { width: 1512, height: 950 }, deviceScaleFactor: 2 })

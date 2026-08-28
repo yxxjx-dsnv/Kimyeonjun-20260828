@@ -92,7 +92,12 @@ export const formula = () => ({
 
 export default function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'GET만 허용합니다.' })
-  res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=86400')
+  // s-maxage=3600을 걸었다가 배포해도 화면이 한 시간 동안 안 바뀌었다
+  // (x-vercel-cache: HIT, age 3372). 이 응답은 코드와 크롤 데이터로 정해지므로
+  // **배포할 때마다 내용이 바뀐다**. 긴 캐시를 걸 대상이 아니었다.
+  // 60초 + SWR로 트래픽 급증만 막고, 배포는 1분 안에 보이게 한다.
+  res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=600')
+  res.setHeader('X-Pool-Crawled-At', poolMeta().crawledAt)
   return res.status(200).json({
     boxes: buildBoxes(),
     groupbuys: buildGroupbuys(),

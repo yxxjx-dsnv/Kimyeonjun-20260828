@@ -29,10 +29,12 @@ page.on('console', (m) => {
   if (m.type() === 'error' && !/favicon/.test(m.text())) errors.push(m.text())
 })
 
-// 1. 진입
+// 1. 진입 — 기대값은 서버에서 받아온다(하드코딩하면 상품이 바뀔 때마다 깨진다)
+const meta = await (await fetch(`${BASE}/api/boxes`)).json()
 await page.goto(BASE, { waitUntil: 'networkidle' })
 await page.waitForSelector('.bcard', { timeout: 20000 })
-check('박스 3종 노출', (await page.$$('.bcard')).length === 3)
+check(`랜덤박스 ${meta.boxes.length}종 노출`, (await page.$$('.bcard')).length === meta.boxes.length)
+check(`공동구매 ${meta.groupbuys.length}종 노출`, (await page.$$('.gbcard')).length === meta.groupbuys.length)
 check('탭바에 올박스', await page.isVisible('.tabbar__b.is-center'))
 
 // 2. 박스 진입 — 확률 곡선과 등급 막대
@@ -77,7 +79,34 @@ check('정산 표기 10건', deltas.length === 10, deltas.slice(0, 3).join(' '))
 check('음수 차액 없음', deltas.every((d) => !d.includes('-')), deltas.join(' '))
 check('재추첨 불가 안내', (await page.textContent('.seed')).includes('같은 방'))
 
-// 8. 정직성 시트
+// 8. 공동구매형 — 상품 확정, 확률은 '얼마를 내는가'에만
+{
+  const gb = meta.groupbuys[0]
+  await page.goto(BASE, { waitUntil: 'networkidle' })
+  await page.click('.gbcard')
+  await page.waitForSelector('.gbnow', { timeout: 10000 })
+  const read = async () => (await page.$$eval('.gbnow b', (e) => e.map((x) => x.textContent)))
+  const at20 = await read()
+  check(`최소 발주 ${gb.minTeam}명 기본값`, (await page.textContent('.gbslider b')).includes(String(gb.minTeam)))
+
+  await page.focus('.gbslider input')
+  for (let i = 0; i < 25; i++) await page.keyboard.press('ArrowRight')
+  await page.waitForTimeout(400)
+  const at45 = await read()
+  check('인원이 늘면 내는 돈이 준다', parseInt(at45[0].replace(/\D/g, '')) < parseInt(at20[0].replace(/\D/g, '')), `${at20[0]} → ${at45[0]}`)
+  check('인원이 늘면 무료 인원이 는다', parseInt(at45[2]) > parseInt(at20[2]), `${at20[2]} → ${at45[2]}`)
+
+  await page.click('.btn--go')
+  await page.waitForSelector('.rvlist', { timeout: 30000 })
+  const free = (await page.$$('.freetag')).length
+  const all = (await page.$$('.rv')).length
+  check('발주 결과에 무료 당첨자', free >= 1 && free < all, `${free}/${all}명`)
+  const gd = await page.$$eval('.rv .rv__delta, .rv .rv__even', (els) => els.map((e) => e.textContent))
+  check('공동구매도 손해 없음', gd.length === all && gd.every((d) => !d.includes('-')))
+}
+
+// 9. 정직성 시트
+await page.goto(BASE, { waitUntil: 'networkidle' })
 await page.click('.top__q')
 await page.waitForSelector('.sheet', { timeout: 5000 })
 const sheet = await page.textContent('.sheet')
