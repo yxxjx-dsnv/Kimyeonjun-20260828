@@ -1,0 +1,43 @@
+:root {
+  /* 올웨이즈 앱 아이콘(AppIcon60x60@2x.png)에서 추출한 실제 브랜드 레드. */
+  --brand: #ea3f48;
+  --brand-weak: #fdedee;
+  --ink: #17171c;
+  --muted: #6b7280;
+  --hair: #e7e9ee;
+  --paper: #ffffff;
+  --band: #f5f6f8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--band);
+  color: var(--ink);
+  font-family: Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', system-ui,
+    sans-serif;
+  /* 45~65세를 핵심 고객으로 잡았으므로 기본 본문을 17px에서 시작한다. */
+  font-size: 17px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.phone {
+  max-width: 448px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: var(--paper);
+}
+
+.ph__top {
+  padding: 14px 18px;
+  font-weight: 700;
+  border-bottom: 1px solid var(--hair);
+}
+
+.ph__body {
+  padding: 18px;
+}
