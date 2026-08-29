@@ -19,7 +19,7 @@
  *   전략 방지              Roth (1982) Economics Letters 9(2) 127–132
  */
 import { fileURLToPath } from 'node:url'
-import { realpathSync, writeFileSync } from 'node:fs'
+import { realpathSync, writeFileSync, readFileSync, existsSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { rng } from './_draw.js'
 import { BOX, slotsOf } from './_box.js'
@@ -525,9 +525,21 @@ if (isMain()) {
       }
     }) }
   }
+  /**
+   * 값이 바뀌었을 때만 쓴다.
+   * measuredAt이 매 실행마다 달라지므로 무조건 쓰면 `npm test`가 돌 때마다 작업 트리가
+   * 더러워진다. 그러면 diff를 봐도 **측정값이 진짜 바뀐 건지 시각만 바뀐 건지 알 수 없다.**
+   * 시드가 고정돼 있어 측정값은 재현되므로, 값이 같으면 파일을 건드리지 않는다.
+   */
   const outPath = join(dirname(fileURLToPath(import.meta.url)), '..', 'data', 'conversion.json')
-  writeFileSync(outPath, JSON.stringify(emit, null, 2))
-  console.log(`\n  → data/conversion.json 저장 (화면이 이 값을 그대로 쓴다)`)
+  const strip = (o) => JSON.stringify({ ...o, measuredAt: null })
+  const unchanged = existsSync(outPath) && strip(JSON.parse(readFileSync(outPath, 'utf8'))) === strip(emit)
+  if (unchanged) {
+    console.log(`\n  → data/conversion.json 변화 없음 (측정값이 재현됐다)`)
+  } else {
+    writeFileSync(outPath, JSON.stringify(emit, null, 2))
+    console.log(`\n  → data/conversion.json 저장 (화면이 이 값을 그대로 쓴다)`)
+  }
 
   console.log('\n  ※ 읽는 법 — 이 표가 이 제품에 대해 말하는 것')
   console.log('    1. 전환은 100%가 아니다. S를 뽑은 사람도 S를 원하므로 잘 내놓지 않는다.')
