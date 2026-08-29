@@ -119,12 +119,32 @@ export function buildBox() {
 
 export const BOX = buildBox()
 
-/** 구좌 하나하나를 펼친 배열. 추첨은 이 위에서 비복원으로 일어난다. */
+/**
+ * 구좌 하나하나를 펼친 배열. 추첨은 이 위에서 비복원으로 일어난다.
+ *
+ * 각 구좌에 안정적인 인덱스 i를 준다. 통 구성이 결정적이므로(self-check가 확인한다)
+ * i는 재실행해도 같은 구좌를 가리킨다. 덕분에 방 상태에 1,000구좌를 통째로 저장하지
+ * 않고 **뽑힌 인덱스만** 남겨도 남은 통을 정확히 복원할 수 있다.
+ * KV에 100KB를 밀어 넣지 않아도 되고, 저장된 것과 계산된 것이 어긋날 여지도 없다.
+ */
 export function slotsOf(box = BOX) {
   const out = []
-  for (const t of box.tiers) for (const c of t.cards) for (let i = 0; i < c.slots; i++) out.push({ tier: t.tier, id: c.id, name: c.name, price: c.price, image: c.image })
+  let i = 0
+  for (const t of box.tiers) for (const c of t.cards) for (let k = 0; k < c.slots; k++) {
+    out.push({ i: i++, tier: t.tier, id: c.id, name: c.name, price: c.price, image: c.image })
+  }
   return out
 }
+
+/** 뽑힌 인덱스 집합에서 남은 통을 복원한다. */
+export const remainingFrom = (drawnIdx, box = BOX) => {
+  const taken = new Set(drawnIdx)
+  return slotsOf(box).filter((s) => !taken.has(s.i))
+}
+
+/** 남은 통의 등급별 재고. 확률은 이것을 구좌 수로 나눈 것이다. */
+export const tierCountsOf = (remaining) =>
+  Object.fromEntries(TIERS.map((g) => [g, remaining.filter((s) => s.tier === g).length]))
 
 // ─────────────────────────── self-check ───────────────────────────
 export function check(box = BOX) {

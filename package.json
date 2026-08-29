@@ -13,7 +13,7 @@
     "serve": "node tests/serve.mjs",
     "box": "node api/_box.js",
     "odds": "node api/_draw.js",
-    "test": "node api/_box.js && node api/_draw.js && node api/_trade.js",
+    "test": "node api/_box.js && node api/_draw.js && node api/_trade.js && node tests/room.test.mjs",
     "trade": "node api/_trade.js"
   },
   "dependencies": {
