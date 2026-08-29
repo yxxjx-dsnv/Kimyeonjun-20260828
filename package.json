@@ -13,7 +13,8 @@
     "serve": "node tests/serve.mjs",
     "box": "node api/_box.js",
     "odds": "node api/_draw.js",
-    "test": "node api/_box.js && node api/_draw.js"
+    "test": "node api/_box.js && node api/_draw.js && node api/_trade.js",
+    "trade": "node api/_trade.js"
   },
   "dependencies": {
     "react": "^18.3.1",
