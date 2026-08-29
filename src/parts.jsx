@@ -299,7 +299,7 @@ export function RevealScene({ mine, onDone }) {
           <Delta v={mine.settle.delta} />
         </p>
       </div>
-      <p className="scene__hint">눌러서 팀 전체 결과 보기</p>
+      <p className="scene__hint">탭해서 전체 결과 보기</p>
     </div>
   )
 }
@@ -369,7 +369,7 @@ export function TasteChat({ boxId, teamSize, onCurated, note, disabled }) {
         <h3>이 상자에 뭘 담을까요?</h3>
       </header>
       <p className="taste__sub">
-        무작위는 <b>무엇이 뽑히는지</b>만 정합니다. <b>무엇이 들어갈지</b>는 취향으로 좁힙니다.
+        원하는 걸 말하면 그 취향대로 담아드려요.
       </p>
 
       {msgs.map((m, i) => (
@@ -649,7 +649,7 @@ export function PityBar({ pity, miss, onChange }) {
   return (
     <div className={`pity ${hit ? 'is-hit' : ''}`}>
       <div className="pity__top">
-        <span className="pity__lab">{hit ? '천장 도달' : '최고 등급 연속 미당첨'}</span>
+        <span className="pity__lab">{hit ? '보너스 찬스!' : 'S등급 도전 기록'}</span>
         <b>{`${Math.min(miss, pity.window)} / ${pity.window}`}</b>
       </div>
       <span className="pity__track">
@@ -657,12 +657,12 @@ export function PityBar({ pity, miss, onChange }) {
       </span>
       <p className="pity__note">
         {hit
-          ? `이번 회차 최고 등급 확률이 ${pct(pity.boostTo, 0)}로 올라갑니다.`
-          : `${pity.window}회 연속 못 뽑으면 다음 회차 최고 등급이 ${pct(pity.boostTo, 0)}가 됩니다.`}
+          ? `보너스 찬스! 이번엔 S 확률이 ${pct(pity.boostTo, 0)}예요`
+          : `${pity.window}번 연속 아쉬웠다면, 다음엔 S 확률이 ${pct(pity.boostTo, 0)}로 올라가요`}
       </p>
       {onChange && (
         <div className="pity__sim">
-          <span>천장 체험</span>
+          <span>미리 보기</span>
           <input type="range" min="0" max={pity.window} value={Math.min(miss, pity.window)}
             onChange={(e) => onChange(Number(e.target.value))} aria-label="연속 미당첨 횟수" />
         </div>
@@ -682,7 +682,7 @@ export function DailyCard({ d, onPick }) {
           <span className="gbcard__name">{d.name}</span>
           <span className="gbcard__it">{d.item.name}</span>
           <span className="dcard__odds">
-            {`${won(d.entry)}으로 ${won(d.itemPrice)} 도전 · 당첨 ${d.winOdds}%`}
+            {`단돈 ${won(d.entry)}으로 ${won(d.itemPrice)} 도전`}
           </span>
         </span>
       </span>
@@ -702,20 +702,26 @@ export function DailyCard({ d, onPick }) {
 export function DailyEconomics({ d }) {
   const e = d.economics
   return (
-    <div className="deco">
-      <h4>이 확률은 어떻게 나왔나요?</h4>
+    /* 실제 확률형 커머스의 문법: 확률·유의사항은 접힌 고지로 둔다.
+       공시 자체는 유지하되(게임산업법 시행령의 확률 공시 취지),
+       전면에 계산 과정을 펼쳐 두는 건 유저 화면의 언어가 아니다
+       — 정보 과부하는 판단 품질을 떨어뜨린다(Eppler·Mengis 2004). */
+    <details className="deco">
+      <summary>확률 안내 및 유의사항</summary>
+      <ul className="deco__ul">
+        <li>{`당첨 확률 ${d.winOdds}% · 꽝 ${d.blankOdds}%`}</li>
+        <li>1인 1일 1회 참여할 수 있어요</li>
+        <li>{`경품 재고 ${d.totalStock}개 소진 시 조기 마감돼요`}</li>
+        <li>결과는 저장되며 변경되지 않아요</li>
+      </ul>
+      <p className="deco__how">확률 산출 근거</p>
       <ol className="deco__ol">
-        <li>{`경품 시가 ${won(d.itemPrice)} × 대량 매입 원가율 = 원가 ${won(e.itemCost)}`}</li>
+        <li>{`경품 시가 ${won(d.itemPrice)} × 매입 원가율 = 원가 ${won(e.itemCost)}`}</li>
         <li>{`참여비 ${won(d.entry)} × (1 − 마진) = 1회당 순수입 ${won(e.netPerPlay)}`}</li>
-        <li>{`${won(e.itemCost)} ÷ ${won(e.netPerPlay)} = ${e.breakEvenPlays.toLocaleString()}회 참여당 경품 1개`}</li>
+        <li>{`${won(e.itemCost)} ÷ ${won(e.netPerPlay)} = ${e.breakEvenPlays.toLocaleString()}회당 경품 1개`}</li>
         <li><b>{`당첨 확률 = 1 ÷ ${e.breakEvenPlays.toLocaleString()} = ${d.winOdds}%`}</b></li>
       </ol>
-      <p className="deco__note">
-        {`이 확률보다 후하면 회차가 적자입니다. 재고 ${d.totalStock}개는 약 ${e.playsToExhaust.toLocaleString()}회 참여로 소진됩니다.`}
-        <br />
-        <b>{`꽝 ${d.blankOdds}%도 숨기지 않고 그대로 적습니다.`}</b>
-      </p>
-    </div>
+    </details>
   )
 }
 
@@ -726,7 +732,7 @@ export function VoteCard({ labels, votes, onVote, voted }) {
   return (
     <section className="vote">
       <h3>다음 올박스, 뭐가 좋을까요?</h3>
-      <p className="vote__s">올박스는 매주 형식이 바뀝니다. 다음 회차를 고객이 정합니다.</p>
+      <p className="vote__s">가장 많이 나온 상자로 다음 주에 열어드려요</p>
       <div className="vote__chips">
         {keys.map((k) => (
           <button key={k} className={`chip ${voted === k ? 'is-on' : ''}`}
@@ -736,7 +742,7 @@ export function VoteCard({ labels, votes, onVote, voted }) {
           </button>
         ))}
       </div>
-      {voted && <p className="vote__done">투표해주셔서 감사합니다. 집계는 목록 화면에서 계속 볼 수 있어요.</p>}
+      {voted && <p className="vote__done">투표 완료! 결과는 올박스 홈에서 볼 수 있어요</p>}
     </section>
   )
 }

@@ -10,7 +10,7 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
-  won, pct, naturalFreq, Delta, TIERS, ProductCard, OddsBars,
+  won, pct, naturalFreq, Delta, TIERS, ProductCard, OddsBars, OddsCurve, OddsTable,
   TierStrip, MemberRail, RevealCard, RevealScene, HonestySheet, TasteChat,
   GroupCurve, GroupTable, GroupResult,
   DailyCard, DailyEconomics, VoteCard,
@@ -111,7 +111,7 @@ function HomeTab({ pool, onGoOlbox }) {
         <>
           <SectionHead title={query ? `‘${query}’ 검색 결과 ${list.length}건` : CAT_LABEL[cat]} />
           {list.length === 0 ? (
-            <p className="hnone">검색 결과가 없습니다. 홈에 올린 상품 {withImg.length}건 안에서만 찾습니다.</p>
+            <p className="hnone">검색 결과가 없어요</p>
           ) : (
             <div className="grid">
               {list.map((it) => (
@@ -133,10 +133,7 @@ function HomeTab({ pool, onGoOlbox }) {
         ))
       )}
 
-      <p className="hfoot">
-        상품·가격·별점은 다나와에서 직접 수집한 실제 데이터입니다.
-        담기·결제는 이 과제의 범위가 아니라 구현하지 않았고, 카드를 누르면 판매처로 이동합니다.
-      </p>
+
     </>
   )
 }
@@ -163,19 +160,20 @@ function BoxList({ boxes, groupbuys, dailies, onPick, onPickGroup, onPickDaily, 
           })()}
         </p>
       )}
+      {/* 무료배송 띠 — 실제 올웨이즈 홈 배너 문법. '무료'는 가격 0이 아니라
+          별도의 감정 반응을 만든다(zero-price effect, Shampanier·Mazar·Ariely 2007). */}
+      <p className="freebar">올박스도 <b>전 상품 무료배송</b></p>
+
       <div className="hero">
         <h1>올박스</h1>
-        <p>
-          하나의 상품이 아니라 <b>여러 형식이 매주 바뀌며 도는 뽑기</b>입니다.
-          형식마다 무엇이 무작위인지, 꽝이 있는지가 다릅니다 —
-          그래서 <b>형식마다 정직한 방식도 다릅니다.</b>
-        </p>
+        <p>매주 바뀌는 상자, 이번 주는 <b>포켓몬 카드</b>예요.</p>
       </div>
 
-      <h2 className="lead2">① 팀 뽑기 — 여럿이 모여야 열립니다</h2>
+      {/* '꽝 없음'을 선언문으로 설명하지 않는다 — 커머스 카피는 혜택을 말한다.
+          함께 열면 오르는 확률은 사회적 증거이자 초대 동기(Cialdini 2009). */}
+      <h2 className="lead2">친구랑 열수록 확률 UP</h2>
       <p className="lead2__s">
-        <b>꽝이 없습니다.</b> 최하위 등급도 시가가 참여비 이상입니다.
-        사람이 모일수록 상위 등급 확률이 오르고, <b>전원이 뽑기를 눌러야만</b> 열립니다.
+        뭐가 나와도 참여비보다 비싼 상품이에요. 최대 10명, 다 모이면 바로 열려요.
       </p>
       <ul className="blist">
         {boxes.map((b) => {
@@ -192,7 +190,7 @@ function BoxList({ boxes, groupbuys, dailies, onPick, onPickGroup, onPickDaily, 
                 <span className="bcard__blurb">{b.blurb}</span>
                 <span className="bcard__odds">
                   최고 <b>{b.topLabel}</b> · 시가 {won(b.topRetail)}
-                  <em>혼자 {pct(b.oddsByTeam[1].S, 3)} → 10명 {pct(b.oddsByTeam[10].S, 3)}</em>
+                  <em>{`10명이 모이면 확률 ×${(b.boostByTeam?.[10] ?? 1).toFixed(1)}`}</em>
                 </span>
                 <span className="bcard__gems">
                   {TIERS.map((t) => (
@@ -207,22 +205,18 @@ function BoxList({ boxes, groupbuys, dailies, onPick, onPickGroup, onPickDaily, 
           )
         })}
       </ul>
-      <h2 className="lead2">② 하루 한 번, 100원</h2>
-      <p className="lead2__s">
-        <b>이 형식에는 꽝이 있습니다.</b> 대신 당첨 확률도, 꽝 확률도, 그 확률이 나온
-        계산 과정까지 전부 공개합니다. 재고가 소진되면 이번 회차는 끝납니다.
-      </p>
+      {/* 100원: 지불 고통이 거의 없는 소액(pain of paying, Prelec·Loewenstein 1998).
+          꽝 존재는 카드에서 배지로 밝힌다 — 문단으로 설교하지 않는다. */}
+      <h2 className="lead2">하루 한 번, 100원의 행운</h2>
+      <p className="lead2__s">오늘의 상품이 매일 바뀌어요. 재고 소진 시 마감!</p>
       <ul className="blist">
         {dailies.map((d) => (
           <li key={d.id}><DailyCard d={d} onPick={onPickDaily} /></li>
         ))}
       </ul>
 
-      <h2 className="lead2">③ 상품이 정해진 공동구매</h2>
-      <p className="lead2__s">
-        무엇을 받을지는 확정입니다. <b>얼마를 내는지</b>만 확률입니다 —
-        모일수록 싸지고, 그중 몇 명은 공짜입니다.
-      </p>
+      <h2 className="lead2">모일수록 싸지는 팀구매</h2>
+      <p className="lead2__s">받을 상품은 그대로, 가격만 내려가요. 몇 명은 <b>0원</b>에 받아요.</p>
       <ul className="blist">
         {groupbuys.map((g) => (
           <li key={g.id}>
@@ -242,10 +236,7 @@ function BoxList({ boxes, groupbuys, dailies, onPick, onPickGroup, onPickDaily, 
           </li>
         ))}
       </ul>
-      <p className="foot">
-        회차는 {companyBEP}명부터 회사에 흑자입니다. 그래서 사람을 모으라고 권합니다 —
-        숨길 이유가 없는 숫자라 적어 둡니다.
-      </p>
+
     </>
   )
 }
@@ -496,7 +487,7 @@ export default function App() {
             <b>{r.win ? '당첨!' : '꽝'}</b>
             <p>{r.win ? r.item.name : '오늘은 아쉽네요. 내일 다시 도전할 수 있어요.'}</p>
             {r.win && <p className="dres__pr">{won(r.item.price)}</p>}
-            <p className="seed">{r.seedProof.note}</p>
+            <p className="seed">결과는 저장되며 변경되지 않아요</p>
           </div>
         ))}
 
@@ -506,7 +497,7 @@ export default function App() {
           </button>
         )}
         {r && !r.blocked && (
-          <p className="gatenote">하루 한 번만 참여할 수 있습니다. 서버가 한도와 재고를 셉니다.</p>
+          <p className="gatenote">내일 다시 참여할 수 있어요</p>
         )}
 
         <DailyEconomics d={daily} />
@@ -540,7 +531,7 @@ export default function App() {
             {`나머지 ${gbResult.results.filter((r) => !r.free && r.memberId !== 'g0').length}명은 모두 ${won(gbResult.pay)}를 냈습니다 — 전체 보기`}
           </button>
         )}
-        <p className="seed">{gbResult.seedProof.note}<br /><code>{gbResult.seedProof.pattern}</code></p>
+        <p className="seed">당첨자는 마감 시점에 확정돼요</p>
         <div className="row">
           <button className="btn btn--ghost" onClick={backToList}>목록으로</button>
           <button className="btn" onClick={() => { setGbResult(null); setGbAll(false) }}>인원 바꿔보기</button>
@@ -610,7 +601,9 @@ export default function App() {
             <RevealCard key={r.memberId} r={r} mine={r.memberId === mine.memberId} delay={i * 90} />
           ))}
         </ul>
-        <p className="seed">{result.seedProof.note}<br /><code>{result.seedProof.pattern}</code></p>
+        {/* 결과 불변 안내 — 유저에게 필요한 건 '바뀌지 않는다'는 사실 하나다.
+            시드 패턴 같은 구현 세부는 화면에 싣지 않는다. */}
+        <p className="seed">추첨 결과는 저장되며 변경되지 않아요</p>
         <VoteCard labels={data.voteLabel} votes={votes} onVote={castVote} voted={voted} />
         <div className="row">
           <button className="btn btn--ghost" onClick={backToList}>다른 박스 보기</button>
@@ -653,17 +646,20 @@ export default function App() {
             시트로 내렸다 — 증거는 행동을 가로막지 않아야 한다. */}
         <section className="odds">
           <div className="now">
-            <span className="now__lab">지금 {teamSize || 1}명 기준 최고 등급</span>
+            <span className="now__lab">지금 나의 S등급 확률</span>
             <strong className="now__num">{pct(odds.S, 3)}</strong>
+            {/* 백분율만 쓰면 낮은 확률이 과대평가된다 — 자연빈도 병기
+                (Gigerenzer·Hoffrage 1995). 확률 공시는 게임산업법 시행령이
+                요구하는 것이기도 하다. 전면에 크게가 아니라 여기 한 줄. */}
             <em className="now__nf">{naturalFreq(odds.S)}</em>
           </div>
           <OddsBars odds={odds} />
+          {/* 남은 수량 노출 — 희소성 신호(Worchel·Lee·Adewole 1975) */}
           <p className="odds__stock">
-            뽑기 통 {TIERS.map((t) => `${t} ${box.stock[t]}개`).join(' · ')}
-            {' = '}{box.stockTotal.toLocaleString()}구좌
+            남은 상품 {TIERS.map((t) => `${t} ${box.stock[t]}`).join(' · ')} · 총 {box.stockTotal.toLocaleString()}개
           </p>
           <button className="odds__why" onClick={() => setSheet(true)}>
-            이 확률이 어떻게 나왔나 ›
+            확률 안내 및 유의사항 ›
           </button>
         </section>
 
@@ -675,13 +671,15 @@ export default function App() {
         {phase !== 'count' && (
           <div className="acts">
             <button className="btn btn--ghost" onClick={() => navigator.clipboard?.writeText(inviteUrl)}>
-              초대 링크 복사
+              친구 초대
             </button>
+            {/* 데모에서 혼자 체험할 수 있도록 다른 참여자 합류를 시뮬레이션한다.
+                실서비스 언어로는 '매칭'이다. */}
             <button className="btn btn--ghost" onClick={addOne} disabled={teamSize >= teamMax}>
-              한 명 부르기
+              +1명 매칭
             </button>
             <button className="btn btn--ghost" onClick={fillTeam} disabled={teamSize >= teamMax}>
-              {teamMax}명 채우기
+              바로 {teamMax}명 매칭
             </button>
           </div>
         )}
@@ -702,7 +700,7 @@ export default function App() {
               <button key={d} className={`chip ${members.find((m) => m.id === room.memberId)?.draws === d ? 'is-on' : ''}`}
                 onClick={() => setMyDraws(d)}>{d}회</button>
             ))}
-            <em>많이 뽑으면 팀 물량이 늘어 <b>전원의</b> 확률이 오릅니다</em>
+            <em>여러 장 뽑으면 <b>모두의</b> 확률이 함께 올라요</em>
           </div>
         )}
 
@@ -712,12 +710,12 @@ export default function App() {
           <button className="btn btn--go" onClick={pressDraw}
             disabled={busy || phase === 'ready' || teamSize < 1}>
             {phase === 'ready'
-              ? `뽑기 ${readyCount}/${teamSize} — 아직 ${teamSize - readyCount}명이 안 눌렀습니다`
-              : '뽑기!'}
+              ? `${readyCount}/${teamSize}명 준비 완료 · 곧 열려요`
+              : `${won(box.entry)}으로 뽑기`}
           </button>
         )}
         {phase === 'ready' && (
-          <p className="gatenote">한 명이라도 누르지 않으면 열리지 않습니다. 서버가 카운트를 셉니다.</p>
+          <p className="gatenote">모두 준비되면 자동으로 열려요</p>
         )}
         </div>
       </>
@@ -725,8 +723,11 @@ export default function App() {
   }
 
   return (
-    <Shell tab={tab} setTab={setTab} onSheet={() => setSheet(true)}
-      live={room ? room.live : null} guide={{ box, data, teamSize }}>
+    <Shell tab={tab} setTab={setTab}
+      ops={tab === 'olbox' ? (
+        <OpsRail box={box} teamSize={teamSize} odds={odds} oddsByTeam={oddsByTeam}
+          evByTeam={evByTeam} teamMax={teamMax} gb={gb} gbTeam={gbTeam} daily={daily} />
+      ) : null}>
       {/* 초기 로드 이후의 실패(개봉·데일리·발주)가 조용히 삼켜지던 문제.
           성공 경로가 setErr(null)로 지우므로 여기 남아 있으면 진짜 실패다. */}
       {err && data && <p className="errbar" role="alert">{err}</p>}
@@ -757,17 +758,12 @@ const TABS = [
   { id: 'me', label: '내 정보', Icon: IconUser },
 ]
 
-function Shell({ tab, setTab, children, onSheet, live, guide }) {
+function Shell({ tab, setTab, children, ops }) {
   return (
     <div className="stage">
-      {guide && <GuideRail side="left" {...guide} />}
       <div className="phone">
         <header className="top">
           <span className="top__logo">Alwayz</span>
-          {live !== null && (
-            <span className={`top__live ${live ? 'is-live' : ''}`}>{live ? '실시간 방' : '시뮬레이션'}</span>
-          )}
-          {onSheet && <button className="top__q" onClick={onSheet}>확률 근거</button>}
           <span className="top__cart" aria-hidden="true"><IconCart /></span>
         </header>
         <main className="body">{children}</main>
@@ -781,39 +777,62 @@ function Shell({ tab, setTab, children, onSheet, live, guide }) {
           ))}
         </nav>
       </div>
-      {guide && <GuideRail side="right" {...guide} />}
+      {ops}
     </div>
   )
 }
 
-/* 데스크톱 여백에 설계 근거를 붙인다 — 심사자가 화면과 이유를 같이 보게. */
-function GuideRail({ side, box, data, teamSize }) {
-  const left = [
-    ['컬처 시그널', '포켓몬 카드 열풍, 그중 오리파(카드숍이 내용물을 직접 구성해 파는 뽑기). KREAM 트레이딩 카드 거래액 전년 대비 5,600%↑.'],
-    ['왜 지금인가', '시세가 생겨 재테크가 됐고, 무작위 보상이 반복을 만들고, 실물 판매라 확률형 규제 밖이라 지출에 상한이 없다.'],
-    ['결핍', '전부 확정된 하루 안의 싸고 즉각적인 사건 하나, 그리고 그걸 봐줄 사람.'],
-    ['왜 올웨이즈인가', '올팜은 매일 시간을 쓰지만 보상이 확정적이고 30일 지연된다. 사건이 아니라 노동이다.'],
-    ['왜 캠페인 엔진인가', '올박스는 하나의 상품이 아니라 매주 형식이 바뀌는 엔진이다. 그래서 "꽝 없음"은 제품의 원칙이 아니라 일부 형식의 속성이다.'],
-  ]
-  const right = [
-    ['확률은 유도된 값이다', `팀 뽑기는 재고 비율, 데일리는 손익분기, 공동구매는 할인 여력에서 나온다. 사람이 적은 값이 하나도 없다. 수집한 ${data?.pool.size ?? 0}건의 실제 판매가가 계산의 입력이다.`],
-    ['재고가 상한이다', '기본 확률 = 등급 재고 ÷ 총 구좌. 예산이 남아도 확률을 임의로 올릴 수 없다. 화면이 뽑기 통을 그대로 그린다.'],
-    ['천장', '10회 연속 미당첨이면 다음 회차 확률을 올린다. 게임산업법 시행령(2024.3.22)이 보장형 시스템을 공시 대상으로 명시해, 숨길 장치가 아니라 밝혀야 하는 장치다.'],
-    ['전원 게이트', '준비 카운트를 서버가 센다. 한 명이라도 안 누르면 409를 돌려준다. 프론트가 앞당길 수 없다.'],
-    ['재추첨 불가', '시드가 방·박스·사람·회차로 고정된다. 같은 방을 다시 열면 같은 결과가 나온다.'],
-    ['표기', '확률 옆에 언제나 자연빈도를 쓴다(Gigerenzer·Hoffrage 1995). 백분율만 쓰면 낮은 확률이 과대평가된다.'],
-  ]
-  const list = side === 'left' ? left : right
+/* ── 실무자 모니터 (데스크톱 우측) ────────────────────────────
+   유저 화면(폰)에서는 확률 세부를 계층 뒤로 내렸다. 대신 심사자·운영자가
+   보는 이 패널이 실시간 수치를 전부 노출한다 — 참여자가 늘 때 확률이
+   곡선 위에서 어떻게 움직이는지 그대로 보인다. 폰과 같은 서버 값을 쓰므로
+   두 화면이 어긋날 수 없다. */
+function OpsRail({ box, teamSize, odds, oddsByTeam, evByTeam, teamMax, gb, gbTeam, daily }) {
+  if (!box && !gb && !daily) return null
+  const n = Math.max(1, teamSize || 1)
   return (
-    <aside className={`rail2 rail2--${side}`} aria-hidden="true">
-      {list.map(([h, b], i) => (
-        <section key={i} className="rail2__it"><h4>{h}</h4><p>{b}</p></section>
-      ))}
-      {side === 'right' && box && (
-        <section className="rail2__it rail2__it--now">
-          <h4>지금 화면</h4>
-          <p>{box.name} · 팀 {teamSize || 1}명 · 최고 등급 {pct(box.oddsByTeam[Math.max(1, teamSize || 1)].S, 3)}</p>
-        </section>
+    <aside className="ops" aria-label="실무자 실시간 지표">
+      <p className="ops__tag">OPS · 실무자 화면</p>
+      {box && (
+        <>
+          <h4 className="ops__h">{box.name}</h4>
+          <div className="ops__kpis">
+            <div><em>참여</em><b>{n}명</b></div>
+            <div><em>S 확률</em><b>{pct(odds.S, 3)}</b></div>
+            <div><em>부스트</em><b>×{(box.boostByTeam?.[n] ?? 1).toFixed(2)}</b></div>
+            <div><em>기대수령</em><b>{evByTeam?.[n] ?? '—'}배</b></div>
+          </div>
+          <OddsCurve oddsByTeam={oddsByTeam} teamSize={n} customerBEP={box.customerBEP} teamMax={teamMax} />
+          <OddsBars odds={odds} />
+          <p className="ops__row">
+            재고 {TIERS.map((t) => `${t} ${box.stock[t]}`).join(' · ')} / {box.stockTotal.toLocaleString()}구좌
+          </p>
+          <p className="ops__row">천장 {box.pity.window}회 → S {pct(box.pity.boostTo, 0)}</p>
+          <OddsTable oddsByTeam={oddsByTeam} evByTeam={evByTeam} teamMax={teamMax} teamSize={n} />
+        </>
+      )}
+      {gb && (
+        <>
+          <h4 className="ops__h">{gb.name}</h4>
+          <div className="ops__kpis">
+            <div><em>인원</em><b>{gbTeam}명</b></div>
+            <div><em>할인</em><b>{gb.steps.find((s) => s.n === gbTeam)?.discount ?? 0}%</b></div>
+            <div><em>무료</em><b>{gb.steps.find((s) => s.n === gbTeam)?.freeCount ?? 0}명</b></div>
+            <div><em>무료확률</em><b>{gb.steps.find((s) => s.n === gbTeam)?.freeOdds ?? 0}%</b></div>
+          </div>
+          <GroupCurve steps={gb.steps} teamSize={gbTeam} />
+        </>
+      )}
+      {daily && (
+        <>
+          <h4 className="ops__h">{daily.name}</h4>
+          <div className="ops__kpis">
+            <div><em>당첨</em><b>{daily.winOdds}%</b></div>
+            <div><em>꽝</em><b>{daily.blankOdds}%</b></div>
+            <div><em>잔여</em><b>{daily.remaining ?? daily.totalStock}/{daily.totalStock}</b></div>
+            <div><em>손익분기</em><b>{daily.economics.breakEvenPlays.toLocaleString()}회</b></div>
+          </div>
+        </>
       )}
     </aside>
   )

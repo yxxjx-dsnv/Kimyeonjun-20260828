@@ -70,10 +70,10 @@ check('탭바에 올박스', await page.isVisible('.tabbar__b.is-center'))
 // 2. 박스 진입 — 상세는 '지금 확률' 한 카드만 보여준다
 await page.click('.bcard')
 await page.waitForSelector('.odds', { timeout: 10000 })
-check('등급 막대 4개', (await page.$$('.bars__row')).length === 4)
+check('등급 막대 4개', (await page.$$('.odds .bars__row')).length === 4)
 const oddsAlone = await page.textContent('.now__num')
 check('자연빈도 병기', (await page.textContent('.now__nf')).includes('명 중 약'))
-check('재고 요약 노출', /[\d,]+구좌/.test(await page.textContent('.odds__stock')))
+check('재고 요약 노출', /총 [\d,]+개/.test(await page.textContent('.odds__stock')))
 check('가로 넘침 없음 — 박스 상세', (await spill(page)).length === 0, (await spill(page)).join(' | '))
 
 // 상세 화면이 다시 15블록으로 불어나는 것을 막는다.
@@ -111,7 +111,7 @@ check('취향 구성 반영이 대화 안에 뜬다', /좁혔|기본 구성/.tes
 check('가로 넘침 없음 — 등급 스트립', (await spill(page)).length === 0, (await spill(page)).join(' | '))
 
 // 5. 인원 모으기 — 곡선 위의 점이 움직인다
-await page.click('text=명 채우기')
+await page.click('text=바로')
 await page.waitForFunction(() => document.querySelectorAll('.av.is-in').length === 10, null, { timeout: 20000 })
 check('10명 모임', (await page.textContent('.rail__count')).includes('10'))
 const oddsTeam = await page.textContent('.now__num')
@@ -121,7 +121,7 @@ check('팀이 커지자 확률 상승', parseFloat(oddsTeam) > parseFloat(oddsAl
 await page.click('.btn--go')
 await page.waitForTimeout(700)
 const gate = await page.textContent('.btn--go')
-check('게이트 진행 표시', /뽑기 \d+\/10/.test(gate), gate.trim())
+check('게이트 진행 표시', /\d+\/10명 준비/.test(gate), gate.trim())
 check('게이트 안내 문구', await page.isVisible('.gatenote'))
 
 // 7. 개봉과 정산
@@ -136,7 +136,7 @@ check('참여자 수만큼 결과', (await page.$$('.rv')).length === 10)
 const deltas = await page.$$eval('.rv .rv__delta, .rv .rv__even', (els) => els.map((e) => e.textContent))
 check('정산 표기 10건', deltas.length === 10, deltas.slice(0, 3).join(' '))
 check('음수 차액 없음', deltas.every((d) => !d.includes('-')), deltas.join(' '))
-check('재추첨 불가 안내', (await page.textContent('.seed')).includes('같은 방'))
+check('결과 불변 안내', (await page.textContent('.seed')).includes('변경되지 않아'))
 
 check('가로 넘침 없음 — 개봉 결과', (await spill(page)).length === 0, (await spill(page)).join(' | '))
 
@@ -206,16 +206,20 @@ check('가로 넘침 없음 — 개봉 결과', (await spill(page)).length === 0
   const tot = await page.textContent('.bin__tot')
   check('총 구좌 표기', /[\d,]+구좌/.test(tot), tot)
   check('천장 바 존재', await page.isVisible('.pity'))
+  const pityBefore = await page.textContent('.pity__note')
   await page.focus('.pity__sim input')
   for (let i = 0; i < 12; i++) await page.keyboard.press('ArrowRight')
   await page.waitForTimeout(300)
-  check('천장 도달 시 안내 변경', (await page.textContent('.pity__note')).includes('올라갑니다'))
+  const pityAfter = await page.textContent('.pity__note')
+  check('천장 도달 시 안내 변경', pityBefore !== pityAfter, `${pityBefore} → ${pityAfter}`)
 }
 
-// 11. 정직성 시트
+// 11. 확률 안내 시트 — 유저와 같은 경로(상세 화면의 '확률 안내')로 진입
 await page.goto(BASE, { waitUntil: 'domcontentloaded' })
-await page.waitForSelector('.top__q', { timeout: 20000 })
-await page.click('.top__q')
+await page.waitForSelector('.bcard', { timeout: 20000 })
+await page.click('.bcard')
+await page.waitForSelector('.odds__why', { timeout: 10000 })
+await page.click('.odds__why')
 await page.waitForSelector('.sheet', { timeout: 5000 })
 const sheet = await page.textContent('.sheet')
 check('수식 공개', sheet.includes('매입 원가율') && sheet.includes('고객 획득비 회수'))
@@ -238,20 +242,33 @@ check('천장은 공시 대상', sheet.includes('보장형 시스템'))
   await dp.waitForTimeout(600)
   const m = await dp.evaluate(() => {
     const body = document.querySelector('.body')
-    const rail = (s) => document.querySelector(`.rail2--${s}`)?.getBoundingClientRect()
-    const seen = (b) => Boolean(b) && b.height > 0 && b.bottom > 0 && b.top < window.innerHeight
     return {
       frame: Math.round(document.querySelector('.phone').getBoundingClientRect().height),
       vh: window.innerHeight,
       pageScrolls: document.documentElement.scrollHeight > window.innerHeight + 1,
       bodyScrolls: body.scrollHeight > body.clientHeight + 1,
-      rails: seen(rail('left')) && seen(rail('right')),
     }
   })
   check('폰 프레임이 뷰포트를 넘지 않음', m.frame <= m.vh, `${m.frame}px / ${m.vh}px`)
   check('페이지가 아니라 본문이 스크롤', !m.pageScrolls && m.bodyScrolls,
     `page=${m.pageScrolls} body=${m.bodyScrolls}`)
-  check('데스크톱 레일 노출', m.rails)
+
+  // 실무자 모니터(OPS) — 유저 폰에서 뒤로 내린 확률 세부는 우측 패널이
+  // 실시간으로 전부 보여준다. 폰과 같은 서버 값을 쓰는지, 참여자가 늘면
+  // 실제로 갱신되는지 잠근다.
+  await dp.click('.tabbar__b:nth-child(3)')
+  await dp.waitForSelector('.bcard', { timeout: 10000 })
+  await dp.click('.bcard')
+  await dp.waitForSelector('.ops__kpis', { timeout: 10000 })
+  const opsS1 = (await dp.textContent('.ops__kpis')).match(/([\d.]+%)/)?.[1]
+  const userS = (await dp.textContent('.now__num')).trim()
+  check('OPS와 유저 화면의 확률이 문자 단위로 일치', opsS1 === userS, `${opsS1} vs ${userS}`)
+  await dp.click('text=바로')
+  await dp.waitForFunction(() => document.querySelectorAll('.av.is-in').length === 10, null, { timeout: 20000 })
+  await dp.waitForTimeout(400)
+  const opsS2 = (await dp.textContent('.ops__kpis')).match(/([\d.]+%)/)?.[1]
+  check('참여자가 늘면 OPS가 실시간 갱신', opsS2 !== opsS1, `${opsS1} → ${opsS2}`)
+  check('OPS에 곡선 렌더', await dp.isVisible('.ops .curve__line'))
   await desk.close()
 }
 

@@ -842,3 +842,58 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
   background: var(--brand-weak); color: var(--brand-dk);
   font-size: var(--fs-label); font-weight: 700;
 }
+
+/* ── 유저 화면용 마감 카피 요소 ─────────────────────────────── */
+/* 무료배송 띠 — 실제 올웨이즈 홈 배너 문법 */
+.freebar {
+  margin: 0 calc(-1 * var(--s4)) var(--s4);
+  padding: var(--s2) var(--s4); text-align: center;
+  background: var(--brand); color: #fff;
+  font-size: var(--fs-label); font-weight: 600;
+}
+.freebar b { font-weight: 800; }
+
+/* 데일리 유의사항 접기 */
+.deco { border: 1px solid var(--hair); border-radius: var(--r2); padding: 0; }
+.deco summary {
+  padding: var(--s3) var(--s4); font-size: var(--fs-label); font-weight: 700;
+  color: var(--ink-2); cursor: pointer; list-style: none;
+}
+.deco summary::after { content: '⌄'; float: right; color: var(--muted); }
+.deco[open] summary::after { content: '⌃'; }
+.deco__ul, .deco__ol, .deco__how { margin: 0 var(--s4); }
+.deco__ul { padding-bottom: var(--s3); }
+.deco__ul li { font-size: var(--fs-label); color: var(--ink-2); line-height: 1.7; padding-left: 12px; position: relative; }
+.deco__ul li::before { content: '·'; position: absolute; left: 2px; }
+.deco__how { font-size: var(--fs-micro); font-weight: 700; color: var(--muted); padding-top: var(--s2); border-top: 1px solid var(--hair); }
+.deco__ol { padding: var(--s2) 0 var(--s4); }
+
+/* ── 실무자 모니터(OPS) — 데스크톱 우측, 유저 폰과 분리된 레이어 ── */
+.ops { display: none; }
+@media (min-width: 1180px) {
+  .stage { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); justify-items: center; }
+  .phone { grid-column: 2; }
+  .ops {
+    display: block; grid-column: 3; justify-self: start;
+    width: 320px; margin: 24px 0 24px 26px;
+    max-height: calc(100vh - 48px); overflow-y: auto; overscroll-behavior: contain;
+    background: var(--paper); border-radius: var(--r3); padding: var(--s4);
+    box-shadow: var(--e1); border: 1px solid var(--hair);
+  }
+}
+.ops__tag {
+  display: inline-block; font-size: var(--fs-micro); font-weight: 800; letter-spacing: 0.06em;
+  color: var(--sale-ink); background: var(--sale-bg);
+  padding: 2px var(--s2); border-radius: var(--r1); margin-bottom: var(--s3);
+}
+.ops__h { font-size: var(--fs-body); font-weight: 800; margin-bottom: var(--s3); }
+.ops__kpis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s2); margin-bottom: var(--s3); }
+.ops__kpis > div { background: var(--band); border-radius: var(--r1); padding: var(--s2) var(--s3); }
+.ops__kpis em { display: block; font-style: normal; font-size: var(--fs-micro); color: var(--muted); }
+.ops__kpis b { font-size: var(--fs-body); font-weight: 800; font-variant-numeric: tabular-nums; }
+.ops__row {
+  margin-top: var(--s2); font-size: var(--fs-micro); color: var(--ink-2);
+  font-variant-numeric: tabular-nums; background: var(--band);
+  padding: var(--s1) var(--s2); border-radius: var(--r1);
+}
+.ops .curve { margin: var(--s2) 0; }

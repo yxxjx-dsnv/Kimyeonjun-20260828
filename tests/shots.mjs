@@ -40,7 +40,7 @@ await page.waitForSelector('.taste__done', { timeout: 40000 })
 await page.waitForTimeout(400)
 await shot(page, 'ob3_taste', 640)                    // ③ 취향 대화
 
-await page.click('text=명 채우기')
+await page.click('text=바로')
 await page.waitForFunction(() => document.querySelectorAll('.av.is-in').length === 10, null, { timeout: 20000 })
 await page.waitForTimeout(500)
 await page.evaluate(() => document.querySelector('.curve').scrollIntoView({ block: 'start' }))
@@ -57,7 +57,7 @@ await page.waitForSelector('.rvlist', { timeout: 60000 })
 await page.waitForTimeout(700)
 await shot(page, 'ob6_result', 760)                   // ⑥ 개봉 결과 + 정산
 
-await page.click('.top__q')
+await page.click('.odds__why')
 await page.waitForSelector('.sheet')
 await page.waitForTimeout(400)
 await shot(page, 'ob7_honesty', 820)                  // ⑦ 정직성 시트
@@ -83,7 +83,7 @@ await shot(page, 'ob13_pity', 560)                    // ⑬ 천장 진행도
 await page.evaluate(() => document.querySelector('.bin').scrollIntoView({ block: 'start' }))
 await page.waitForTimeout(300)
 await shot(page, 'ob14_bin', 480)                     // ⑭ 뽑기 통 (혼자)
-await page.click('text=명 채우기')
+await page.click('text=바로')
 await page.waitForFunction(() => document.querySelectorAll('.av.is-in').length === 10, null, { timeout: 20000 })
 await page.evaluate(() => document.querySelector('.bin').scrollIntoView({ block: 'start' }))
 await page.waitForTimeout(500)
