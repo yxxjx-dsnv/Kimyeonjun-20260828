@@ -723,7 +723,7 @@ export default function App() {
   }
 
   return (
-    <Shell tab={tab} setTab={setTab}
+    <Shell tab={tab} setTab={setTab} pool={data.pool}
       ops={tab === 'olbox' ? (
         <OpsRail box={box} teamSize={teamSize} odds={odds} oddsByTeam={oddsByTeam}
           evByTeam={evByTeam} teamMax={teamMax} gb={gb} gbTeam={gbTeam} daily={daily} />
@@ -758,9 +758,74 @@ const TABS = [
   { id: 'me', label: '내 정보', Icon: IconUser },
 ]
 
-function Shell({ tab, setTab, children, ops }) {
+/* ── 좌측 배경 레일 (데스크톱) ────────────────────────────────
+   폰 셸이 448px이라 넓은 화면에서 양옆이 빈다. 그 자리를 설명에 쓴다.
+   왼쪽은 '무엇을 왜 만들었나', 오른쪽은 '지금 화면의 실시간 수치와 근거'.
+   채용 담당자가 한 번 훑고 이해할 분량으로만 적는다. */
+function BriefRail({ pool }) {
+  return (
+    <aside className="brief" aria-label="과제 설명">
+      <p className="brief__tag">레브잇 올웨이즈 직무 과제</p>
+      <h2 className="brief__h">올박스 — 팀으로 여는 확률형 구매</h2>
+      <p className="brief__lead">
+        올웨이즈의 <b>팀구매</b> 위에 <b>확률</b>을 얹었습니다.
+        혼자 사면 정가, 여럿이 모이면 좋은 게 나올 확률이 오릅니다.
+      </p>
+
+      <section className="brief__sec">
+        <h3>컬처 시그널</h3>
+        <p className="brief__p">
+          <b>포켓몬 카드 · 오리파</b>. 카드숍이 내용물을 직접 구성해 파는 뽑기가
+          수십만 원대에 유통되는데, <b>실물 판매라 확률 공시 의무가 없습니다.</b>
+        </p>
+      </section>
+
+      <section className="brief__sec">
+        <h3>풀려는 문제</h3>
+        <ul>
+          <li>확률형은 <b>꽝이면 돈을 버린다</b> — 혜택에 민감한 올웨이즈 고객이 못 산다</li>
+          <li>팀구매 초대가 <b>&ldquo;너도 싸게 사&rdquo;라는 부탁</b>이라 미안하다</li>
+          <li>올팜은 매일 시간을 쓰는데 보상이 <b>확정적이고 30일 지연</b>된다</li>
+        </ul>
+      </section>
+
+      <section className="brief__sec">
+        <h3>쓰는 데이터</h3>
+        <p className="brief__p">
+          다나와에서 직접 수집한 <b>{(pool?.size ?? 0).toLocaleString()}건</b>
+          (검색어 {pool?.queries ?? 0}개). 상품·가격·별점·리뷰·스펙을 화면과
+          AI 큐레이션에 그대로 씁니다.
+        </p>
+        <p className="brief__dim">
+          상품 가격이 바뀌면 확률표도 함께 바뀝니다 — 크롤 데이터가 장식이 아니라
+          연산의 입력입니다.
+        </p>
+      </section>
+
+      <section className="brief__sec">
+        <h3>세 가지 형식</h3>
+        <ul>
+          <li><b>팀 뽑기</b> — 무엇을 받을지가 확률. 꽝 없음</li>
+          <li><b>데일리 100원</b> — 당첨/꽝이 확률. 하루 한 번</li>
+          <li><b>팀구매</b> — 얼마를 낼지가 확률. 몇 명은 0원</li>
+        </ul>
+        <p className="brief__dim">
+          하나의 상품이 아니라 매주 형식이 바뀌는 <b>캠페인 엔진</b>입니다.
+        </p>
+      </section>
+
+      <p className="brief__note">
+        가운데 화면은 <b>실제 유저가 보는 그대로</b>입니다.
+        오른쪽은 심사자용 패널로, 유저 화면에는 나오지 않습니다.
+      </p>
+    </aside>
+  )
+}
+
+function Shell({ tab, setTab, children, ops, pool }) {
   return (
     <div className="stage">
+      <BriefRail pool={pool} />
       <div className="phone">
         <header className="top">
           <span className="top__logo">Alwayz</span>
@@ -788,11 +853,40 @@ function Shell({ tab, setTab, children, ops }) {
    곡선 위에서 어떻게 움직이는지 그대로 보인다. 폰과 같은 서버 값을 쓰므로
    두 화면이 어긋날 수 없다. */
 function OpsRail({ box, teamSize, odds, oddsByTeam, evByTeam, teamMax, gb, gbTeam, daily }) {
-  if (!box && !gb && !daily) return null
   const n = Math.max(1, teamSize || 1)
+  const idle = !box && !gb && !daily
   return (
     <aside className="ops" aria-label="실무자 실시간 지표">
       <p className="ops__tag">OPS · 실무자 화면</p>
+
+      {idle && (
+        <>
+          <h4 className="ops__h">확률은 형식마다 다른 곳에서 나옵니다</h4>
+          <div className="opsw">
+            <div className="opsw__name">세 형식, 세 개의 출처</div>
+            <p className="opsw__eq">
+              팀 뽑기 → 재고 비율 × 부스트<br />
+              데일리 → 1 / 손익분기 회수<br />
+              팀구매 → 대량 매입 할인 여력
+            </p>
+            <p className="opsw__body">
+              <b>사람이 손으로 적은 확률이 하나도 없습니다.</b> 전부 서버
+              (<code>api/_draw.js</code>)가 크롤 데이터에서 계산하고, 화면은 그 값을
+              렌더만 합니다. 상품 가격이 바뀌면 확률표도 함께 바뀝니다.
+            </p>
+          </div>
+          <div className="opsw">
+            <div className="opsw__name">이 패널을 만든 이유</div>
+            <p className="opsw__body">
+              가운데 화면은 <b>실제 유저가 보는 그대로</b>라, 확률 세부를 계층 뒤로
+              내렸습니다. 대신 이 패널이 같은 서버 값을 실시간으로 전부 노출합니다 —
+              박스를 열면 참여자 수에 따라 확률이 어떻게 움직이는지 곡선 위에서 보입니다.
+            </p>
+            <p className="opsw__ref">유저 화면에는 나오지 않습니다 · 데스크톱 1180px↑에서만</p>
+          </div>
+          <p className="ops__row">박스를 선택하면 실시간 지표가 켜집니다</p>
+        </>
+      )}
       {box && (
         <>
           <h4 className="ops__h">{box.name}</h4>
@@ -804,10 +898,61 @@ function OpsRail({ box, teamSize, odds, oddsByTeam, evByTeam, teamMax, gb, gbTea
           </div>
           <OddsCurve oddsByTeam={oddsByTeam} teamSize={n} customerBEP={box.customerBEP} teamMax={teamMax} />
           <OddsBars odds={odds} />
+
+          {/* 지금 화면의 숫자가 어떤 식에서 나왔는지 그 자리에서 보인다.
+              값은 전부 서버(api/_draw.js)가 계산한 것을 렌더만 한 것이다. */}
+          <div className="opsw">
+            <div className="opsw__name">확률이 나오는 식</div>
+            <p className="opsw__eq">
+              P(S) = 재고비율 × 부스트<br />
+              = {box.stock.S}/{box.stockTotal.toLocaleString()} × {(box.boostByTeam?.[n] ?? 1).toFixed(2)}
+              {' = '}<b>{pct(odds.S, 3)}</b>
+            </p>
+            <p className="opsw__body">
+              기본 확률은 <b>뽑기 통 재고 비율 그대로</b>입니다. 재고가 상한이라
+              예산이 남아도 확률을 임의로 올릴 수 없습니다.
+            </p>
+          </div>
+
+          <div className="opsw">
+            <div className="opsw__name">부스트는 어디서 나오나</div>
+            <p className="opsw__eq">
+              부스트(n) = 구매력(n) / 구매력(1)<br />
+              구매력(n) = 예산(n) / 원가율(n)
+            </p>
+            <p className="opsw__body">
+              사람이 모이면 실제로 두 가지가 생깁니다 — <b>대량 매입으로 내려가는
+              원가</b>(수량할인 임계를 로지스틱으로 평활화)와 <b>팀원 중 신규 유입만큼
+              회수되는 고객 획득비</b>. 그만큼만 확률로 돌려줍니다.
+              정의상 혼자면 <b>정확히 ×1.00</b>입니다.
+            </p>
+            <p className="opsw__ref">Bass (1969) 확산모형의 모방 항 · 수량할인 MOQ 임계</p>
+          </div>
+
+          <div className="opsw">
+            <div className="opsw__name">이 설계의 이점</div>
+            <p className="opsw__body">
+              초대의 문법이 바뀝니다. 기존 팀구매 초대는 <b>&ldquo;너도 싸게 사&rdquo;라는
+              부탁</b>이지만, 여기서는 부르면 <b>내 확률이 실제로 오릅니다</b> —
+              바이럴이 인간관계 비용을 쓰지 않습니다. 지금 화면에서
+              1명 → {teamMax}명이면 S가 {pct(oddsByTeam[1].S, 3)} → {pct(oddsByTeam[teamMax].S, 3)},
+              기대 수령이 {evByTeam?.[1]}배 → {evByTeam?.[teamMax]}배입니다.
+            </p>
+          </div>
+
           <p className="ops__row">
             재고 {TIERS.map((t) => `${t} ${box.stock[t]}`).join(' · ')} / {box.stockTotal.toLocaleString()}구좌
           </p>
-          <p className="ops__row">천장 {box.pity.window}회 → S {pct(box.pity.boostTo, 0)}</p>
+
+          <div className="opsw">
+            <div className="opsw__name">천장 {box.pity.window}회 → S {pct(box.pity.boostTo, 0)}</div>
+            <p className="opsw__body">
+              연속 미당첨자를 보호합니다. 재미 장치가 아니라 <b>규제가 공시하라고
+              명시한 소비자 보호 장치</b>라 확률표에 조건을 함께 적습니다.
+            </p>
+            <p className="opsw__ref">게임산업법 시행령(2024.3.22) — 보장형 시스템·연속 시행 공시 대상</p>
+          </div>
+
           <OddsTable oddsByTeam={oddsByTeam} evByTeam={evByTeam} teamMax={teamMax} teamSize={n} />
         </>
       )}
@@ -821,6 +966,14 @@ function OpsRail({ box, teamSize, odds, oddsByTeam, evByTeam, teamMax, gb, gbTea
             <div><em>무료확률</em><b>{gb.steps.find((s) => s.n === gbTeam)?.freeOdds ?? 0}%</b></div>
           </div>
           <GroupCurve steps={gb.steps} teamSize={gbTeam} />
+          <div className="opsw">
+            <div className="opsw__name">확률이 가격에만 작동합니다</div>
+            <p className="opsw__body">
+              상품은 확정입니다. 대량 매입으로 내려간 <b>할인 여력</b>을 전원 할인과
+              무료 당첨 인원으로 나눕니다. 안 당첨돼도 <b>정가보다 싸게 산 상품</b>이
+              오므로 재산상 손실이 0 — 사행성 요건이 성립하지 않습니다.
+            </p>
+          </div>
         </>
       )}
       {daily && (
@@ -831,6 +984,27 @@ function OpsRail({ box, teamSize, odds, oddsByTeam, evByTeam, teamMax, gb, gbTea
             <div><em>꽝</em><b>{daily.blankOdds}%</b></div>
             <div><em>잔여</em><b>{daily.remaining ?? daily.totalStock}/{daily.totalStock}</b></div>
             <div><em>손익분기</em><b>{daily.economics.breakEvenPlays.toLocaleString()}회</b></div>
+          </div>
+          <div className="opsw">
+            <div className="opsw__name">확률이 나오는 식</div>
+            <p className="opsw__eq">
+              P(당첨) = 1 / (경품원가 ÷ 1회 순수입)<br />
+              = 1 / ({won(daily.economics.itemCost)} ÷ {won(daily.economics.netPerPlay)})
+              {' = '}<b>{daily.winOdds}%</b>
+            </p>
+            <p className="opsw__body">
+              여기선 확률을 <b>손익분기에서</b> 유도합니다. 이보다 후하면 회차가
+              적자라, 이 숫자가 곧 상한입니다.
+            </p>
+          </div>
+          <div className="opsw">
+            <div className="opsw__name">이 형식만 꽝이 있습니다</div>
+            <p className="opsw__body">
+              100원은 스피또 최저가(500원)의 5분의 1입니다. 잃어도 생활에 영향이 없는
+              금액이라 꽝을 허용하고, 대신 <b>꽝 {daily.blankOdds}%와 산출 근거까지
+              전부 공개</b>합니다. 정직성의 축이 무손실이 아니라 완전 공개로 옮겨갑니다.
+            </p>
+            <p className="opsw__ref">Temu 스핀휠(당첨 직전 정지)의 정확한 반대 방향</p>
           </div>
         </>
       )}

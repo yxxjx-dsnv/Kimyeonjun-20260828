@@ -432,6 +432,7 @@ export const poolMeta = () => ({
   crawledAt: POOL.crawledAt,
   source: POOL.source,
   size: POOL.items.length,
+  queries: POOL.queries?.length ?? 0,
   minPrice: POOL.minPrice,
 })
 export { byId, POOL }

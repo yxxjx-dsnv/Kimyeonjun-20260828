@@ -868,14 +868,26 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
 .deco__how { font-size: var(--fs-micro); font-weight: 700; color: var(--muted); padding-top: var(--s2); border-top: 1px solid var(--hair); }
 .deco__ol { padding: var(--s2) 0 var(--s4); }
 
+/* 기본은 숨김. 데스크톱 미디어쿼리에서만 켠다 —
+   이 두 줄이 미디어쿼리 뒤에 오면 덮어써서 레일이 사라진다. */
+.brief { display: none; }
+
 /* ── 실무자 모니터(OPS) — 데스크톱 우측, 유저 폰과 분리된 레이어 ── */
 .ops { display: none; }
 @media (min-width: 1180px) {
-  .stage { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); justify-items: center; }
+  .stage {
+    display: grid; grid-template-columns: 320px auto 340px;
+    justify-content: center; align-items: start; gap: 26px;
+  }
+  .brief {
+    display: block; grid-column: 1; justify-self: end;
+    width: 320px; margin: 24px 0;
+    max-height: calc(100vh - 48px); overflow-y: auto; overscroll-behavior: contain;
+  }
   .phone { grid-column: 2; }
   .ops {
     display: block; grid-column: 3; justify-self: start;
-    width: 320px; margin: 24px 0 24px 26px;
+    width: 340px; margin: 24px 0;
     max-height: calc(100vh - 48px); overflow-y: auto; overscroll-behavior: contain;
     background: var(--paper); border-radius: var(--r3); padding: var(--s4);
     box-shadow: var(--e1); border: 1px solid var(--hair);
@@ -897,3 +909,51 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
   padding: var(--s1) var(--s2); border-radius: var(--r1);
 }
 .ops .curve { margin: var(--s2) 0; }
+
+/* ── 좌측 배경 레일 — 채용 담당자가 한 번 훑고 이해할 분량 ────── */
+.brief__tag {
+  display: inline-block; font-size: var(--fs-micro); font-weight: 800; letter-spacing: 0.04em;
+  color: var(--brand); background: var(--brand-weak);
+  padding: 3px var(--s2); border-radius: var(--r1); margin-bottom: var(--s3);
+}
+.brief__h { font-size: var(--fs-strong); font-weight: 800; line-height: 1.35; letter-spacing: -0.02em; }
+.brief__lead { margin-top: var(--s2); font-size: var(--fs-body); line-height: 1.65; color: var(--ink-2); }
+.brief__lead b, .brief__p b, .brief__sec li b { color: var(--ink); font-weight: 700; }
+.brief__sec { margin-top: var(--s5); }
+.brief__sec h3 {
+  font-size: var(--fs-micro); font-weight: 800; letter-spacing: 0.04em;
+  color: var(--brand); margin-bottom: var(--s2);
+}
+.brief__sec ul { display: grid; gap: var(--s2); }
+.brief__sec li {
+  font-size: var(--fs-label); line-height: 1.6; color: var(--ink-2);
+  padding-left: 12px; position: relative;
+}
+.brief__sec li::before { content: '·'; position: absolute; left: 2px; font-weight: 700; }
+.brief__p { font-size: var(--fs-label); line-height: 1.65; color: var(--ink-2); }
+.brief__dim { margin-top: var(--s2); font-size: var(--fs-micro); line-height: 1.6; color: var(--muted); }
+.brief__note {
+  margin-top: var(--s5); padding: var(--s3); border-radius: var(--r2);
+  background: var(--band); font-size: var(--fs-micro); line-height: 1.6; color: var(--ink-2);
+}
+.brief__note b { color: var(--ink); }
+
+/* OPS 안의 '왜/수식/이점' 블록 */
+.opsw {
+  margin-top: var(--s3); padding: var(--s3);
+  border-radius: var(--r2); background: var(--band);
+}
+.opsw__name { font-size: var(--fs-label); font-weight: 800; color: var(--ink); margin-bottom: var(--s2); }
+.opsw__eq {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: var(--fs-micro); line-height: 1.7; color: var(--ink-2);
+  background: var(--paper); border-radius: var(--r1);
+  padding: var(--s2); margin-bottom: var(--s2); overflow-wrap: anywhere;
+}
+.opsw__eq b { color: var(--brand); }
+.opsw__body { font-size: var(--fs-micro); line-height: 1.65; color: var(--ink-2); }
+.opsw__body b { color: var(--ink); font-weight: 700; }
+.opsw__ref {
+  margin-top: var(--s2); padding-top: var(--s2); border-top: 1px dashed var(--hair);
+  font-size: var(--fs-micro); line-height: 1.5; color: var(--muted);
+}

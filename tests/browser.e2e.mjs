@@ -258,6 +258,11 @@ check('천장은 공시 대상', sheet.includes('보장형 시스템'))
   // 실제로 갱신되는지 잠근다.
   await dp.click('.tabbar__b:nth-child(3)')
   await dp.waitForSelector('.bcard', { timeout: 10000 })
+  // 좌측 배경 레일 — 채용 담당자가 읽는 자리. 데이터 수치는 서버에서 온다.
+  check('좌측 브리프 레일 노출', await dp.isVisible('.brief__h'))
+  check('브리프에 실제 수집 건수', /\d{3}건/.test(await dp.textContent('.brief')))
+  // 박스 미선택 상태에서도 패널이 비지 않는다
+  check('OPS 기본 상태 안내', (await dp.textContent('.ops')).includes('형식마다'))
   await dp.click('.bcard')
   await dp.waitForSelector('.ops__kpis', { timeout: 10000 })
   const opsS1 = (await dp.textContent('.ops__kpis')).match(/([\d.]+%)/)?.[1]
@@ -269,6 +274,13 @@ check('천장은 공시 대상', sheet.includes('보장형 시스템'))
   const opsS2 = (await dp.textContent('.ops__kpis')).match(/([\d.]+%)/)?.[1]
   check('참여자가 늘면 OPS가 실시간 갱신', opsS2 !== opsS1, `${opsS1} → ${opsS2}`)
   check('OPS에 곡선 렌더', await dp.isVisible('.ops .curve__line'))
+  // 수식·이유·이점이 실시간 값과 함께 붙어 있어야 한다
+  const opsText = await dp.textContent('.ops')
+  check('OPS에 확률 수식', opsText.includes('P(S) = 재고비율 × 부스트'))
+  check('OPS 수식이 실시간 값', (await dp.textContent('.opsw__eq')).includes(opsS2))
+  check('OPS에 설계 이유', opsText.includes('부스트는 어디서 나오나'))
+  check('OPS에 이점 설명', opsText.includes('이 설계의 이점'))
+  check('OPS에 학술·규제 근거', opsText.includes('Bass (1969)') && opsText.includes('게임산업법'))
   await desk.close()
 }
 
