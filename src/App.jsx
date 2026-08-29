@@ -34,6 +34,25 @@ const CATS = [
 ]
 const CAT_LABEL = Object.fromEntries(CATS.map((c) => [c.id, c.label]))
 
+/* 쿠팡 골드박스 문법의 카운트다운 — 화면 장식이 아니라 사실이다:
+   데일리 참여 한도와 래플 응모가 실제로 KST 자정에 리셋된다(서버 todayKey). */
+function useMidnightLeft() {
+  const calc = () => {
+    const now = new Date(Date.now() + 9 * 3600 * 1000) // KST
+    const left = 86400 - (now.getUTCHours() * 3600 + now.getUTCMinutes() * 60 + now.getUTCSeconds())
+    const h = String(Math.floor(left / 3600)).padStart(2, '0')
+    const m = String(Math.floor((left % 3600) / 60)).padStart(2, '0')
+    const s = String(left % 60).padStart(2, '0')
+    return `${h}:${m}:${s}`
+  }
+  const [t, setT] = useState(calc)
+  useEffect(() => {
+    const id = setInterval(() => setT(calc()), 1000)
+    return () => clearInterval(id)
+  }, [])
+  return t
+}
+
 function SectionHead({ title, onMore }) {
   return (
     <div className="shead">
@@ -150,6 +169,13 @@ function StubTab({ title, body }) {
 
 /* ─────────────────────────── 올박스 ─────────────────────────── */
 function BoxList({ boxes, groupbuys, dailies, raffles, saveups, onPick, onPickGroup, onPickDaily, onPickRaffle, onPickSaveup, votes, voteLabel }) {
+  const left = useMidnightLeft()
+  // 골드박스식 섹션 점프 칩
+  const jump = (id) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  const FCHIPS = [
+    ['sec-team', '팀 뽑기'], ['sec-daily', '100원'], ['sec-raffle', '래플'],
+    ['sec-save', '적금'], ['sec-gb', '팀구매'],
+  ]
   return (
     <>
       {votes && Object.values(votes).some((v) => v > 0) && (
@@ -164,14 +190,22 @@ function BoxList({ boxes, groupbuys, dailies, raffles, saveups, onPick, onPickGr
           별도의 감정 반응을 만든다(zero-price effect, Shampanier·Mazar·Ariely 2007). */}
       <p className="freebar">올박스도 <b>전 상품 무료배송</b></p>
 
-      <div className="hero">
-        <h1>올박스</h1>
-        <p>매주 바뀌는 상자, 이번 주는 <b>포켓몬 카드</b>예요.</p>
+      {/* 골드박스식 노랑 히어로 — 검정 굵은 타이포 + '단 하루' 긴급성 */}
+      <div className="goldhero">
+        <p className="goldhero__sub">매일 아침 새로 열리는, 단 하루 특가</p>
+        <h1 className="goldhero__logo">올<span className="goldhero__gift"><IconBox /></span>박스</h1>
+        <p className="goldhero__note">이번 주 상자는 <b>포켓몬 카드</b> · 오늘 마감까지 <b className="num">{left}</b></p>
       </div>
+
+      <nav className="fchips" aria-label="형식 바로가기">
+        {FCHIPS.map(([id, label], i) => (
+          <button key={id} className={`fchips__b ${i === 0 ? 'is-on' : ''}`} onClick={() => jump(id)}>{label}</button>
+        ))}
+      </nav>
 
       {/* '꽝 없음'을 선언문으로 설명하지 않는다 — 커머스 카피는 혜택을 말한다.
           함께 열면 오르는 확률은 사회적 증거이자 초대 동기(Cialdini 2009). */}
-      <h2 className="lead2">친구랑 열수록 확률 UP</h2>
+      <h2 className="lead2" id="sec-team">친구랑 열수록 확률 UP</h2>
       <p className="lead2__s">
         뭐가 나와도 참여비보다 비싼 상품이에요. 최대 10명, 다 모이면 바로 열려요.
       </p>
@@ -207,8 +241,8 @@ function BoxList({ boxes, groupbuys, dailies, raffles, saveups, onPick, onPickGr
       </ul>
       {/* 100원: 지불 고통이 거의 없는 소액(pain of paying, Prelec·Loewenstein 1998).
           꽝 존재는 카드에서 배지로 밝힌다 — 문단으로 설교하지 않는다. */}
-      <h2 className="lead2">하루 한 번, 100원의 행운</h2>
-      <p className="lead2__s">오늘의 상품이 매일 바뀌어요. 재고 소진 시 마감!</p>
+      <h2 className="lead2" id="sec-daily">하루 한 번, 100원의 행운</h2>
+      <p className="lead2__s">한정 시간, 한정 수량! <b className="tleft">{left} 남음</b></p>
       <ul className="blist">
         {dailies.map((d) => (
           <li key={d.id}><DailyCard d={d} onPick={onPickDaily} /></li>
@@ -217,8 +251,8 @@ function BoxList({ boxes, groupbuys, dailies, raffles, saveups, onPick, onPickGr
 
       {/* ④ 래플 — 선착순 대신 추첨. 응모가 무료라 낙첨 손실이 0이다.
           (배분 공정성: 봇·오픈런이 이기는 선착순의 대안 — SNKRS·무신사 선례) */}
-      <h2 className="lead2">0원 응모 래플</h2>
-      <p className="lead2__s">선착순 대신 추첨으로 드려요. 응모는 무료, 낙첨해도 잃는 게 없어요.</p>
+      <h2 className="lead2" id="sec-raffle">0원 응모 래플</h2>
+      <p className="lead2__s">선착순 대신 추첨! 오늘 응모 마감 <b className="tleft">{left} 남음</b></p>
       <ul className="blist">
         {(raffles || []).map((r) => (
           <li key={r.id}>
@@ -240,7 +274,7 @@ function BoxList({ boxes, groupbuys, dailies, raffles, saveups, onPick, onPickGr
       </ul>
 
       {/* ⑤ 무손실 적금 — 이자 풀만 추첨, 원금 보존 (Premium Bonds 방식) */}
-      <h2 className="lead2">잃지 않는 적금</h2>
+      <h2 className="lead2" id="sec-save">잃지 않는 적금</h2>
       <p className="lead2__s">이자만 모아 매주 추첨해요. 꽝이어도 <b>원금은 100% 그대로</b>.</p>
       <ul className="blist">
         {(saveups || []).map((s) => (
@@ -260,7 +294,7 @@ function BoxList({ boxes, groupbuys, dailies, raffles, saveups, onPick, onPickGr
         ))}
       </ul>
 
-      <h2 className="lead2">모일수록 싸지는 팀구매</h2>
+      <h2 className="lead2" id="sec-gb">모일수록 싸지는 팀구매</h2>
       <p className="lead2__s">받을 상품은 그대로, 가격만 내려가요. 몇 명은 <b>0원</b>에 받아요.</p>
       <ul className="blist">
         {groupbuys.map((g) => (

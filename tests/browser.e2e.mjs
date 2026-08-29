@@ -71,6 +71,15 @@ check(`래플 ${meta.raffles.length}종 노출`, (await page.$$('.gbcard__tag--r
 check(`적금 ${meta.saveups.length}종 노출`, (await page.$$('.gbcard__tag--sv')).length === meta.saveups.length)
 check('탭바에 올박스', await page.isVisible('.tabbar__b.is-center'))
 
+// 골드박스 문법 — 노랑 히어로·형식 점프 칩·실시간 카운트다운(자정 리셋은 실제 서버 동작)
+check('골드박스 히어로', await page.isVisible('.goldhero__logo'))
+check('형식 점프 칩 5개', (await page.$$('.fchips__b')).length === 5)
+const t1 = await page.textContent('.goldhero__note .num')
+check('카운트다운 형식', /^\d{2}:\d{2}:\d{2}$/.test(t1), t1)
+await page.waitForTimeout(1500)
+const t2 = await page.textContent('.goldhero__note .num')
+check('카운트다운이 실제로 흐른다', t2 !== t1, `${t1} → ${t2}`)
+
 // 2. 박스 진입 — 상세는 '지금 확률' 한 카드만 보여준다
 await page.click('.bcard')
 await page.waitForSelector('.odds', { timeout: 10000 })

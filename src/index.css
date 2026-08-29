@@ -972,3 +972,50 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
 }
 .gbhero__pr s { color: var(--muted); font-weight: 500; margin-right: var(--s2); }
 .gbhero__pr em { font-style: normal; color: var(--brand); font-weight: 800; }
+
+/* ── 골드박스 문법 이식 ────────────────────────────────────────
+   쿠팡 골드박스 실측(2026-08-29 캡처): 노랑 배너 + 검정 굵은 로고 타이포,
+   카드마다 빨간 카운트다운 pill, 노란 판매 게이지, 카테고리 필터 칩. */
+.goldhero {
+  margin: 0 calc(-1 * var(--s4)) var(--s3);
+  padding: var(--s4) var(--s4) var(--s4);
+  background: linear-gradient(180deg, #ffe14d, #ffd400);
+  text-align: center; color: #16130a;
+}
+.goldhero__sub { font-size: var(--fs-label); font-weight: 700; color: #4a3d00; }
+.goldhero__logo {
+  margin-top: 2px;
+  font-size: var(--fs-display); font-weight: 900; letter-spacing: -0.04em;
+  display: flex; align-items: center; justify-content: center; gap: 2px;
+}
+.goldhero__gift {
+  display: inline-grid; place-items: center; width: 34px; height: 34px;
+  border-radius: var(--r1); background: #16130a; color: #ffd400; margin: 0 4px;
+}
+.goldhero__gift svg { width: 22px; height: 22px; }
+.goldhero__note { margin-top: var(--s1); font-size: var(--fs-label); color: #4a3d00; }
+.goldhero__note b { color: #16130a; }
+
+/* 카운트다운 강조 — 골드박스 카드의 빨간 pill과 같은 자리 */
+.tleft {
+  display: inline-block; padding: 1px var(--s2); border-radius: var(--r1);
+  background: var(--brand-weak); color: var(--brand-dk);
+  font-variant-numeric: tabular-nums; font-weight: 800;
+}
+
+/* 형식 점프 칩 — 골드박스 카테고리 필터 문법 */
+.fchips {
+  display: flex; gap: var(--s2); overflow-x: auto; scrollbar-width: none;
+  margin: 0 calc(-1 * var(--s4)) var(--s4); padding: 0 var(--s4);
+}
+.fchips::-webkit-scrollbar { display: none; }
+.fchips__b {
+  flex: none; font-size: var(--fs-label); font-weight: 700;
+  padding: var(--s2) var(--s3); border-radius: var(--rp);
+  border: 1px solid var(--hair); color: var(--ink-2); background: var(--paper);
+}
+.fchips__b.is-on, .fchips__b:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+/* 데일리 재고 게이지를 골드박스 노랑 바 문법으로 */
+.dcard__bar { background: var(--hair); }
+.dcard__fill { background: linear-gradient(90deg, #ffd400, #ffb300); }
