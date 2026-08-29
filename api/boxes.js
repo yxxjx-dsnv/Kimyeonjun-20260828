@@ -7,9 +7,11 @@
  *
  * roomId를 주면 그 방의 **현재** 통 상태로 갱신된 확률을 함께 내려준다(I3).
  */
-import { BOX, TIERS, remainingFrom, tierCountsOf } from './_box.js'
+import { BOX, TIERS, slotsOf, remainingFrom, tierCountsOf } from './_box.js'
 import { allOdds, updateTable, pSolo, fmtPct, naturalFreq } from './_draw.js'
 import { readRoom, kvEnabled } from './_room.js'
+import conversion from '../data/conversion.json' with { type: 'json' }
+import oripaAudit from '../data/oripa-audit.json' with { type: 'json' }
 
 export default async function handler(req, res) {
   // 코드와 크롤 데이터로 정해지므로 배포마다 내용이 바뀐다.
@@ -37,9 +39,35 @@ export default async function handler(req, res) {
 
   res.status(200).json({
     box: BOX,
+    /**
+     * 구좌별 등급을 인덱스 순서대로 이어붙인 문자열 (길이 N).
+     * 화면의 1,000칸 그리드가 이것을 그대로 읽는다. 클라이언트가 통을 다시
+     * 펼치면 서버와 두 벌이 되고, 두 벌은 반드시 어긋난다(I15).
+     */
+    slotTiers: slotsOf().map((s) => s.tier).join(''),
     odds: allOdds(),
     updates: Object.fromEntries(TIERS.map((g) => [g, updateTable(g, [0, 250, 500, 750, 900, 990])])),
     live,
+    /**
+     * 교환 전환율 — node api/_trade.js가 10만 회 시뮬로 재서 파일로 내보낸 값이다.
+     * 화면은 이 문자열을 그대로 렌더한다. 손으로 적지 않는다.
+     */
+    conversion,
+    /**
+     * 오리파 확률 표기 실측 — node crawler/crawl.js oripa 의 출력이다.
+     * 화면의 첫 문단이 이 숫자를 쓴다. 손으로 적으면 크롤을 다시 돌려도 화면이
+     * 안 바뀌고, 그 순간 "직접 조사했다"는 주장이 검증 불가능해진다.
+     */
+    oripa: {
+      total: oripaAudit.oripaTotal,
+      probNum: oripaAudit.probNum,
+      guarantee: oripaAudit.guarantee,
+      undisclosed: oripaAudit.undisclosed,
+      detailReached: oripaAudit.detailReached,
+      unreachable: oripaAudit.oripaTotal - oripaAudit.detailAttempted,
+      auditedAt: oripaAudit.auditedAt,
+      limit: oripaAudit.method.limit,
+    },
     // 계산 근거 — 화면의 '근거' 시트가 이 문자열을 그대로 쓴다.
     basis: {
       individual: 'P(g) = K_g / N  (재고 ÷ 구좌). 정의이지 수식이 아니다.',

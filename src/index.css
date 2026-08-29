@@ -1,3 +1,263 @@
-/* Phase 5가 다시 쓴다. v1의 index.css(61KB)는 3형식 캠페인 화면 스타일이라 지웠다. */
-:root { color-scheme: light dark }
-body { margin: 0 }
+/*
+  올박스 v2 — 스타일
+  CSS 프레임워크를 쓰지 않는다(패키지 4개 원칙). 토큰과 컴포넌트 클래스만 둔다.
+
+  ## 디자인 방향
+  이 제품의 세계는 카드 아트가 아니라 **셀 수 있음**이다. "1,000구좌 중 S 1장"이
+  주장의 전부이므로, 화면의 주인공은 헤드라인이 아니라 1,000개 셀을 실제로 그린
+  통이다. 평가자가 눈으로 셀 수 있고, 개봉하면 셀이 꺼지며 확률이 갱신된다.
+  오리파가 못 보여주는 것을 화면이 직접 반증한다.
+
+  등급 마커는 포켓몬 TCG의 실제 레어도 기호(● ◆ ★)를 쓴다. 이 세계의 어휘다.
+  화려함은 한 곳에만 — 1,000칸 중 S 한 칸만 홀로그램이고 나머지는 전부 납작하다.
+
+  ## 타이포
+  고운바탕   디스플레이. 문서·기록의 목소리.
+  Plex Sans KR  본문·UI
+  Plex Mono     **모든 수치**. 확률·구좌·시세가 고정폭인 것은 이것이 장부이기 때문이다.
+*/
+
+:root {
+  /* 지면 — 크림색이 아니라 차가운 종이. 장부·모눈종이 쪽이다. */
+  --paper: #eef1f5;
+  --paper-2: #e4e9f0;
+  --card: #ffffff;
+  --ink: #12161f;
+  --ink-2: #3c4658;
+  --ink-3: #6b7688;
+  --line: #cfd6e0;
+  --line-2: #e2e7ee;
+
+  /* 등급 — 포켓몬 레어도 기호에 붙는 색. 1,000칸에서 서로 구분돼야 한다. */
+  --t-c: #aeb7c6;   /* 970칸을 채우므로 옅게. 특수 칸이 눈에 들어와야 한다 */
+  --t-b: #2e7d6b;
+  --t-a: #b4453a;
+  --t-s: #5b34d9;
+
+  --warn: #b4453a;
+  --ok: #2e7d6b;
+
+  --r: 6px;
+  --gut: clamp(16px, 4vw, 32px);
+  --maxw: 1080px;
+
+  color-scheme: light;
+  font-synthesis-weight: none;
+  -webkit-text-size-adjust: 100%;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 16px/1.65 'IBM Plex Sans KR', system-ui, -apple-system, sans-serif;
+  /*
+    한글은 어절 단위로 끊어야 읽힌다. 기본값이면 "통이 안 보입 / 니다"처럼
+    단어 중간에서 잘린다. 실제로 히어로 헤드라인이 그렇게 깨져 있었다.
+  */
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  /* 모눈종이 — 이 페이지가 세는 문서라는 것을 지면 자체가 말한다. 아주 옅게. */
+  background-image:
+    linear-gradient(var(--line-2) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line-2) 1px, transparent 1px);
+  background-size: 28px 28px;
+  background-position: -1px -1px;
+}
+
+h1, h2, h3 { font-family: 'Gowun Batang', serif; font-weight: 700; line-height: 1.3; margin: 0; letter-spacing: -0.01em; }
+h1 { font-size: clamp(30px, 6.2vw, 54px); letter-spacing: -0.03em; }
+h2 { font-size: clamp(21px, 3.4vw, 30px); }
+h3 { font-size: clamp(17px, 2.2vw, 20px); }
+p { margin: 0 0 0.9em; }
+a { color: inherit; }
+
+.num, .mono { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+
+/* ── 뼈대 ─────────────────────────────────────────────── */
+.wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 var(--gut); }
+
+.topbar {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(238, 241, 245, 0.92);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+.topbar-in { display: flex; align-items: center; gap: 14px; height: 52px; }
+.brand { font-family: 'Gowun Batang', serif; font-weight: 700; font-size: 18px; letter-spacing: -0.02em; white-space: nowrap; }
+.topbar-strip { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; }
+.topbar-count { font-size: 12px; color: var(--ink-3); white-space: nowrap; }
+
+/*
+  세로 여백만 준다. `padding: X 0`으로 쓰면 단축 속성이 .wrap의 좌우 패딩까지
+  0으로 덮어써서 모바일에서 본문이 화면 끝에 붙는다. 실제로 그렇게 깨져 있었다.
+  선택자 우선순위가 같고 이 규칙이 뒤에 있어 캐스케이드에서 이긴다.
+  padding-block을 쓰면 좌우를 건드리지 않으므로 순서와 무관하게 안전하다.
+*/
+.section { padding-block: clamp(40px, 7vw, 76px); border-top: 1px solid var(--line); scroll-margin-top: 64px; }
+h2, h3 { scroll-margin-top: 64px; }
+.section:first-of-type { border-top: 0; }
+
+/*
+  섹션 라벨 — 01/02/03이 아니라 "이 화면이 무엇을 증명하는가"를 적는다.
+  순서 자체는 정보가 아니고, 증명 대상이 정보다.
+*/
+.proves {
+  display: inline-flex; align-items: baseline; gap: 9px;
+  font-size: 11.5px; letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--ink-3); margin-bottom: 12px;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.proves b { color: var(--t-a); font-weight: 600; }
+.lede { font-size: clamp(15px, 1.9vw, 17px); color: var(--ink-2); max-width: 62ch; }
+
+/* ── 히어로 ────────────────────────────────────────────── */
+.hero { padding-block: clamp(44px, 8vw, 88px) clamp(32px, 5vw, 56px); }
+.hero h1 { max-width: 15ch; }
+.hero h1 em { font-style: normal; color: var(--t-a); }
+.hero-sub { margin-top: 18px; max-width: 52ch; font-size: clamp(15px, 2vw, 18px); color: var(--ink-2); }
+
+/* 실측 카드 — 우리가 직접 잰 숫자. 인용이 아니라 조사라는 것이 이 블록의 요점이다. */
+.measure {
+  margin-top: 26px; background: var(--card); border: 1px solid var(--line);
+  border-radius: var(--r); padding: 18px 20px; max-width: 560px;
+}
+.measure-h { font-size: 12.5px; color: var(--ink-3); margin-bottom: 12px; letter-spacing: 0.02em; }
+.measure-row { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 7px 0; border-top: 1px dashed var(--line-2); }
+.measure-row:first-of-type { border-top: 0; }
+.measure-row .k { font-size: 14.5px; }
+.measure-row .v { font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 17px; font-variant-numeric: tabular-nums; }
+.measure-row .v.zero { color: var(--warn); }
+.measure-note { margin-top: 12px; font-size: 12.5px; color: var(--ink-3); line-height: 1.55; }
+
+/* ── 통 그리드 — 이 페이지의 서명 ──────────────────────── */
+/*
+  통 — 1,000칸을 **한 화면에 한꺼번에** 보여야 한다. 세어볼 수 있다는 것이 요점이라
+  스크롤해야 다 보이면 요점이 사라진다. 50열 × 20행으로 묶고 폭을 760px로 잡으면
+  칸이 약 14px가 되어 전체가 320px 안에 들어온다.
+*/
+.boxgrid {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 50), 1fr);
+  gap: 1.5px;
+  max-width: 760px;
+  padding: 12px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+}
+.cell {
+  aspect-ratio: 1; border-radius: 1.5px; background: var(--t-c);
+  transition: opacity 240ms ease, transform 240ms ease;
+}
+.cell.t-B { background: var(--t-b); }
+.cell.t-A { background: var(--t-a); }
+.cell.t-C { background: var(--t-c); }
+.cell.t-S {
+  /* 1,000칸 중 유일하게 홀로그램. 화려함은 한 곳에만 쓴다. */
+  background: linear-gradient(115deg, #5b34d9, #b23ad9, #34a1d9, #5b34d9);
+  background-size: 300% 300%;
+  animation: holo 4.5s ease-in-out infinite;
+  box-shadow: 0 0 0 1.5px #fff, 0 0 0 2.5px #5b34d9;
+  border-radius: 2px;
+}
+.cell.gone { opacity: 0.14; transform: scale(0.72); }
+@keyframes holo { 0%, 100% { background-position: 0% 50% } 50% { background-position: 100% 50% } }
+
+.grid-legend { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 14px; font-size: 13px; }
+.legend-item { display: inline-flex; align-items: center; gap: 7px; }
+.rarity { font-size: 12px; line-height: 1; }
+.rarity.t-C { color: var(--t-c) } .rarity.t-B { color: var(--t-b) }
+.rarity.t-A { color: var(--t-a) } .rarity.t-S { color: var(--t-s) }
+
+/* 얇은 진행 스트립 — 상단바에서 남은 구좌를 항상 보여준다. */
+.strip { flex: 1; height: 7px; min-width: 60px; background: var(--line); border-radius: 4px; overflow: hidden; }
+.strip > i { display: block; height: 100%; background: var(--ink-2); transition: width 400ms ease; }
+
+/* ── 표 ────────────────────────────────────────────────── */
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r); background: var(--card); }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { padding: 9px 13px; text-align: right; border-bottom: 1px solid var(--line-2); white-space: nowrap; }
+th { font-size: 11.5px; letter-spacing: 0.05em; color: var(--ink-3); font-weight: 500; text-transform: uppercase; background: var(--paper-2); }
+th:first-child, td:first-child { text-align: left; }
+tr:last-child td { border-bottom: 0; }
+td.n { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; }
+td.hi { font-weight: 600; }
+.freq { display: block; font-size: 11.5px; color: var(--ink-3); font-family: 'IBM Plex Sans KR', sans-serif; }
+
+/* ── 조각 ──────────────────────────────────────────────── */
+.badge {
+  display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; border-radius: 999px;
+  font-size: 11.5px; font-weight: 500; border: 1px solid var(--line); background: var(--card); color: var(--ink-2);
+}
+.badge.sim { border-color: #d9c46a; background: #fdf8e3; color: #7a6512; }
+.badge.ai { border-color: #a9c0e8; background: #eef4fd; color: #2c5da8; }
+.badge.rule { border-color: var(--line); background: var(--paper-2); color: var(--ink-3); }
+
+.btn {
+  font: 600 15px/1 'IBM Plex Sans KR', sans-serif; padding: 12px 20px; border-radius: var(--r);
+  border: 1px solid var(--ink); background: var(--ink); color: var(--paper); cursor: pointer;
+  transition: transform 120ms ease, opacity 120ms ease;
+}
+.btn:hover:not(:disabled) { transform: translateY(-1px); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn.ghost { background: transparent; color: var(--ink); }
+.btn.sm { font-size: 13px; padding: 8px 13px; }
+.btn:focus-visible, .cardpick:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+  outline: 2px solid var(--t-s); outline-offset: 2px;
+}
+
+.panel { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 18px 20px; }
+.grid2 { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.stack { display: flex; flex-direction: column; gap: 14px; }
+.row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+/* 통 안의 카드 목록 */
+.cardlist { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+.cardpick {
+  display: flex; gap: 10px; align-items: center; text-align: left; width: 100%;
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--r);
+  padding: 8px; cursor: pointer; font: inherit; color: inherit;
+}
+.cardpick[aria-pressed='true'] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.cardpick img { width: 44px; height: 44px; object-fit: contain; background: var(--paper-2); border-radius: 3px; flex: none; }
+.cardpick .nm { font-size: 12.5px; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.cardpick .pr { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--ink-3); }
+
+/* 슬라이더 */
+input[type='range'] { width: 100%; accent-color: var(--ink); }
+.slider-read { display: flex; align-items: baseline; gap: 10px; font-family: 'IBM Plex Mono', monospace; }
+.slider-read b { font-size: 30px; font-weight: 600; }
+
+/* 수식 */
+.formula {
+  font-family: 'IBM Plex Mono', monospace; font-size: 13px; background: var(--paper-2);
+  border: 1px solid var(--line); border-radius: var(--r); padding: 11px 13px;
+  overflow-x: auto; white-space: pre; line-height: 1.7;
+}
+
+/* 고지 — 툴팁이나 더보기에 넣지 않는다(I11). 첫 화면 크기로 둔다. */
+.notice { border-left: 3px solid var(--t-a); background: var(--card); border-radius: 0 var(--r) var(--r) 0; padding: 14px 18px; }
+.notice h3 { font-family: 'IBM Plex Sans KR', sans-serif; font-size: 15px; font-weight: 700; margin-bottom: 5px; }
+.notice p { font-size: 14px; color: var(--ink-2); margin: 0; }
+
+/* 교환 사이클 */
+.cycle { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; font-family: 'IBM Plex Mono', monospace; font-size: 13.5px; padding: 9px 0; }
+.cycle .who { background: var(--paper-2); border: 1px solid var(--line); border-radius: 4px; padding: 3px 9px; }
+.cycle .arrow { color: var(--ink-3); }
+
+/* 대조 뷰 — 오리파 칸이 물음표로 남는 것이 이 표의 목적이다 */
+.compare th:nth-child(2), .compare td:nth-child(2) { background: repeating-linear-gradient(45deg, #f6f7f9, #f6f7f9 6px, #eceff3 6px, #eceff3 12px); }
+.unknown { color: var(--ink-3); font-family: 'IBM Plex Mono', monospace; font-weight: 600; }
+
+.foot { padding-block: 40px 64px; font-size: 13px; color: var(--ink-3); border-top: 1px solid var(--line); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}
+@media (max-width: 560px) {
+  .boxgrid { --cols: 40; gap: 1px; padding: 8px; }
+  .topbar-count { display: none; }
+}

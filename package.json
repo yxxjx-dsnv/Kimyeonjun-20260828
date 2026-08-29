@@ -13,8 +13,9 @@
     "serve": "node tests/serve.mjs",
     "box": "node api/_box.js",
     "odds": "node api/_draw.js",
-    "test": "node api/_box.js && node api/_draw.js && node api/_trade.js && node tests/room.test.mjs",
-    "trade": "node api/_trade.js"
+    "test": "node api/_box.js && node api/_draw.js && node api/_trade.js && node tests/room.test.mjs && npm run --silent build:ssr && node tests/render.test.mjs",
+    "trade": "node api/_trade.js",
+    "build:ssr": "vite build --ssr src/ssr.jsx --outDir dist-ssr"
   },
   "dependencies": {
     "react": "^18.3.1",

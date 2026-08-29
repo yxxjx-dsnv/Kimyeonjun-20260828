@@ -19,7 +19,8 @@
  *   전략 방지              Roth (1982) Economics Letters 9(2) 127–132
  */
 import { fileURLToPath } from 'node:url'
-import { realpathSync } from 'node:fs'
+import { realpathSync, writeFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
 import { rng } from './_draw.js'
 import { BOX, slotsOf } from './_box.js'
 
@@ -506,6 +507,28 @@ if (isMain()) {
         `${c.cyclesPerRound.toFixed(2).padStart(8)}`)
     }
   }
+  /**
+   * 측정값을 파일로 내보낸다. 화면이 이 파일을 서버를 통해 읽는다.
+   * 화면에 숫자를 손으로 적으면 엔진을 고쳐도 화면이 안 바뀌고, 그것이 v1에서
+   * 코드·덱·문서의 배수가 서로 달랐던 경로다. 수치는 전부 실행 출력이어야 한다.
+   */
+  const emit = { measuredAt: new Date().toISOString(), teamSize: 10, trials: 100000, models: {} }
+  for (const model of ['homogeneous', 'heterogeneous']) {
+    emit.models[model] = { label: PREF_MODELS[model], rows: [1, 3, 5, 10].map((k) => {
+      const c = conversionRate({ k, model })
+      return {
+        k,
+        movedByTrade: c.pMovedByTrade, movedPct: `${(c.pMovedByTrade * 100).toFixed(1)}%`,
+        meGivenTeam: c.pMeGivenTeam, mePct: `${(c.pMeGivenTeam * 100).toFixed(1)}%`,
+        improvedRate: c.improvedRate, improvedPct: `${(c.improvedRate * 100).toFixed(1)}%`,
+        cyclesPerRound: Number(c.cyclesPerRound.toFixed(2)),
+      }
+    }) }
+  }
+  const outPath = join(dirname(fileURLToPath(import.meta.url)), '..', 'data', 'conversion.json')
+  writeFileSync(outPath, JSON.stringify(emit, null, 2))
+  console.log(`\n  → data/conversion.json 저장 (화면이 이 값을 그대로 쓴다)`)
+
   console.log('\n  ※ 읽는 법 — 이 표가 이 제품에 대해 말하는 것')
   console.log('    1. 전환은 100%가 아니다. S를 뽑은 사람도 S를 원하므로 잘 내놓지 않는다.')
   console.log('    2. 같은 것을 원하는 사람이 많을수록(k↑) 전환 효과가 줄어든다.')

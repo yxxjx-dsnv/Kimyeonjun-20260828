@@ -1,0 +1,97 @@
+{
+  "measuredAt": "2026-08-29T19:55:53.501Z",
+  "teamSize": 10,
+  "trials": 100000,
+  "models": {
+    "homogeneous": {
+      "label": "동질 — 지목 후 전원 시세 내림차순 (AI 없는 폴백)",
+      "rows": [
+        {
+          "k": 1,
+          "movedByTrade": 0.01925254813137033,
+          "movedPct": "1.9%",
+          "meGivenTeam": 0.1243680485338726,
+          "mePct": "12.4%",
+          "improvedRate": 0.105217,
+          "improvedPct": "10.5%",
+          "cyclesPerRound": 0.51
+        },
+        {
+          "k": 3,
+          "movedByTrade": 0.01473922902494331,
+          "movedPct": "1.5%",
+          "meGivenTeam": 0.09854771784232365,
+          "mePct": "9.9%",
+          "improvedRate": 0.082003,
+          "improvedPct": "8.2%",
+          "cyclesPerRound": 0.4
+        },
+        {
+          "k": 5,
+          "movedByTrade": 0.009719222462203024,
+          "movedPct": "1.0%",
+          "meGivenTeam": 0.10273972602739725,
+          "mePct": "10.3%",
+          "improvedRate": 0.059707,
+          "improvedPct": "6.0%",
+          "cyclesPerRound": 0.29
+        },
+        {
+          "k": 10,
+          "movedByTrade": 0,
+          "movedPct": "0.0%",
+          "meGivenTeam": 0.08445297504798464,
+          "mePct": "8.4%",
+          "improvedRate": 0,
+          "improvedPct": "0.0%",
+          "cyclesPerRound": 0
+        }
+      ]
+    },
+    "heterogeneous": {
+      "label": "이질 — 지목 후 각자 다른 취향 순서 (지목 + ChatGPT)",
+      "rows": [
+        {
+          "k": 1,
+          "movedByTrade": 0.5191489361702127,
+          "movedPct": "51.9%",
+          "meGivenTeam": 0.5674641148325359,
+          "mePct": "56.7%",
+          "improvedRate": 0.683758,
+          "improvedPct": "68.4%",
+          "cyclesPerRound": 2.54
+        },
+        {
+          "k": 3,
+          "movedByTrade": 0.19322033898305085,
+          "movedPct": "19.3%",
+          "meGivenTeam": 0.26163391933815927,
+          "mePct": "26.2%",
+          "improvedRate": 0.683443,
+          "improvedPct": "68.3%",
+          "cyclesPerRound": 2.54
+        },
+        {
+          "k": 5,
+          "movedByTrade": 0.08918617614269789,
+          "movedPct": "8.9%",
+          "meGivenTeam": 0.1671763506625892,
+          "mePct": "16.7%",
+          "improvedRate": 0.68373,
+          "improvedPct": "68.4%",
+          "cyclesPerRound": 2.55
+        },
+        {
+          "k": 10,
+          "movedByTrade": 0,
+          "movedPct": "0.0%",
+          "meGivenTeam": 0.09375,
+          "mePct": "9.4%",
+          "improvedRate": 0.681062,
+          "improvedPct": "68.1%",
+          "cyclesPerRound": 2.53
+        }
+      ]
+    }
+  }
+}

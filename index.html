@@ -3,15 +3,20 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#EA3F48" />
-    <!-- 다나와 이미지 CDN이 Referer가 붙은 요청을 배포 도메인에서만 403으로 막는다. -->
+    <title>올박스 — 통이 보이는 팀 뽑기</title>
+    <meta name="description" content="오리파의 문제는 확률이 낮은 것이 아니라 통이 안 보이는 것입니다. 올박스는 1,000구좌를 전부 보여주고, 뽑힐 때마다 확률을 갱신합니다." />
+    <meta name="theme-color" content="#12161F" />
+    <!--
+      v1에서 배운 것: 다나와 이미지 CDN이 Referer가 붙은 요청을 **배포 도메인에서만**
+      403으로 막는다. 로컬에서는 멀쩡하고 배포하면 카드 이미지가 전부 깨진다.
+      지우지 말 것.
+    -->
     <meta name="referrer" content="no-referrer" />
-    <title>올박스 — 여럿이 모여야 열리는 확률형 팀구매</title>
-    <meta name="description" content="꽝 없는 확률형 구매를 팀으로 엽니다. 팀이 커질수록 상위 등급 확률이 오르고, 전원이 뽑기를 눌러야만 열립니다." />
-    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
+      href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
     />
   </head>
   <body>
