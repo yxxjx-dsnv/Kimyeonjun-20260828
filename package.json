@@ -13,7 +13,9 @@
     "test:api": "node --env-file=.env.local tests/api.e2e.mjs",
     "test:browser": "node tests/browser.e2e.mjs",
     "shots": "node tests/shots.mjs",
-    "serve": "node tests/serve.mjs"
+    "serve": "node tests/serve.mjs",
+    "crawl:oripa": "node crawler/crawl.js oripa",
+    "report": "node crawler/report.mjs"
   },
   "dependencies": {
     "react": "^18.3.1",

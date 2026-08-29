@@ -1,0 +1,359 @@
+{
+  "auditedAt": "2026-08-29T19:05:32.401Z",
+  "method": {
+    "surface": "상품명 + 다나와 스펙 문자열에서 확률 단어와 수치를 전수 탐색",
+    "detail": "상세 HTML을 받되, 상품명 조각이나 가격이 본문에 있어야만 판정. 없으면 unreachable",
+    "limit": "다나와 중개 상품은 브리지 페이지가 목적지를 JS로만 넘겨 상세 도달 불가. 도달 불가는 미공시로 세지 않는다"
+  },
+  "axisTotal": 91,
+  "oripaTotal": 37,
+  "probNum": 0,
+  "probWord": 0,
+  "guarantee": 30,
+  "undisclosed": 37,
+  "detailAttempted": 1,
+  "detailReached": 1,
+  "surface": [
+    {
+      "id": "xI28984655328",
+      "name": "[해외] 포켓몬카드 오리지널팩 640 RR RRR 3장 확정 고환원 오리파 1개 블랙",
+      "price": 23340,
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=I28984655328&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17880299358941&cate=16349280",
+      "probWord": false,
+      "probNum": false,
+      "guarantee": true
+    },
+    {
+      "id": "xI28303134688",
+      "name": "[해외] SAR AR VOL.01 [STELAB] 포켓몬 카드 포케카 오리파 부이즈 수록 이상 1장 봉입 1",
+      "price": 44450,
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=I28303134688&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17880299351297&cate=16349280",
+      "probWord": false,
+      "probNum": false,
+      "guarantee": false
+    },
+    {
+      "id": "x4820139081",
+      "name": "[해외] 알파 포켓몬스터 카드 오리파 SAR 확정 랜덤팩 단품/미개봉 팩 받기",
+      "price": 45330,
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=224983&cate_c4=225436&cmpny_c=EE128&link_prod_c=4820139081&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17880299357135&cate=19337898",
+      "probWord": false,
+      "probNum": false,
+      "guarantee": true
+    },
+    {
+      "id": "x9451520502",
+      "name": "[해외] ALPHA 알파 포켓몬스터 카드 오리파 SAR 확정 랜덤팩",
+      "price": 45590,
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=1985&cate_c2=226099&cate_c3=226126&cate_c4=0&cmpny_c=TH201&link_prod_c=9451520502&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17880299359834&cate=15241655",
+      "probWord": false,
+      "probNum": false,
+      "guarantee": true
+    },
+    {
+      "id": "x9523204301",
+      "name": "[해외] ALPHA 알파 포켓몬스터 카드 오리파 SAR 확정 랜덤팩",
+      "price": 45590,
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=1985&cate_c2=226099&cate_c3=226126&cate_c4=0&cmpny_c=TH201&link_prod_c=9523204301&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17880299358247&cate=15241655",
+      "probWord": false,
+      "probNum": false,
+      "guarantee": true
+    },
+    {
+      "id": "x9513039847",
+      "name": "[해외] ALPHA 알파 포켓몬스터 카드 오리파 SAR 확정 랜덤팩",
+      "price": 45590,
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=1985&cate_c2=226099&cate_c3=226126&cate_c4=0&cmpny_c=TH201&link_prod_c=9513039847&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17880299352950&cate=15241655",
+      "probWord": false,
+      "probNum": false,
+      "guarantee": true
+    },
+    {
+      "id": "xF627983091",
+      "name": "[해외] 알파 포켓몬스터 카드 오리파 SAR 확정 랜덤팩 단품/미개봉 팩 받기",
+      "price": 46380,
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=224983&cate_c4=225436&cmpny_c=EE715&link_prod_c=F627983091&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17880299352483&cate=19337898",
+      "probWord": false,
+      "probNum": false,
+      "guarantee": true
+    },
+    {
+      "id": "x9535067028",
+      "name": "[해외] 알파 포켓몬스터 카드 오리파 SAR 확정 랜덤팩",
+      "price": 47010,
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=0&cate_c4=0&cmpny_c=TH201&link_prod_c=9535067028&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17880299357289",
+      "probWord": false,
+      "probNum": false,
+      "guarantee": true
+    },
+    {
+      "id": "xI29013899561",
+      "name": "[해외] 알파 포켓몬스터 카드 오리파 SAR 확정 랜덤팩 단품 오리파 1개",
+      "price": 47100,
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=224983&cate_c4=0&cmpny_c=TP40F&link_prod_c=I29013899561&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17880299359722&cate=1921053",
+      "probWord": false,
+      "probNum": false,
+      "guarantee": true
+    },
+    {
+      "id": "x9528802079",
+      "name": "[해외] ノ？ブランド品 병렬 확정 원피스 병렬 확정 카드 오리파",
+      "price": 50400,
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=22591&cate_c2=0&cate_c3=0&cate_c4=0&cmpny_c=TH201&link_prod_c=9528802079&keyword=%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17880299377468",
+      "probWord": false,
+      "probNum": false,
+      "guarantee": true
+    },
+    {
+      "id": "xF596974512",
+      "name": "[해외] ALPHA 알파 포켓몬스터 카드 오리파 SAR 확정 랜덤팩",
+      "price": 51100,
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=EE715&link_prod_c=F596974512&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17880299353180&cate=16349280",
+      "probWord": false,
+      "probNum": false,
+      "guarantee": true
+    },
+    {
+      "id": "xV94900151110",
+      "name": "[해외] [미개봉 5팩 확정] 유희왕 OCG 오리파 오리지널 팩 ALPHA의 오리파 1개",
+      "price": 59210,
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V94900151110&keyword=%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17880299377010&cate=16349280",
+      "probWord": false,
+      "probNum": false,
+      "guarantee": true
+    },
+    {
+      "id": "xI26919859211",
+      "name": "[해외] 유희왕 한정수 대량 오리파 복주머니 SR 이상 50장",
+      "price": 63420,
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=I26919859211&keyword=%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17880299373888&cate=16349280",
+      "probWord": false,
+      "probNum": false,
+      "guarantee": false
+    },
+    {
+      "id": "xI28303134574",
+      "name": "[해외] [SAR 111 VOL.01 확정] 포케카 오리파 소녀 수록 호화 포켓몬 카드 전 입 초보자",
+      "price": 68120,
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=I28303134574&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17880299353116&cate=16349280",
+      "probWord": false,
+      "probNum": false,
+      "guarantee": true
+    },
+    {
+      "id": "xV94363056744",
+      "name": "[해외] 2 500 OCG [최저 보증 엔] 유희왕 오리파 오리지널 팩 ALPHA의 오리파 (단품 상세페이지 참조 상세페이지 참조",
+      "price": 74320,
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V94363056744&keyword=%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17880299379447&cate=16349280",
+      "probWord": false,
+      "probNum": false,
+      "guarantee": false
+    },
+    {
+      "id": "xV95718627619",
+      "name": "[해외] 유희왕 감정품 PSA 확정 오리파(1세트) L2 1개 상세페이지 참조",
+      "price": 75290,
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95718627619&keyword=%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17880299376711&cate=16349280",
+      "probWord": false,
+      "probNum": false,
+      "guarantee": true
+    },
+    {
+      "id": "xV95680001415",
+      "name": "[해외] 유희왕 감정품 PSA 확정 오리파(1세트) L2 1개 상세페이지 참조",
+      "price": 75290,
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95680001415&keyword=%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17880299379466&cate=16349280",
+      "probWord": false,
+      "probNum": false,
+      "guarantee": true
+    },
+    {
+      "id": "xV95865649832",
+      "name": "[해외] 유희왕 감정품 PSA 확정 오리파(1세트) L2 1개 상세페이지 참조",
+      "price": 76650,
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95865649832&keyword=%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17880299372779&cate=16349280",
+      "probWord": false,
+      "probNum": false,
+      "guarantee": true
+    },
+    {
+      "id": "d26031071",
+      "name": "유희왕 BMG 쟁탈 오리파 블랙 마술사 소녀 20th 비밀 홀로그램 20TH-JPC55 2017-JPP01",
+      "price": 84460,
+      "url": "https://prod.danawa.com/info/?pcode=26031071",
+      "probWord": false,
+      "probNum": false,
+      "guarantee": false
+    },
+    {
+      "id": "xI28616570503",
+      "name": "[해외] [PSA 신 확정 오리파] 유희왕 OCG 오리파 특상 1개 상세페이지 참조",
+      "price": 106000,
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=I28616570503&keyword=%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17880299374615&cate=16349280",
+      "probWord": false,
+      "probNum": false,
+      "guarantee": true
+    },
+    {
+      "id": "xV94900147067",
+      "name": "[해외] 2 500 OCG [최저 보증 엔] 유희왕 오리파 오리지널 팩 ALPHA의 오리파 (단품 상세페이지 참조 상세페이지 참조",
+      "price": 106990,
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V94900147067&keyword=%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17880299373105&cate=16349280",
+      "probWord": false,
+      "probNum": false,
+      "guarantee": false
+    },
+    {
+      "id": "xI28984582604",
+      "name": "[해외] 포켓몬카드 여자 캐릭터 PSA 확정 오리파 L6 1개",
+      "price": 107900,
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=I28984582604&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17880299357445&cate=16349280",
+      "probWord": false,
+      "probNum": false,
+      "guarantee": true
+    },
+    {
+      "id": "xV95369270429",
+      "name": "[해외] 유희왕 한정수 대량 오리파 복주머니 SR 이상 100장",
+      "price": 150920,
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95369270429&keyword=%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17880299372664&cate=16349280",
+      "probWord": false,
+      "probNum": false,
+      "guarantee": false
+    },
+    {
+      "id": "xLO2661964319",
+      "name": "[해외] 포켓몬 카드 게임 MEGA 확장팩 닌자 스피너 BOX 30팩 150장 랜덤팩 트레이딩카드",
+      "price": 164510,
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=1985&cate_c2=226099&cate_c3=226126&cate_c4=0&cmpny_c=EE309&link_prod_c=LO2661964319&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC+%EB%9E%9C%EB%8D%A4%ED%8C%A9&r=17880299405295&cate=15241655",
+      "probWord": false,
+      "probNum": false,
+      "guarantee": false
+    },
+    {
+      "id": "xF642362944",
+      "name": "[해외] ALPHA 포켓몬 카드 오리파 PSA 피카츄 시리즈 확정 랜덤팩 전 500구",
+      "price": 167360,
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=224983&cate_c4=0&cmpny_c=EE715&link_prod_c=F642362944&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17880299352684&cate=1921053",
+      "probWord": false,
+      "probNum": false,
+      "guarantee": true
+    },
+    {
+      "id": "x4834862998",
+      "name": "[해외] ALPHA 포켓몬 카드 오리파 PSA 피카츄 시리즈 확정 랜덤팩 전 500구",
+      "price": 167370,
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=224983&cate_c4=0&cmpny_c=EE128&link_prod_c=4834862998&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17880299352991&cate=1921053",
+      "probWord": false,
+      "probNum": false,
+      "guarantee": true
+    },
+    {
+      "id": "xLO2727939374",
+      "name": "ALPHA [해외] ALPHA 포켓몬스터 카드 오리파 PSA 피카츄 시리즈 확정 랜덤팩",
+      "price": 180920,
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=22591&cate_c2=223531&cate_c3=223549&cate_c4=0&cmpny_c=EE309&link_prod_c=LO2727939374&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17880299353244",
+      "probWord": false,
+      "probNum": false,
+      "guarantee": true
+    },
+    {
+      "id": "x9523041101",
+      "name": "[해외] ALPHA 포켓몬스터 카드 오리파 PSA 피카츄 시리즈 확정 랜덤팩",
+      "price": 182510,
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=1985&cate_c2=226099&cate_c3=226126&cate_c4=0&cmpny_c=TH201&link_prod_c=9523041101&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17880299358146&cate=15241655",
+      "probWord": false,
+      "probNum": false,
+      "guarantee": true
+    },
+    {
+      "id": "xI29013894731",
+      "name": "[해외] ALPHA 포켓몬스터 카드 오리파 PSA 피카츄 시리즈 확정 랜덤팩 PSA10 확정 1개",
+      "price": 185300,
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=224983&cate_c4=0&cmpny_c=TP40F&link_prod_c=I29013894731&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17880299359485&cate=1921053",
+      "probWord": false,
+      "probNum": false,
+      "guarantee": true
+    },
+    {
+      "id": "x4812747034",
+      "name": "[해외] 14394759 수집 카드 덱 포켓몬 SR 이상 확정 리리에 차지 오리파 PSA 10 L3 PSA 10 확정 1.0",
+      "price": 247000,
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=224974&cate_c4=225358&cmpny_c=EE128&link_prod_c=4812747034&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17880299357835&cate=1939252",
+      "probWord": false,
+      "probNum": false,
+      "guarantee": true
+    },
+    {
+      "id": "xLO2729929953",
+      "name": "[해외] 알파 포켓몬스터 카드 오리파 PSA 피카츄 확정 랜덤팩",
+      "price": 343560,
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=1985&cate_c2=226099&cate_c3=226126&cate_c4=0&cmpny_c=EE309&link_prod_c=LO2729929953&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17880299352096&cate=15241655",
+      "probWord": false,
+      "probNum": false,
+      "guarantee": true
+    },
+    {
+      "id": "xV95941926280",
+      "name": "[해외] ALPHA 포켓몬스터 카드 오리파 PSA 피카츄 시리즈 확정 랜덤팩 PSA10 확정 1개",
+      "price": 346400,
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=220348&cate_c2=224914&cate_c3=224983&cate_c4=0&cmpny_c=TP40F&link_prod_c=V95941926280&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17880299357779&cate=1921053",
+      "probWord": false,
+      "probNum": false,
+      "guarantee": true
+    },
+    {
+      "id": "xF616440018",
+      "name": "[해외] ALPHA 포켓몬스터 카드 오리파 PSA 피카츄 시리즈 확정 랜덤팩",
+      "price": 376500,
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=EE715&link_prod_c=F616440018&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17880299358733&cate=16349280",
+      "probWord": false,
+      "probNum": false,
+      "guarantee": true
+    },
+    {
+      "id": "xI28953243205",
+      "name": "[해외] 알파 포켓몬스터 카드 오리파 PSA 피카츄 확정 랜덤팩 1개 PSA 확정",
+      "price": 384400,
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=I28953243205&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17880299352837&cate=16349280",
+      "probWord": false,
+      "probNum": false,
+      "guarantee": true
+    },
+    {
+      "id": "x4810682359",
+      "name": "[해외] 알파 포켓몬스터 카드 오리파 PSA 피카츄 확정 랜덤팩",
+      "price": 384400,
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=1985&cate_c2=226099&cate_c3=226126&cate_c4=0&cmpny_c=EE128&link_prod_c=4810682359&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17880299359246&cate=15241655",
+      "probWord": false,
+      "probNum": false,
+      "guarantee": true
+    },
+    {
+      "id": "xF618334940",
+      "name": "[해외] 알파 포켓몬스터 카드 오리파 PSA 피카츄 확정 랜덤팩",
+      "price": 384400,
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=1985&cate_c2=226099&cate_c3=226126&cate_c4=0&cmpny_c=EE715&link_prod_c=F618334940&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17880299354340&cate=15241655",
+      "probWord": false,
+      "probNum": false,
+      "guarantee": true
+    },
+    {
+      "id": "xV95883752354",
+      "name": "[해외] 알파 포켓몬스터 카드 오리파 PSA 피카츄 확정 랜덤팩 1개 PSA 확정",
+      "price": 834200,
+      "url": "https://prod.danawa.com/bridge/go_link_goods.php?cate_c1=222154&cate_c2=222190&cate_c3=222262&cate_c4=222712&cmpny_c=TP40F&link_prod_c=V95883752354&keyword=%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%B9%B4%EB%93%9C+%EC%98%A4%EB%A6%AC%ED%8C%8C&r=17880299351964&cate=16349280",
+      "probWord": false,
+      "probNum": false,
+      "guarantee": true
+    }
+  ],
+  "detail": [
+    {
+      "id": "d26031071",
+      "name": "유희왕 BMG 쟁탈 오리파 블랙 마술사 소녀 20th 비밀 홀로그램 20TH-JPC55 2017-JPP01",
+      "verdict": "none",
+      "why": "확률 언급 없음"
+    }
+  ]
+}
