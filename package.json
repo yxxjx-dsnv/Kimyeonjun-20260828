@@ -10,7 +10,10 @@
     "crawl": "node crawler/crawl.js",
     "crawl:oripa": "node crawler/crawl.js oripa",
     "report": "node crawler/report.mjs",
-    "serve": "node tests/serve.mjs"
+    "serve": "node tests/serve.mjs",
+    "box": "node api/_box.js",
+    "odds": "node api/_draw.js",
+    "test": "node api/_box.js && node api/_draw.js"
   },
   "dependencies": {
     "react": "^18.3.1",
