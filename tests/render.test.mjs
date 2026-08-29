@@ -1,144 +1,281 @@
 /**
- * 렌더 검증 — 브라우저 없이 화면을 검사한다.
- *   node tests/render.test.mjs
+ * 화면 테스트 — 프레임워크 없이. `npm run build:ssr && node tests/render.test.mjs`
  *
- * 잠그려는 것 세 가지.
- *   ① 화면에 찍히는 확률 숫자가 서버 계산과 문자 단위로 같은가 (문서–코드 드리프트)
- *   ② 자연빈도 병기가 실제로 렌더되는가
- *   ③ browser.e2e.mjs가 쓰는 셀렉터가 App.jsx에 실제로 있는가
- *
- * ③은 직전 과제에서 브라우저 테스트가 npm test에 없어 UI와 어긋난 채 방치됐던
- * 부채를 갚는 항목이다. 브라우저를 띄우지 않고 드리프트만 잡는다.
+ * 두 종류를 섞어 쓴다.
+ *   렌더 검사  실제 SSR HTML을 보고 문자열을 대조한다. 소스만 읽으면 못 잡는 것이 있다.
+ *   소스 검사  금지 문구·하드코딩처럼 "없어야 하는 것"은 소스에서 본다.
  */
+import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import { createServer } from 'vite'
-import { renderToString } from 'react-dom/server'
-import React from 'react'
-import boxesHandler from '../api/boxes.js'
-import { getBox, oddsOf, evMultiple, customerBEP, TIERS, TEAM_MAX, BOXES, DAILIES } from '../api/_draw.js'
+import { join, dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { createElement as h } from 'react'
+import { render, OddsTable, UpdateTable, TradeTable, CycleView, BoxGrid, GridLegend, SimBadge } from '../dist-ssr/ssr.js'
+import { BOX, TIERS, slotsOf } from '../api/_box.js'
+import { allOdds, updateTable } from '../api/_draw.js'
+import { ttc, completePrefs } from '../api/_trade.js'
 
-let fail = 0
-const check = (label, cond, extra = '') => {
-  // 근거는 실패했을 때만 붙인다. 통과 로그에 붙으면 실패처럼 읽힌다.
-  console.log(`${cond ? '✓' : '✗ 실패'} ${label}${!cond && extra ? ' — ' + extra : ''}`)
-  if (!cond) fail++
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
+const src = (f) => readFileSync(join(ROOT, f), 'utf8')
+const APP = src('src/App.jsx')
+const PARTS = src('src/parts.jsx')
+
+let pass = 0
+const fails = []
+const t = (name, fn) => {
+  try { fn(); pass++; console.log(`  ✓ ${name}`) }
+  catch (e) { fails.push(name); console.log(`  ✗ ${name}\n      ${e.message}`) }
 }
 
-const vite = await createServer({ server: { middlewareMode: true }, appType: 'custom', logLevel: 'error' })
-const parts = await vite.ssrLoadModule('/src/parts.jsx')
-const { default: App } = await vite.ssrLoadModule('/src/App.jsx')
+const ODDS = allOdds()
+const N = 10
 
-// ── ① 앱 셸 ────────────────────────────────────────────────
-{
-  const html = renderToString(React.createElement(App))
-  check('앱 셸 렌더', html.includes('Alwayz'))
-  for (const t of ['홈', '콘텐츠', '올박스', '관심상품', '내 정보'])
-    check(`탭 '${t}' 존재`, html.includes(t))
-  check('중앙 플로팅 자리에 올박스', html.includes('is-center'))
-}
+/**
+ * SSR HTML은 엔티티를 이스케이프한다. C등급 팀 확률 ">99.999%"의 '>'가 '&gt;'가 되어
+ * 순진하게 includes로 비교하면 렌더가 멀쩡한데도 실패한다. 사람이 읽는 텍스트로 되돌린다.
+ */
+const decode = (h) => h.replace(/&gt;/g, '>').replace(/&lt;/g, '<').replace(/&amp;/g, '&')
+                       .replace(/&quot;/g, '"').replace(/&#x27;|&#39;/g, "'")
 
-// ── ② 화면 숫자 = 서버 계산 ────────────────────────────────
-for (const id of BOXES.map((b) => b.id)) {
-  const box = getBox(id)
-  const odds = oddsOf(box, 7)
-  const bars = renderToString(React.createElement(parts.OddsBars, { odds }))
-  for (const t of TIERS) {
-    const want = parts.pct(odds[t], odds[t] < 0.01 ? 3 : 1)
-    check(`${id} ${t} 화면 숫자 = 서버 계산 (${want})`, bars.includes(want))
+console.log('─────── I4 화면 숫자 = 서버 숫자 (문자 단위) ───────')
+
+const oddsHtml = decode(render(h(OddsTable, { odds: ODDS, n: N })))
+
+t('모든 개인 확률 문자열이 서버 계산 그대로 렌더된다', () => {
+  for (const o of ODDS) assert.ok(oddsHtml.includes(o.soloPct), `${o.tier} 개인 ${o.soloPct} 없음`)
+})
+
+t('모든 팀 확률 문자열이 서버 계산 그대로 렌더된다', () => {
+  for (const o of ODDS) {
+    const s = o.team[N - 1].pct
+    assert.ok(oddsHtml.includes(s), `${o.tier} 팀 ${s} 없음`)
   }
+})
 
-  const oddsByTeam = Object.fromEntries(
-    Array.from({ length: TEAM_MAX }, (_, i) => [i + 1, oddsOf(box, i + 1)])
-  )
-  const evByTeam = Object.fromEntries(
-    Array.from({ length: TEAM_MAX }, (_, i) => [i + 1, +evMultiple(box, i + 1).toFixed(3)])
-  )
-  const curve = renderToString(
-    React.createElement(parts.OddsCurve, {
-      oddsByTeam, teamSize: 7, customerBEP: customerBEP(box), teamMax: TEAM_MAX,
-    })
-  )
-  check(`${id} 곡선 렌더`, curve.includes('<path') && curve.includes('curve__dot'))
-  check(`${id} 고객 분기 마커 ${customerBEP(box)}명`, curve.includes(`${customerBEP(box)}명부터 2배`))
+t('모든 배수 문자열이 서버 계산 그대로 렌더된다', () => {
+  for (const o of ODDS) assert.ok(oddsHtml.includes(o.team[N - 1].mul), `${o.tier} 배수 없음`)
+})
 
-  // 더보기 표는 접혀 있어도 데이터가 서버 값과 같아야 한다
-  const table = renderToString(
-    React.createElement(parts.OddsTable, { oddsByTeam, evByTeam, teamMax: TEAM_MAX, teamSize: 7 })
-  )
-  check(`${id} 더보기 버튼`, table.includes('확률이 어떻게 오르나요?'))
-}
+t('자연빈도가 모든 확률 옆에 존재한다 (D10)', () => {
+  for (const o of ODDS) {
+    assert.ok(oddsHtml.includes(o.soloFreq), `${o.tier} 개인 자연빈도 없음`)
+    assert.ok(oddsHtml.includes(o.team[N - 1].freq), `${o.tier} 팀 자연빈도 없음`)
+  }
+})
 
-// ── ③ 자연빈도 병기 (Gigerenzer & Hoffrage 1995) ───────────
-{
-  const box = getBox('charizard')
-  const odds = oddsOf(box, 10)
-  const strip = renderToString(
-    React.createElement(parts.TierStrip, {
-      tier: { tier: 'S', band: [box.entry * 100, box.entry * 250], count: 39, meanRetail: 763898, samples: [] },
-      odds: odds.S,
-    })
-  )
-  check('확률 옆에 자연빈도', strip.includes('명 중 약'), parts.naturalFreq(odds.S))
-  check('자연빈도 계산', parts.naturalFreq(0.0135) === '1,000명 중 약 14명', parts.naturalFreq(0.0135))
-  check('희박한 확률은 분모를 바꾼다', parts.naturalFreq(0.0001) === '10,000명 중 약 1명', parts.naturalFreq(0.0001))
-}
+t('K=1 등급만 "정확히 n배"라고 적는다 (반올림 금지, I16)', () => {
+  const exact = ODDS.filter((o) => o.exactlyLinear)
+  assert.equal(exact.length, 1)
+  assert.equal(exact[0].team[N - 1].mul, `${N}.00배`)
+  const nearly = ODDS.find((o) => !o.exactlyLinear && o.K > 1)
+  assert.notEqual(nearly.team[N - 1].mul, `${N}.00배`, 'K>1인데 정확히 n배로 표시되면 안 된다')
+  assert.ok(oddsHtml.includes('재고가 1장이라 정확히 n배'))
+  assert.ok(oddsHtml.includes('재고가 여러 장이라 n배보다 작다'))
+})
 
-// ── ④ 하한을 정확히 맞으면 '본전' ──────────────────────────
-{
-  check('차액 0은 본전', renderToString(React.createElement(parts.Delta, { v: 0 })).includes('본전'))
-  check('차액 양수는 +금액', renderToString(React.createElement(parts.Delta, { v: 1300 })).includes('+1,300원'))
-}
+t('성립 불가능한 갱신 상태는 —로 표시된다 (I17)', () => {
+  const ups = Object.fromEntries(TIERS.map((g) => [g, updateTable(g, [0, 250, 500, 750, 900, 990])]))
+  const html = decode(render(h(UpdateTable, { updates: ups, tiers: TIERS })))
+  const impossible = ups.C.filter((r) => !r.possible)
+  assert.ok(impossible.length > 0, '검사할 불가능 구간이 있어야 한다')
+  assert.ok(html.includes('—'), '불가능 구간이 —로 나와야 한다')
+  assert.ok(!html.includes('100.000%') || ups.S.some((r) => r.pct === '100.000%'),
+    '불가능한 상태가 100%로 표시되면 안 된다')
+})
 
-// ── ⑤ API 핸들러 직접 호출 ─────────────────────────────────
-{
-  const res = { code: 0, body: null, status(c) { this.code = c; return this }, setHeader() { return this }, json(b) { this.body = b; return this } }
-  await boxesHandler({ method: 'GET' }, res)
-  check('GET /api/boxes 200', res.code === 200)
-  check(`박스 ${BOXES.length}종`, res.body.boxes.length === BOXES.length)
-  check('수식 파라미터 노출', Boolean(res.body.formula.assumptions.length))
-  check('홈 탭용 샘플 포함', res.body.sample.length > 0)
-  check(`데일리 ${DAILIES.length}종`, res.body.dailies.length === DAILIES.length)
-  check('데일리는 꽝 확률까지 공개', res.body.dailies[0].blankOdds > 0)
-  check('데일리 확률 계산근거 노출', Boolean(res.body.dailies[0].economics.breakEvenPlays))
-  check('박스에 재고 노출', res.body.boxes.every((b) => b.stockTotal > 0))
-  check('박스에 천장 규칙 노출', res.body.boxes.every((b) => b.pity?.window > 0))
-  check('투표 집계 노출', Object.keys(res.body.votes).length === 4)
-}
+console.log('\n─────── 텍스트 노드 분리 (v1에서 깨진 지점) ───────')
 
-// ── ⑥ 디자인 토큰 — 스케일 밖으로 새는 것을 막는다 ──────────
-// 이전엔 font-size가 120개 선언에 18종이었고 9~20px가 1px씩 연속이라
-// 인접 단계가 육안으로 구분되지 않았다. 스케일을 다시 흐트러뜨리면 여기서 걸린다.
-{
-  const css = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
-  const defs = [...css.matchAll(/--fs-([a-z]+):\s*(\d+)px/g)]
-  check(`타이포 스케일 ${defs.length}단계 정의`, defs.length >= 6 && defs.length <= 8, `${defs.length}단계`)
+t('숫자와 단위가 한 노드에 붙어 있다 — <!-- -->로 쪼개지지 않는다', () => {
+  const legend = decode(render(h(GridLegend, { tiers: BOX.tiers })))
+  for (const tier of BOX.tiers) {
+    const s = `${tier.K.toLocaleString('ko-KR')}구좌`
+    assert.ok(legend.includes(s), `"${s}"가 통째로 있어야 한다`)
+  }
+  assert.ok(!/\d<!-- -->/.test(legend), '숫자 뒤에 주석 노드가 끼면 안 된다')
+})
 
-  // 정의부(--fs-*: 34px) 자체는 리터럴이 맞으므로 제외하고, 사용처만 본다.
-  const literals = [...css.matchAll(/(^|[;{]\s*)font-size:\s*(\d+)px/gm)].map((m) => m[2])
-  check('토큰 밖 리터럴 font-size 없음', literals.length === 0, `${literals.length}건: ${[...new Set(literals)].join(',')}`)
+t('확률 셀에도 주석 노드가 끼지 않는다', () => {
+  assert.ok(!/\d<!-- -->%/.test(oddsHtml))
+  for (const o of ODDS) assert.ok(oddsHtml.includes(`>${o.soloPct}<`), `${o.soloPct}가 한 노드여야 한다`)
+})
 
-  // 가짜 배지 금지 — 데이터가 아니라 인덱스로 배지를 붙이면 정직성 주장과 충돌한다.
-  const jsx = readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8') +
-              readFileSync(new URL('../src/parts.jsx', import.meta.url), 'utf8')
-  check('인덱스 기반 가짜 배지 없음', !/badge=\{[^}]*%\s*\d/.test(jsx))
-}
+console.log('\n─────── 교환 뷰가 엔진 출력과 일치하는가 ───────')
 
-// ── ⑦ E2E 셀렉터 실존 (직전 과제 부채 상환) ────────────────
-{
-  const src = readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8') +
-              readFileSync(new URL('../src/parts.jsx', import.meta.url), 'utf8')
-  let e2e = ''
-  try { e2e = readFileSync(new URL('./browser.e2e.mjs', import.meta.url), 'utf8') } catch {}
-  const selectors = [...e2e.matchAll(/["'`](\.[a-z][a-z0-9_-]*(?:__[a-z0-9-]+)?)["'`]/gi)].map((m) => m[1])
-  const uniq = [...new Set(selectors)]
-  for (const sel of uniq)
-    check(`E2E 셀렉터 ${sel} 존재`, src.includes(sel.slice(1)), 'App.jsx/parts.jsx에 없음')
-  const texts = [...e2e.matchAll(/text=([^"'`,)]+)/g)].map((m) => m[1].trim())
-  for (const t of [...new Set(texts)])
-    check(`E2E 문구 '${t}' 존재`, src.includes(t))
-  if (!e2e) console.log('  (browser.e2e.mjs 없음 — 셀렉터 검증 건너뜀)')
-}
+const UNIVERSE = [...new Map(slotsOf().map((s) => [s.id, s])).values()]
+const drawn = slotsOf().filter((_, i) => i % 97 === 0).slice(0, 6)
+const parts = drawn.map((d, i) => ({
+  id: `p${i}`, holding: d.id,
+  prefs: completePrefs({ target: drawn[(i + 2) % drawn.length].id, universe: UNIVERSE }),
+}))
+const out = ttc(parts, 'render-test')
+const byId = new Map(UNIVERSE.map((c) => [c.id, c]))
+const tradeRows = out.results.map((x) => {
+  const b = byId.get(x.before), a = byId.get(x.after)
+  return {
+    memberId: x.id, name: x.id,
+    before: b && { id: b.id, name: b.name, price: b.price, tier: b.tier },
+    after: a && { id: a.id, name: a.name, price: a.price, tier: a.tier },
+    improved: x.improved, same: x.same, worse: x.worse, gain: x.gain, gotTarget: false,
+  }
+})
+const tradeHtml = decode(render(h(TradeTable, { results: tradeRows })))
 
-await vite.close()
-console.log(fail === 0 ? '\n✅ 전부 통과' : `\n❌ 실패 ${fail}건`)
-process.exit(fail === 0 ? 0 : 1)
+t('개선 여부가 _trade.js 출력과 일치한다', () => {
+  const improved = out.results.filter((x) => x.improved).length
+  const shown = (tradeHtml.match(/선호 \d+단계 개선/g) || []).length
+  assert.equal(shown, improved, `엔진 ${improved}명 vs 화면 ${shown}명`)
+})
+
+t('교환 후 가격이 엔진이 준 값 그대로 렌더된다', () => {
+  for (const r of tradeRows) {
+    if (r.after) assert.ok(tradeHtml.includes(`${r.after.price.toLocaleString('ko-KR')}원`), `${r.after.price} 없음`)
+  }
+})
+
+t('나빠진 사람이 없다 (I5) — 있으면 화면이 그것을 드러낸다', () => {
+  assert.ok(out.results.every((x) => !x.worse))
+  assert.ok(!tradeHtml.includes('나빠짐'), '나빠진 사람이 없으면 그 배지도 없어야 한다')
+})
+
+t('교환 사이클이 화살표로 그려진다', () => {
+  const html = decode(render(h(CycleView, { cycles: out.tradeCycles.map((c) => c.map((id) => ({ id, name: id }))) })))
+  if (out.tradeCycles.length) {
+    assert.ok(html.includes('→'), '사이클이 있으면 화살표가 있어야 한다')
+    for (const c of out.tradeCycles) for (const id of c) assert.ok(html.includes(id))
+  }
+})
+
+console.log('\n─────── 통 그리드 ───────')
+
+t(`${BOX.N}개 셀을 전부 그린다 (요약하지 않는다)`, () => {
+  const html = render(h(BoxGrid, { slotTiers: slotsOf().map((s) => s.tier).join(''), drawn: [] }))
+  assert.equal((html.match(/class="cell/g) || []).length, BOX.N)
+})
+
+t('등급별 셀 수가 재고와 정확히 같다', () => {
+  const html = render(h(BoxGrid, { slotTiers: slotsOf().map((s) => s.tier).join(''), drawn: [] }))
+  for (const tier of BOX.tiers) {
+    const n = (html.match(new RegExp(`cell t-${tier.tier}(?![A-Z])`, 'g')) || []).length
+    assert.equal(n, tier.K, `${tier.tier}등급 셀 ${n} vs 재고 ${tier.K}`)
+  }
+})
+
+t('뽑힌 구좌는 꺼진 상태로 그려진다 (비복원 시각화, I3)', () => {
+  const html = render(h(BoxGrid, { slotTiers: slotsOf().map((s) => s.tier).join(''), drawn: [0, 5, 9] }))
+  assert.equal((html.match(/ gone/g) || []).length, 3)
+})
+
+console.log('\n─────── I10 희소성 압박 금지 ───────')
+
+const FORBIDDEN = [
+  '얼마 안 남', '서두르', '마감 임박', '곧 마감', '지금 바로', '놓치지', '품절 임박',
+  '단 하루', '오늘만', '카운트다운', '남았습니다!', '마지막 기회', '한정 특가',
+]
+t('희소성 압박 문구가 없다', () => {
+  for (const w of FORBIDDEN) {
+    assert.ok(!APP.includes(w), `App.jsx에 금지 문구 "${w}"`)
+    assert.ok(!PARTS.includes(w), `parts.jsx에 금지 문구 "${w}"`)
+  }
+})
+
+t('카운트다운 타이머가 없다', () => {
+  assert.ok(!/setInterval[\s\S]{0,200}(남은|초|분|시간)/.test(APP), '카운트다운으로 보이는 타이머')
+  assert.ok(!APP.includes('Date.now() +'), '만료 시각 계산이 없어야 한다')
+})
+
+t('재고 표시는 사실 표시로만 쓴다', () => {
+  assert.ok(APP.includes('남은 구좌'), '재고 개수의 사실 표시는 허용된다')
+  assert.ok(!/남은 구좌[^`'"]{0,20}!/.test(APP), '재고 표시에 감정 유도 부호가 붙으면 안 된다')
+})
+
+console.log('\n─────── I11 · I12 고지 ───────')
+
+t('팀 인원이 늘면 무엇이 달라지는지가 본문에 있다 (툴팁·더보기 아님)', () => {
+  assert.ok(APP.includes('팀 인원이 늘면 무엇이 어떻게 달라지는지'))
+  assert.ok(APP.includes('notice'), '고지가 전용 블록으로 렌더된다')
+  assert.ok(!/title=\{?['"`][^'"`]*팀 인원/.test(APP), 'title 속성(툴팁)에 숨기면 안 된다')
+  assert.ok(!/<details[\s\S]{0,400}팀 인원이 늘면/.test(APP), 'details(더보기)에 숨기면 안 된다')
+})
+
+t('초대자 추가 보상이 없다는 것을 명시한다 (I12)', () => {
+  assert.ok(APP.includes('초대한 사람에게 추가 보상은 없습니다'))
+})
+
+t('첫 화면에 문제 제시와 타깃이 있다', () => {
+  const hero = APP.slice(APP.indexOf('className="wrap hero"'), APP.indexOf('확인 1'))
+  assert.ok(hero.includes('통이 안 보입니다'))
+  assert.ok(hero.includes('30~40대 부모'))
+  assert.ok(hero.includes('boxes.oripa'), '실측 수치를 서버에서 받아 쓴다')
+})
+
+console.log('\n─────── 하드코딩 탐지 ───────')
+
+t('화면 소스에 확률·배수 리터럴이 없다', () => {
+  for (const [f, s] of [['App.jsx', APP], ['parts.jsx', PARTS]]) {
+    const hits = s.match(/['"`][^'"`]*\d+\.\d+\s*(%|배)[^'"`]*['"`]/g) || []
+    assert.equal(hits.length, 0, `${f}에 하드코딩: ${hits.join(', ')}`)
+  }
+})
+
+t('화면이 확률을 스스로 계산하지 않는다 (I4)', () => {
+  for (const [f, s] of [['App.jsx', APP], ['parts.jsx', PARTS]]) {
+    assert.ok(!/toFixed\s*\(/.test(s), `${f}에서 toFixed를 부르면 서버와 두 벌이 된다`)
+    assert.ok(!/Math\.(pow|log|exp)/.test(s), `${f}에서 확률 계산을 하면 안 된다`)
+  }
+})
+
+t('대조 뷰의 혼자·팀 칸이 실제 엔진 결과를 쓴다', () => {
+  const cmp = APP.slice(APP.indexOf('className="tablewrap compare"'), APP.indexOf('오리파 칸이 물음표로'))
+  assert.ok(cmp.includes('odds[0].soloPct'), '혼자 칸이 서버 확률')
+  assert.ok(cmp.includes('odds[0].team['), '팀 칸이 서버 확률')
+  assert.ok(cmp.includes('myResult'), '받은 것이 실제 추첨 결과')
+  assert.ok(cmp.includes('myTrade'), '교환 후가 실제 교환 결과')
+  assert.ok(!/['"`][^'"`]*\d\.\d+%/.test(cmp), '대조 뷰에 하드코딩된 확률이 있으면 안 된다')
+})
+
+t('대조 뷰의 오리파 칸은 물음표로 남는다 (추정치로 채우지 않는다)', () => {
+  const cmp = APP.slice(APP.indexOf('className="tablewrap compare"'), APP.indexOf('오리파 칸이 물음표로'))
+  const unknowns = (cmp.match(/className="unknown"/g) || []).length
+  assert.ok(unknowns >= 4, `오리파 칸이 최소 4개는 물음표여야 한다 (현재 ${unknowns})`)
+})
+
+t('교환 전환율 표가 측정 파일에서 온다', () => {
+  assert.ok(APP.includes('boxes.conversion.models.heterogeneous.rows'))
+  assert.ok(APP.includes('boxes.conversion.models.homogeneous.rows'))
+})
+
+console.log('\n─────── I13 시뮬 배지 · E2E 셀렉터 ───────')
+
+t('시뮬레이션인 것에 배지가 붙는다', () => {
+  assert.ok((APP.match(/<SimBadge/g) || []).length >= 3, '시뮬 지점마다 배지')
+  assert.ok(render(h(SimBadge, { what: 'x' })).includes('시뮬'))
+})
+
+const SELECTORS = ['.boxgrid', '.cell', '.compare', '.notice', '.proves', '.cycle', '.measure', '.badge.sim', '.strip']
+t(`E2E 셀렉터 ${SELECTORS.length}개가 실제로 존재한다`, () => {
+  const css = src('src/index.css')
+  for (const s of SELECTORS) {
+    const cls = s.replace(/^\./, '').split('.').pop()
+    assert.ok(css.includes(`.${cls}`), `CSS에 ${s} 없음`)
+    assert.ok(APP.includes(cls) || PARTS.includes(cls), `JSX에 ${s} 없음`)
+  }
+})
+
+console.log('\n─────── CSS 캐스케이드 함정 ───────')
+
+t('.wrap과 겹치는 클래스가 좌우 패딩을 덮어쓰지 않는다', () => {
+  const css = src('src/index.css')
+  // `.wrap`이 좌우 패딩을 주고, 같은 요소에 함께 붙는 클래스(.section/.hero/.foot)가
+  // `padding: X 0` 단축을 쓰면 그것을 0으로 덮는다. 모바일에서 본문이 화면 끝에 붙었다.
+  // v1의 "캐스케이드를 변수로 이긴다"와 같은 종류의 버그다.
+  const companions = ['.section', '.hero', '.foot']
+  for (const c of companions) {
+    const m = css.match(new RegExp(`\\${c}\\s*\\{[^}]*\\}`))
+    assert.ok(m, `${c} 규칙이 있어야 한다`)
+    assert.ok(!/[^-]padding\s*:/.test(m[0]),
+      `${c}가 padding 단축을 쓰면 .wrap의 좌우 패딩을 덮는다. padding-block을 쓸 것`)
+  }
+})
+
+console.log(`\n  ${pass}개 통과${fails.length ? ` · ${fails.length}건 실패: ${fails.join(', ')}` : ''}`)
+if (fails.length) process.exitCode = 1

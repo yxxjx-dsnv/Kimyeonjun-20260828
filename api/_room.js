@@ -83,6 +83,20 @@ export async function counter(key, delta = 0) {
   return Number(await cmd(['INCRBY', key, String(delta)]))
 }
 
-/** 오늘 날짜 키(KST 기준). 데일리 한도가 자정에 리셋되도록. */
-export const todayKey = () =>
-  new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10)
+/**
+ * 방의 초기 상태. **통 전체를 저장하지 않는다** — 뽑힌 구좌의 인덱스만 남기고
+ * 남은 통은 api/_box.js의 remainingFrom()으로 복원한다(1,000구좌 ≈ 100KB 절약).
+ * 저장된 것과 계산된 것이 두 벌로 갈라지지 않는다는 것이 더 중요한 이유다.
+ */
+export const newRoom = (id, boxId = 'olbox') => ({
+  id,
+  boxId,
+  rev: 0,
+  createdAt: Date.now(),
+  members: [],          // { id, name, ready, target, aiPrefs, aiWhy, aiSource }
+  drawn: [],            // 뽑힌 구좌 인덱스 (비복원 상태의 전부)
+  round: 0,
+  opened: false,
+  openResults: null,    // 개봉 결과 (멱등 재조회용)
+  trade: null,          // 교환 결과 (멱등 재조회용)
+})

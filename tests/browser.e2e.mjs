@@ -1,371 +1,160 @@
 /**
- * 브라우저 E2E — 실제 클릭으로 코어 루프를 통과시킨다.
- *   npm run build && node tests/serve.mjs 3111 &
- *   node tests/browser.e2e.mjs [baseUrl]
+ * 배포본 E2E — 실제 브라우저로 클릭해서 확인한다.
+ *   node tests/browser.e2e.mjs [URL]        기본 http://localhost:3111
  *
- * Playwright는 package.json에 넣지 않는다(패키지 4개 원칙).
- *   npm i -D playwright --no-save && npx playwright install chromium
+ * Playwright는 애드혹 설치다(`npm i -D playwright --no-save`). package.json에
+ * 넣지 않는다 — 패키지 4개 제약을 지키고, npm test는 이 파일 없이도 전부 돈다.
  *
- * 여기서 쓰는 셀렉터·문구는 tests/render.test.mjs가 App.jsx에 실제로
- * 있는지 검사한다. 직전 과제에서 이 테스트가 UI와 어긋난 채 방치됐던
- * 부채를 그렇게 갚는다.
+ * 여기서 검사하는 것은 "코드가 그렇게 쓰여 있는가"가 아니라
+ * **"사용자가 여는 URL에서 실제로 그렇게 동작하는가"**다.
+ * v1에서 배포 성공 로그를 보고도 사용자는 옛 화면을 보고 있었다.
  */
-const BASE = process.argv[2] || process.env.BASE || 'http://localhost:3111'
-const { chromium } = await import('playwright')
+import { chromium } from 'playwright'
 
-let fail = 0
-const check = (label, cond, extra = '') => {
-  // 근거는 실패했을 때만 붙인다. 통과 로그에 붙으면 실패처럼 읽힌다.
-  console.log(`${cond ? '✓' : '✗ 실패'} ${label}${!cond && extra ? ' — ' + extra : ''}`)
-  if (!cond) fail++
+const BASE = (process.argv[2] || 'http://localhost:3111').replace(/\/$/, '')
+const CACHE_BUST = `?v=${Math.random().toString(36).slice(2)}`
+
+let step = 0
+const fails = []
+const ok = (name, cond, detail) => {
+  step++
+  if (!cond) fails.push(name)
+  console.log(`  ${cond ? '✓' : '✗'} ${String(step).padStart(2)}. ${name}${detail ? ` — ${detail}` : ''}`)
 }
-
-/**
- * 가로 넘침 검사 — 같은 원인(grid/flex 아이템의 min-width:auto)으로 두 번 화면이 깨졌다.
- * 처음엔 개봉 결과 카드, 다음엔 등급 스트립이 414px 안에서 664px로 그려졌다.
- * 검사가 한 화면만 보고 있어서 두 번째를 놓쳤으므로, 이제 모든 화면에서 부른다.
- *
- * 가로 스크롤 컨테이너 안의 자식이 밖으로 나가는 것은 정상이므로 제외한다.
- */
-const spill = (page) =>
-  page.evaluate(() => {
-    const host = document.querySelector('.body')
-    if (!host) return []
-    const W = host.clientWidth
-    const L = host.getBoundingClientRect().left
-    const clipped = (el) => {
-      for (let p = el.parentElement; p && p !== document.body; p = p.parentElement) {
-        const ov = getComputedStyle(p).overflowX
-        if (ov === 'auto' || ov === 'scroll' || ov === 'hidden') return true
-        if (p === host) return false
-      }
-      return false
-    }
-    return [...host.querySelectorAll('*')]
-      .filter((e) => {
-        const b = e.getBoundingClientRect()
-        return b.width > 0 && b.right > L + W + 1 && !clipped(e)
-      })
-      .slice(0, 5)
-      .map((e) => `${e.tagName.toLowerCase()}.${String(e.className).slice(0, 30)}(+${Math.round(e.getBoundingClientRect().right - (L + W))}px)`)
-  })
 
 const browser = await chromium.launch()
-const ctx = await browser.newContext({ viewport: { width: 414, height: 900 }, deviceScaleFactor: 2 })
-const page = await ctx.newPage()
-const errors = []
-page.on('pageerror', (e) => errors.push(String(e.message)))
-page.on('console', (m) => {
-  if (m.type() === 'error' && !/favicon/.test(m.text())) errors.push(m.text())
-})
+const page = await browser.newPage({ viewport: { width: 1280, height: 900 } })
+const consoleErrors = []
+page.on('console', (m) => m.type() === 'error' && consoleErrors.push(m.text()))
+page.on('pageerror', (e) => consoleErrors.push(`pageerror: ${e.message}`))
 
-// 1. 진입 — 기대값은 서버에서 받아온다(하드코딩하면 상품이 바뀔 때마다 깨진다)
-const meta = await (await fetch(`${BASE}/api/boxes`)).json()
-await page.goto(BASE, { waitUntil: 'networkidle' })
-await page.waitForSelector('.bcard', { timeout: 20000 })
-check(`랜덤박스 ${meta.boxes.length}종 노출`, (await page.$$('.bcard')).length === meta.boxes.length)
-// 래플·적금 카드도 .gbcard 셸을 쓰므로 '상품 확정' 태그로 공동구매만 센다
-check(`공동구매 ${meta.groupbuys.length}종 노출`,
-  (await page.$$('.gbcard__tag:not(.gbcard__tag--rf):not(.gbcard__tag--sv)')).length === meta.groupbuys.length)
-check(`래플 ${meta.raffles.length}종 노출`, (await page.$$('.gbcard__tag--rf')).length === meta.raffles.length)
-check(`적금 ${meta.saveups.length}종 노출`, (await page.$$('.gbcard__tag--sv')).length === meta.saveups.length)
-check('탭바에 올박스', await page.isVisible('.tabbar__b.is-center'))
+console.log(`═══ 올박스 E2E — ${BASE} ═══\n`)
+console.log('─── 로딩과 첫 화면 ───')
 
-// 골드박스 문법 — 노랑 히어로·형식 점프 칩·실시간 카운트다운(자정 리셋은 실제 서버 동작)
-check('골드박스 히어로', await page.isVisible('.goldhero__logo'))
-check('형식 점프 칩 5개', (await page.$$('.fchips__b')).length === 5)
-const t1 = await page.textContent('.goldhero__note .num')
-check('카운트다운 형식', /^\d{2}:\d{2}:\d{2}$/.test(t1), t1)
-await page.waitForTimeout(1500)
-const t2 = await page.textContent('.goldhero__note .num')
-check('카운트다운이 실제로 흐른다', t2 !== t1, `${t1} → ${t2}`)
+const res = await page.goto(BASE + '/' + CACHE_BUST, { waitUntil: 'networkidle', timeout: 45000 })
+ok('페이지가 200으로 열린다', res.status() === 200, `HTTP ${res.status()}`)
+ok('통이 렌더될 때까지 도달한다', await page.waitForSelector('.boxgrid', { timeout: 20000 }).then(() => true).catch(() => false))
 
-// 2. 박스 진입 — 상세는 '지금 확률' 한 카드만 보여준다
-await page.click('.bcard')
-await page.waitForSelector('.odds', { timeout: 10000 })
-check('등급 막대 4개', (await page.$$('.odds .bars__row')).length === 4)
-const oddsAlone = await page.textContent('.now__num')
-check('자연빈도 병기', (await page.textContent('.now__nf')).includes('명 중 약'))
-check('재고 요약 노출', /총 [\d,]+개/.test(await page.textContent('.odds__stock')))
-check('가로 넘침 없음 — 박스 상세', (await spill(page)).length === 0, (await spill(page)).join(' | '))
+const h1 = await page.locator('h1').first().textContent()
+ok('첫 화면이 문제를 제시한다', /통이 안 보입니다/.test(h1), h1?.slice(0, 30))
+ok('타깃이 첫 화면에 명시된다', await page.getByText('30~40대 부모').first().isVisible())
 
-// 상세 화면이 다시 15블록으로 불어나는 것을 막는다.
-const blocks = await page.$$eval('.body > *', (e) => e.length)
-check('상세 블록 7개 이하', blocks <= 7, `${blocks}블록`)
+const measure = await page.locator('.measure').textContent()
+ok('오리파 실측이 첫 화면에 있다', /확률을 적어 둔 상품/.test(measure) && /\d+ \/ \d+건/.test(measure),
+  measure.match(/\d+ \/ \d+건/)?.[0])
+ok('실측의 한계를 함께 적는다', /중개 링크라 판매자 상세 페이지에 도달할 수 없었습니다/.test(measure))
 
-// 3. 확률 근거 시트 — 곡선·표·뽑기통·천장은 전부 여기로 내렸다
-await page.click('.odds__why')
-await page.waitForSelector('.sheet__live', { timeout: 5000 })
-check('시트에 확률 곡선', await page.isVisible('.curve__line'))
-check('시트에 뽑기 통', (await page.$$('.sheet__live .bin__row')).length === 4)
-check('시트에 천장 바', await page.isVisible('.sheet__live .pity'))
-check('가로 넘침 없음 — 확률 근거 시트', (await spill(page)).length === 0, (await spill(page)).join(' | '))
-await page.click('.more__btn')
-await page.waitForSelector('.otable', { timeout: 5000 })
-check('더보기 표 1~10명', (await page.$$('.otable tbody tr')).length === 10)
-await page.click('.sheet .btn--ghost')
-await page.waitForSelector('.sheet', { state: 'detached', timeout: 5000 })
+console.log('\n─── 통 공개 ───')
+const cells = await page.locator('.cell').count()
+ok('구좌를 전부 그린다 (요약하지 않는다)', cells === 1000, `${cells}칸`)
+const [s, a, b, c] = await Promise.all(['S', 'A', 'B', 'C'].map((t) => page.locator(`.cell.t-${t}`).count()))
+ok('등급별 칸 수가 재고와 같다', s === 1 && a === 4 && b === 25 && c === 970, `S${s} A${a} B${b} C${c}`)
+ok('통 안 카드가 실제 상품 이미지와 함께 보인다', (await page.locator('.cardpick img').count()) > 0,
+  `${await page.locator('.cardpick img').count()}장`)
 
-// 4. 취향 대화 (ChatGPT) — 키가 없으면 규칙 기반으로 내려앉는다
-await page.click('text=손주 줄 것도 넣어서')
-// AI가 되물을 수 있다. 그 경우에도 칩은 항상 떠 있어야 하고(막다른 골목 금지),
-// 한 번 더 고르면 결과 문장이 대화 안(.taste__done)에 떠야 한다.
-for (let turn = 0; turn < 2; turn++) {
-  try { await page.waitForSelector('.taste__done', { timeout: 40000 }); break } catch {
-    const chip = await page.$('.taste__chips .chip')
-    check('되묻기 상태에서도 칩이 떠 있다', Boolean(chip))
-    if (!chip) break
-    await chip.click()
-  }
-}
-const done = await page.textContent('.taste__done')
-check('취향 구성 반영이 대화 안에 뜬다', /좁혔|기본 구성/.test(done), done)
-// 등급 스트립이 664px로 그려져 화면 밖으로 나갔던 자리다.
-check('가로 넘침 없음 — 등급 스트립', (await spill(page)).length === 0, (await spill(page)).join(' | '))
+console.log('\n─── 팀 확률과 고지 (I11 · I12) ───')
+const teamNotice = await page.getByText('팀 인원이 늘면 무엇이 어떻게 달라지는지').isVisible()
+ok('팀 효과 고지가 화면 본문에 있다 (툴팁·더보기 아님)', teamNotice)
+ok('초대자 추가 보상 없음을 명시한다', await page.getByText('초대한 사람에게 추가 보상은 없습니다').isVisible())
+const oddsText = await page.locator('table').first().textContent()
+ok('확률 옆에 자연빈도가 병기된다 (D10)', /\d{1,3}(,\d{3})*명 중/.test(oddsText), oddsText.match(/[\d,]+명 중 [^\s]+/)?.[0])
+ok('초기하분포 식이 화면에 노출된다', await page.locator('.formula').first().isVisible())
+const mulCells = await page.locator('table').first().textContent()
+ok('K=1은 정확히 n배, K>1은 아니라고 적는다',
+  /재고가 1장이라 정확히 n배/.test(mulCells) && /재고가 여러 장이라 n배보다 작다/.test(mulCells))
 
-// 5. 인원 모으기 — 곡선 위의 점이 움직인다
-await page.click('text=바로')
-await page.waitForFunction(() => document.querySelectorAll('.av.is-in').length === 10, null, { timeout: 20000 })
-check('10명 모임', (await page.textContent('.rail__count')).includes('10'))
-const oddsTeam = await page.textContent('.now__num')
-check('팀이 커지자 확률 상승', parseFloat(oddsTeam) > parseFloat(oddsAlone), `${oddsAlone} → ${oddsTeam}`)
+console.log('\n─── 팀 만들기 · 지목 · ChatGPT ───')
+await page.getByRole('button', { name: /명으로 팀 만들기/ }).click()
+await page.waitForSelector('text=내 지목', { timeout: 30000 })
+ok('방이 만들어지고 참여 화면이 열린다', await page.getByText('내 지목').isVisible())
 
-// 6. 전원 게이트 — 한 명이라도 안 누르면 안 열린다
-await page.click('.btn--go')
-await page.waitForTimeout(700)
-const gate = await page.textContent('.btn--go')
-check('게이트 진행 표시', /\d+\/10명 준비/.test(gate), gate.trim())
-check('게이트 안내 문구', await page.isVisible('.gatenote'))
+await page.locator('.cardpick').first().click()
+await page.waitForTimeout(800)
+ok('통 안 카드를 지목할 수 있다', (await page.locator('.cardpick[aria-pressed="true"]').count()) > 0)
 
-// 7. 개봉과 정산
-await page.waitForSelector('.rvlist', { timeout: 60000 })
-// 개봉은 전폭 장면으로 먼저 나온다. 탭하면 걷히고 팀 전체 결과가 드러난다.
-check('개봉 장면 노출', await page.isVisible('.scene'))
-check('장면에 등급과 정산', /낸 돈.*시가/s.test(await page.textContent('.scene__card')))
-await page.click('.scene')
-await page.waitForSelector('.scene', { state: 'detached', timeout: 5000 })
-check('참여자 수만큼 결과', (await page.$$('.rv')).length === 10)
-// '내가 받은 것' 요약 카드에도 정산이 있으므로 참여자 카드 안으로 한정한다.
-const deltas = await page.$$eval('.rv .rv__delta, .rv .rv__even', (els) => els.map((e) => e.textContent))
-check('정산 표기 10건', deltas.length === 10, deltas.slice(0, 3).join(' '))
-check('음수 차액 없음', deltas.every((d) => !d.includes('-')), deltas.join(' '))
-check('결과 불변 안내', (await page.textContent('.seed')).includes('변경되지 않아'))
+await page.getByRole('button', { name: '팀원들 취향 정하기' }).click()
+await page.waitForTimeout(3000)
+ok('팀원 지목이 집계된다', /명 지목/.test(await page.locator('.cardlist').first().textContent()))
 
-check('가로 넘침 없음 — 개봉 결과', (await spill(page)).length === 0, (await spill(page)).join(' | '))
+await page.getByRole('button', { name: '2순위 이하 순위 만들기' }).click()
+await page.waitForSelector('.badge.ai, .badge.rule', { timeout: 40000 })
+const aiBadge = await page.locator('.panel').filter({ hasText: 'AI에게 순위 맡기기' }).locator('.badge').first().textContent()
+ok('AI 순위 생성이 응답하고 출처를 배지로 밝힌다', /ChatGPT|규칙 기반/.test(aiBadge), aiBadge)
 
-// 8. 공동구매형 — 상품 확정, 확률은 '얼마를 내는가'에만
-{
-  const gb = meta.groupbuys[0]
-  await page.goto(BASE, { waitUntil: 'networkidle' })
-  await page.click('.gbcard:has(.gbcard__tag:not(.gbcard__tag--rf):not(.gbcard__tag--sv))')
-  await page.waitForSelector('.gbnow', { timeout: 10000 })
-  const read = async () => (await page.$$eval('.gbnow b', (e) => e.map((x) => x.textContent)))
-  const at20 = await read()
-  check(`최소 발주 ${gb.minTeam}명 기본값`, (await page.textContent('.gbslider b')).includes(String(gb.minTeam)))
+console.log('\n─── 전원 게이트 (I8) — 서버가 판정한다 ───')
+await page.getByRole('button', { name: '통 열기' }).click()
+const gate = await page.waitForSelector('text=/서버 응답 409/', { timeout: 15000 }).then(() => true).catch(() => false)
+ok('준비 전 개봉이 서버 409로 막힌다 (프론트 방어가 아니다)', gate)
+const gateText = gate ? await page.locator('.notice').filter({ hasText: '서버 응답' }).textContent() : ''
+ok('누가 안 눌렀는지 서버가 알려준다', /아직 안 누른 사람/.test(gateText))
 
-  await page.focus('.gbslider input')
-  for (let i = 0; i < 25; i++) await page.keyboard.press('ArrowRight')
-  await page.waitForTimeout(400)
-  const at45 = await read()
-  check('인원이 늘면 내는 돈이 준다', parseInt(at45[0].replace(/\D/g, '')) < parseInt(at20[0].replace(/\D/g, '')), `${at20[0]} → ${at45[0]}`)
-  check('인원이 늘면 무료 인원이 는다', parseInt(at45[2]) > parseInt(at20[2]), `${at20[2]} → ${at45[2]}`)
+await page.getByRole('button', { name: '전원 준비시키기' }).click()
+await page.waitForTimeout(4000)
+await page.getByRole('button', { name: '통 열기' }).click()
+await page.waitForSelector('text=뽑힌 카드는 통에서 빠집니다', { timeout: 20000 })
+ok('전원 준비 후에는 열린다', await page.getByText('뽑힌 카드는 통에서 빠집니다').isVisible())
 
-  await page.click('.btn--go')
-  await page.waitForSelector('.rvlist', { timeout: 30000 })
-  // 60명 결과를 전부 늘어놓지 않는다 — 당첨자와 나만 먼저, 나머지는 한 줄
-  const collapsed = (await page.$$('.rv')).length
-  const moreBtn = await page.$('.rv__more')
-  check('결과가 접혀서 나온다', Boolean(moreBtn) && collapsed <= 12, `${collapsed}행`)
-  if (moreBtn) { await moreBtn.click(); await page.waitForTimeout(200) }
-  const free = (await page.$$('.freetag')).length
-  const all = (await page.$$('.rv')).length
-  check('발주 결과에 무료 당첨자', free >= 1 && free < all, `${free}/${all}명`)
-  const gd = await page.$$eval('.rv .rv__delta, .rv .rv__even', (els) => els.map((e) => e.textContent))
-  check('공동구매도 손해 없음', gd.length === all && gd.every((d) => !d.includes('-')))
-  check('가로 넘침 없음 — 공동구매', (await spill(page)).length === 0, (await spill(page)).join(' | '))
-}
+console.log('\n─── 비복원 (I3) ───')
+await page.waitForTimeout(3500)
+const gone = await page.locator('.cell.gone').count()
+ok('뽑힌 구좌가 통에서 꺼진다', gone === 10, `${gone}칸`)
+const topbar = await page.locator('.topbar-count').textContent()
+ok('남은 구좌가 줄어든 것이 상단에 보인다', /990/.test(topbar), topbar?.trim())
+const openTable = await page.locator('table').filter({ hasText: '뽑기 직전 남은 구좌' }).textContent()
+ok('뽑을 때마다 확률이 갱신된 것이 기록된다', /1,000구좌/.test(openTable) && /991구좌/.test(openTable))
+const first = openTable.match(/0\.100%/), later = openTable.match(/0\.101%/)
+ok('갱신된 확률이 실제로 다르다', !!first && !!later, '0.100% → 0.101%')
+const upd = await page.locator('table').filter({ hasText: '구좌 소진' }).textContent()
+ok('성립 불가능한 갱신 상태는 —로 표시된다 (I17)', upd.includes('—'))
 
-// 9. 데일리 100원 — 꽝 있는 포맷, 확률 전부 공개
-{
-  const d = meta.dailies[0]
-  await page.goto(BASE, { waitUntil: 'domcontentloaded' })
-  await page.waitForSelector('.dcard', { timeout: 20000 })
-  check(`데일리 ${meta.dailies.length}종 노출`, (await page.$$('.dcard')).length === meta.dailies.length)
-  await page.click('.dcard')
-  await page.waitForSelector('.gbnow', { timeout: 10000 })
-  const stat = await page.$$eval('.gbnow b', (e) => e.map((x) => x.textContent))
-  check('당첨 확률 공개', stat[0].includes(String(d.winOdds)))
-  check('꽝 확률도 공개', stat[1].includes(String(d.blankOdds)))
-  check('확률 계산 근거 4단계', (await page.$$('.deco__ol li')).length === 4)
-  await page.click('.btn--go')
-  await page.waitForSelector('.dres', { timeout: 20000 })
-  const t = (await page.textContent('.dres b')).trim()
-  check('당첨 또는 꽝이 나온다', ['당첨!', '꽝'].includes(t), t)
-  check('투표 카드 등장', await page.isVisible('.vote'))
-  check('가로 넘침 없음 — 데일리', (await spill(page)).length === 0, (await spill(page)).join(' | '))
-}
+console.log('\n─── 교환 (I5) ───')
+await page.getByRole('button', { name: '교환 실행' }).click()
+await page.waitForSelector('text=이 교환에서 아무도 손해 보지 않습니다', { timeout: 20000 })
+const cycles = await page.locator('.cycle').count()
+ok('교환 고리가 화면에 그려진다', cycles > 0, `${cycles}개`)
+const cycleText = cycles ? await page.locator('.cycle').first().textContent() : ''
+ok('고리가 A → B → A 형태로 보인다', (cycleText.match(/→/g) || []).length >= 2, cycleText.replace(/\s+/g, ' ').slice(0, 40))
+const tradeText = await page.locator('table').filter({ hasText: '교환 전' }).textContent()
+ok('교환 전/후와 개선 여부가 참여자별로 보인다', /선호 \d+단계 개선|그대로/.test(tradeText))
+ok('나빠진 사람이 없다', !tradeText.includes('나빠짐'))
+ok('개별 합리성의 출처를 밝힌다', /Gale의 Top Trading Cycles/.test(await page.locator('.notice').filter({ hasText: '손해' }).textContent()))
+const convText = await page.locator('table').filter({ hasText: '같은 걸 원한 사람' }).textContent()
+ok('교환 전환율 표가 있고 100%가 아니다', /%/.test(convText) && !/100\.0%/.test(convText))
+ok('선호가 같을 때와 다를 때를 나란히 보여준다', /선호가 서로 다를 때/.test(convText) && /선호가 모두 같을 때/.test(convText))
 
-// 9-b. ④ 래플 — 응모 무료·중복 409·낙첨 손실 0
-{
-  await page.goto(BASE, { waitUntil: 'domcontentloaded' })
-  await page.waitForSelector('.gbcard__tag--rf', { timeout: 20000 })
-  await page.click('.gbcard__tag--rf')
-  await page.waitForSelector('.gbnow', { timeout: 10000 })
-  check('래플: 정가 취소선 + 래플가', /↓/.test(await page.textContent('.gbhero__pr')))
-  await page.click('text=무료로 응모하기')
-  await page.waitForSelector('text=응모 완료', { timeout: 10000 })
-  check('래플: 응모 번호 발급', /\d+번/.test(await page.textContent('.gatenote')))
-  await page.click('text=추첨 결과 보기')
-  await page.waitForSelector('.dres', { timeout: 10000 })
-  const rfT = await page.textContent('.dres')
-  check('래플: 당첨 또는 무손실 낙첨', /당첨|잃은 건 0원/.test(rfT), rfT.slice(0, 40))
-  check('가로 넘침 없음 — 래플', (await spill(page)).length === 0, (await spill(page)).join(' | '))
-}
+console.log('\n─── 대조 뷰 ───')
+const cmp = await page.locator('.compare').textContent()
+ok('오리파 / 혼자 / 팀 세 칸이 있다', /오리파 \(실제 시장\)/.test(cmp) && /혼자 열기/.test(cmp) && /팀으로 열기/.test(cmp))
+const unknowns = await page.locator('.compare .unknown').count()
+ok('오리파 칸이 물음표로 남는다 (추정치로 채우지 않았다)', unknowns >= 4, `${unknowns}칸`)
+ok('혼자·팀 칸은 실제 엔진 결과다', /0\.100%/.test(cmp) && /1\.000%/.test(cmp))
+const seed = await page.locator('.mono').filter({ hasText: '추첨 시드' }).textContent()
+ok('시드가 노출돼 재현 가능하다', /추첨 시드 \S+\|\S+\|\S+\|\d/.test(seed), seed?.trim().slice(0, 46))
 
-// 9-c. ⑤ 무손실 적금 — 적립 → 확률 → 추첨 → 원금 보존
-{
-  await page.goto(BASE, { waitUntil: 'domcontentloaded' })
-  await page.waitForSelector('.gbcard__tag--sv', { timeout: 20000 })
-  await page.click('.gbcard__tag--sv')
-  await page.waitForSelector('.gbnow', { timeout: 10000 })
-  await page.click('.draws .chip:nth-child(3)')
-  await page.waitForSelector('text=내 당첨 확률', { timeout: 10000 })
-  check('적금: 적립하면 확률이 뜬다', /[\d.]+%/.test(await page.textContent('.gatenote')))
-  await page.click('text=이번 주 추첨 보기')
-  await page.waitForSelector('.dres', { timeout: 10000 })
-  const svT = await page.textContent('.dres')
-  check('적금: 원금 보존 명시', svT.includes('원금') && svT.includes('5,000'), svT.slice(0, 60))
-  check('가로 넘침 없음 — 적금', (await spill(page)).length === 0, (await spill(page)).join(' | '))
-}
+console.log('\n─── 근거 시트 · 금지 (I10) ───')
+const ev = await page.locator('.section').last().textContent()
+ok('무엇이 정의·정리·실측·가정·미검증인지 구분한다',
+  /정의/.test(ev) && /정리/.test(ev) && /실측/.test(ev) && /가정/.test(ev) && /미검증/.test(ev))
+ok('시뮬레이션 범위를 밝힌다', /팀원 · 교환 상대 · 10만 회 분포는 시뮬레이션/.test(ev))
+const body = await page.locator('body').textContent()
+const FORBIDDEN = ['얼마 안 남', '서두르', '마감 임박', '지금 바로', '놓치지', '마지막 기회']
+const found = FORBIDDEN.filter((w) => body.includes(w))
+ok('희소성 압박 문구가 화면에 없다', found.length === 0, found.join(', ') || '없음')
+ok('시뮬 배지가 화면에 있다 (I13)', (await page.locator('.badge.sim').count()) > 0)
 
-// 10. 뽑기 통과 천장
-{
-  // networkidle을 쓰지 않는다 — 데일리 화면을 거친 뒤로는 앱이 주기적으로
-  // 상태를 확인해 idle이 오지 않는다. 필요한 요소가 뜨는 것으로 판단한다.
-  await page.goto(BASE, { waitUntil: 'domcontentloaded' })
-  await page.waitForSelector('.blist li:nth-child(2) .bcard', { timeout: 20000 })
-  await page.click('.blist li:nth-child(2) .bcard')
-  await page.waitForSelector('.odds__why', { timeout: 10000 })
-  await page.click('.odds__why')
-  await page.waitForSelector('.bin', { timeout: 10000 })
-  check('뽑기 통 4등급', (await page.$$('.bin__row')).length === 4)
-  const tot = await page.textContent('.bin__tot')
-  check('총 구좌 표기', /[\d,]+구좌/.test(tot), tot)
-  check('천장 바 존재', await page.isVisible('.pity'))
-  const pityBefore = await page.textContent('.pity__note')
-  await page.focus('.pity__sim input')
-  for (let i = 0; i < 12; i++) await page.keyboard.press('ArrowRight')
-  await page.waitForTimeout(300)
-  const pityAfter = await page.textContent('.pity__note')
-  check('천장 도달 시 안내 변경', pityBefore !== pityAfter, `${pityBefore} → ${pityAfter}`)
-}
+console.log('\n─── 응답 헤더 · 콘솔 ───')
+const boxesRes = await page.request.get(`${BASE}/api/boxes${CACHE_BUST}`)
+const cc = boxesRes.headers()['cache-control'] || ''
+ok('/api/boxes 캐시가 s-maxage=60', /s-maxage=60/.test(cc), cc)
+ok('/api/boxes에 stale-while-revalidate가 있다', /stale-while-revalidate=600/.test(cc))
+const bj = await boxesRes.json()
+ok('배포본이 이번 크롤 데이터를 쓴다', bj.box?.crawledAt?.startsWith('2026-08-29'), bj.box?.crawledAt)
+ok('통 구성이 코드와 일치한다', bj.box?.N === 1000 && bj.box?.tiers?.length === 4)
 
-// 11. 확률 안내 시트 — 유저와 같은 경로(상세 화면의 '확률 안내')로 진입
-await page.goto(BASE, { waitUntil: 'domcontentloaded' })
-await page.waitForSelector('.bcard', { timeout: 20000 })
-await page.click('.bcard')
-await page.waitForSelector('.odds__why', { timeout: 10000 })
-await page.click('.odds__why')
-await page.waitForSelector('.sheet', { timeout: 5000 })
-const sheet = await page.textContent('.sheet')
-check('수식 공개', sheet.includes('매입 원가율') && sheet.includes('고객 획득비 회수'))
-check('가정 명시', sheet.includes('모델 가정'))
-check('포맷별 정직성 설명', sheet.includes('일부 형식의 속성'))
-check('꽝 없는 형식의 3층 구조', sheet.includes('수집 단계에서'))
-check('꽝 있는 형식도 명시', sheet.includes('이 형식에는 꽝이 있습니다'))
-check('확률 출처 3가지', sheet.includes('재고 비율') && sheet.includes('손익분기') && sheet.includes('할인 여력'))
-check('천장은 공시 대상', sheet.includes('천장(보장)'))
+const realErrors = consoleErrors.filter((e) => !/409/.test(e))
+ok('예상치 못한 콘솔 에러가 없다 (409는 게이트 시연이므로 제외)',
+  realErrors.length === 0, realErrors.slice(0, 2).join(' / ') || '없음')
 
-// 12. 데스크톱 셸 — 폰이 '기기'로 보여야 한다.
-// 프레임에 높이 상한이 없어 홈 그리드에서 3,885px까지 자랐던 적이 있다.
-// 실제 앱은 화면이 고정되고 스크롤은 본문 안에서만 일어난다.
-{
-  const desk = await browser.newContext({ viewport: { width: 1512, height: 950 } })
-  const dp = await desk.newPage()
-  await dp.goto(BASE, { waitUntil: 'domcontentloaded' })
-  await dp.waitForSelector('.bcard', { timeout: 20000 })
-  await dp.click('.tabbar__b:nth-child(1)')          // 홈 — 내용이 가장 긴 탭
-  await dp.waitForTimeout(600)
-  const m = await dp.evaluate(() => {
-    const body = document.querySelector('.body')
-    return {
-      frame: Math.round(document.querySelector('.phone').getBoundingClientRect().height),
-      vh: window.innerHeight,
-      pageScrolls: document.documentElement.scrollHeight > window.innerHeight + 1,
-      bodyScrolls: body.scrollHeight > body.clientHeight + 1,
-    }
-  })
-  check('폰 프레임이 뷰포트를 넘지 않음', m.frame <= m.vh, `${m.frame}px / ${m.vh}px`)
-  check('페이지가 아니라 본문이 스크롤', !m.pageScrolls && m.bodyScrolls,
-    `page=${m.pageScrolls} body=${m.bodyScrolls}`)
-
-  // 실무자 모니터(OPS) — 유저 폰에서 뒤로 내린 확률 세부는 우측 패널이
-  // 실시간으로 전부 보여준다. 폰과 같은 서버 값을 쓰는지, 참여자가 늘면
-  // 실제로 갱신되는지 잠근다.
-  await dp.click('.tabbar__b:nth-child(3)')
-  await dp.waitForSelector('.bcard', { timeout: 10000 })
-  // 좌측 배경 레일 — 채용 담당자가 읽는 자리. 데이터 수치는 서버에서 온다.
-  check('좌측 브리프 레일 노출', await dp.isVisible('.brief__h'))
-  check('브리프에 실제 수집 건수', /\d{3}건/.test(await dp.textContent('.brief')))
-  // 박스 미선택 상태에서도 패널이 비지 않는다
-  check('OPS 기본 상태 안내', (await dp.textContent('.ops')).includes('형식마다'))
-  await dp.click('.bcard')
-  await dp.waitForSelector('.ops__kpis', { timeout: 10000 })
-  const opsS1 = (await dp.textContent('.ops__kpis')).match(/([\d.]+%)/)?.[1]
-  const userS = (await dp.textContent('.now__num')).trim()
-  check('OPS와 유저 화면의 확률이 문자 단위로 일치', opsS1 === userS, `${opsS1} vs ${userS}`)
-  await dp.click('text=바로')
-  await dp.waitForFunction(() => document.querySelectorAll('.av.is-in').length === 10, null, { timeout: 20000 })
-  await dp.waitForTimeout(400)
-  const opsS2 = (await dp.textContent('.ops__kpis')).match(/([\d.]+%)/)?.[1]
-  check('참여자가 늘면 OPS가 실시간 갱신', opsS2 !== opsS1, `${opsS1} → ${opsS2}`)
-  check('OPS에 곡선 렌더', await dp.isVisible('.ops .curve__line'))
-  // 수식·이유·이점이 실시간 값과 함께 붙어 있어야 한다
-  const opsText = await dp.textContent('.ops')
-  check('OPS에 확률 수식', opsText.includes('P(S) = 재고비율 × 부스트'))
-  check('OPS 수식이 실시간 값', (await dp.textContent('.opsw__eq')).includes(opsS2))
-  check('OPS에 설계 이유', opsText.includes('부스트는 어디서 나오나'))
-  check('OPS에 이점 설명', opsText.includes('이 설계의 이점'))
-  check('OPS에 학술·규제 근거', opsText.includes('Bass (1969)') && opsText.includes('게임산업법'))
-  // CTA가 스크롤 중 본문 바닥에 딱 붙는지 — 캐스케이드 순서 버그로 72px 떠 있던 적이 있다
-  await dp.evaluate(() => { document.querySelector('.body').scrollTop = 300 })
-  await dp.waitForTimeout(250)
-  const ctaGap = await dp.evaluate(() => {
-    const cta = document.querySelector('.cta').getBoundingClientRect()
-    const body = document.querySelector('.body').getBoundingClientRect()
-    return Math.round(body.bottom) - Math.round(cta.bottom)
-  })
-  check('CTA가 본문 바닥에 밀착', Math.abs(ctaGap) <= 1, `${ctaGap}px 떠 있음`)
-  await desk.close()
-}
-
-// 13. 홈 탭 — 실제 올웨이즈 구조를 따라가는지. 눌러도 아무 일 없는 컨트롤이 없어야 한다.
-{
-  await page.goto(BASE, { waitUntil: 'domcontentloaded' })
-  await page.waitForSelector('.bcard', { timeout: 20000 })
-  await page.click('.tabbar__b:nth-child(1)')
-  await page.waitForSelector('.pcard', { timeout: 10000 })
-  check('Alwayz 워드마크', (await page.textContent('.top__logo')) === 'Alwayz')
-  check('카테고리 6개', (await page.$$('.cats__b')).length === 6)
-  check('퀵메뉴 6개', (await page.$$('.quick__t')).length === 6)
-  check('섹션 헤더 존재', (await page.$$('.shead')).length >= 3)
-
-  const before = (await page.$$('.pcard')).length
-  await page.fill('.hsearch input', '리자몽')
-  await page.waitForTimeout(400)
-  const after = (await page.$$('.pcard')).length
-  check('검색이 실제로 동작', after > 0 && after < before, `${before} → ${after}건`)
-
-  await page.fill('.hsearch input', '')
-  await page.click('.cats__b:nth-child(4)')
-  await page.waitForTimeout(400)
-  check('카테고리 전환 동작', (await page.textContent('.shead h2')).includes('포켓몬'))
-  check('카드에 별점 렌더', (await page.$$('.pcard__rate')).length > 0)
-  check('카드에 스펙 칩 렌더', (await page.$$('.chip2')).length > 0)
-  check('가로 넘침 없음 — 홈', (await spill(page)).length === 0, (await spill(page)).join(' | '))
-}
-
-check('콘솔 에러 없음', errors.length === 0, errors.slice(0, 2).join(' | '))
+console.log(`\n  ${step - fails.length}/${step}단계 통과${fails.length ? ` · 실패: ${fails.join(', ')}` : ''}`)
 await browser.close()
-console.log(fail === 0 ? '\n✅ 전부 통과' : `\n❌ 실패 ${fail}건`)
-process.exit(fail === 0 ? 0 : 1)
+if (fails.length) process.exitCode = 1

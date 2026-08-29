@@ -1,386 +1,177 @@
 /**
- * POST /api/curate — 취향 대화로 박스 구성하기. ChatGPT는 이 파일에만 있다.
+ * POST /api/curate — ChatGPT.  과제 요건: 대화형 AI는 반드시 ChatGPT API.
+ *   body { action: 'prefs', roomId, memberId, taste }   선호 순위 생성
+ *   body { action: 'ask', question, cardId? }           카드 용어·시세 설명
  *
- * 확률형 구매의 가장 큰 약점은 "안 쓸 물건이 오는 것"이다. 혜택 소비자는
- * 낭비를 못 견디므로, 무작위를 쓰되 취향 밖으로는 나가지 않게 해야 한다.
- * 그래서 대화로 취향 축을 잡고 그 안에서만 무작위를 돌린다.
+ * OpenAI를 raw fetch로 부른다. SDK를 설치하지 않으므로 npm 패키지가 0개 늘어난다.
+ * 모델 gpt-4o-mini, JSON 모드. 키는 .env.local의 OPENAI_API_KEY.
+ * 키가 없으면 규칙 기반으로 내려앉고 **그 사실을 응답에 표기한다**(화면이 배지로 띄운다).
  *
- * LLM이 돌려주는 것은 pickedIds(문자열 배열)와 문장뿐이다.
- * LLM이 정하지 못하는 것: 티어 배정 · 확률 · 가격 · 하한 충족 여부 · 추첨 결과.
- * 전부 서버가 _pool.js 가격으로 다시 계산한다.
+ * ## AI의 자리 (I9) — v1에서 무엇이 잘못됐나
+ * v1은 ChatGPT가 박스 구성에 관여했고, 모델이 상품 id를 되묻기 보기(options) 필드에
+ * 넣는 사고로 박스가 무너졌다. v2에서 AI의 자리를 바꿨다.
+ *   통은 서버가 확정한 뒤 고정된다. AI는 손대지 않는다.
+ *   AI가 반환하는 것은 **선호 순위와 설명 문장뿐**이다.
+ *   반환된 id가 통 안에 없으면 버린다(환각 차단).
+ *   누락된 카드는 시세 내림차순으로 서버가 채운다.
+ *   사용자가 화면에서 순위를 직접 고칠 수 있다. AI는 초안일 뿐이다.
+ * 프롬프트는 부탁이고 가드가 보증이다. 아래 rescue/필터가 가드다.
  *
- * 실행:  node api/curate.js   (네트워크 없이 순수 함수만 자체 검증)
+ * ## AI가 장식이 아닌 이유 (Phase 3 측정)
+ * 선호가 동질이면 TTC가 사이클을 만들지 못해 교환이 거의 일어나지 않는다
+ * (개선율 10.5% vs 68.4%). 선호를 이질적으로 만드는 것이 이 기능의 실제 일이다.
  */
-import {
-  getBox, tiersOf, collapseUp, tierMeanRetail, oddsOf, byId,
-  TIERS, BANDS, MIN_TIER_ITEMS, POOL,
-} from './_draw.js'
+import { slotsOf } from './_box.js'
+import { completePrefs } from './_trade.js'
+import { mutateRoom } from './_room.js'
 
+const UNIVERSE = [...new Map(slotsOf().map((s) => [s.id, s])).values()]
+const VALID = new Set(UNIVERSE.map((c) => c.id))
 const MODEL = 'gpt-4o-mini'
-const MAX_MESSAGES = 12
-const MAX_CHARS = 400
-const PROMPT_PER_TIER = 40 // 프롬프트에 넣을 티어별 후보 상한 (토큰 관리)
-export const MIN_BOX_ITEMS = 12
 
-const SYSTEM = `너는 커머스 앱 '올웨이즈'의 올박스 담당자다. 45~65세 여성 고객과 짧게 대화하며
-어떤 상품이 들어간 상자를 원하는지 파악한다. 규칙:
-1. reply는 2문장 이내, 존댓말, 60자를 넘기지 않는다.
-2. pickedIds에는 **반드시 20~28개**를 담는다. 비워두면 안 된다. 되물을 때도
-   지금 파악한 범위에서 일단 채운다. 후보 목록에 있는 id만 쓰고 지어내지 않는다.
-3. **각 등급에서 최소 4개씩** 고른다. C(가장 싼 등급)를 반드시 4개 이상 채운다.
-   C가 비면 상자가 성립하지 않아 네 구성은 통째로 버려진다.
-4. options는 **사람이 읽는 한국어 보기 문구**다(예: "국물 요리 위주"). 상품 id를
-   여기에 넣지 않는다. 되묻지 않을 때는 빈 배열로 둔다.
-5. axis에는 파악한 취향을 12자 이내 한 줄로 적는다. 예: "주방 살림 위주".
-6. 상품 가격이나 확률을 문장에 쓰지 않는다. 그건 화면이 보여준다.
-반드시 JSON만 출력: {"reply":"","question":null,"options":[],"axis":"","pickedIds":[]}`
-
-/* ── 프롬프트용 후보 블록 ─────────────────────────────────── */
-export function candidateBlock(box) {
-  const T = tiersOf(box)
-  const lines = []
-  for (const t of TIERS) {
-    const xs = [...T[t]].sort((a, b) => a.price - b.price)
-    const step = Math.max(1, Math.ceil(xs.length / PROMPT_PER_TIER))
-    for (let i = 0; i < xs.length; i += step) {
-      const it = xs[i]
-      lines.push(`${it.id}|${t}|${it.name.slice(0, 28)}|${it.price}`)
-    }
-  }
-  return lines.join('\n')
-}
-
-/* ── 가드 ─────────────────────────────────────────────────── */
-
-/** ① id 조인 — 풀에 없는 id는 조용히 사라진다. 환각 상품이 화면에 못 뜬다. */
-export const joinIds = (ids) =>
-  (Array.isArray(ids) ? ids : [])
-    .map((i) => byId.get(String(i).trim()))
-    .filter(Boolean)
+const catalog = () =>
+  UNIVERSE.map((c) => ({ id: c.id, tier: c.tier, price: c.price, name: c.name.slice(0, 60) }))
 
 /**
- * ② options 오염 회수 — 모델이 상품 id를 '보기'로 착각해 options에 넣는 일이
- * 실제로 있었다(첫 실측에서 pickedIds가 0개였던 원인). 프롬프트를 고쳤지만
- * 같은 실수를 코드로도 막는다. 풀에 있는 id는 회수하고 options에서는 지운다.
+ * 모델이 엉뚱한 필드에 카드 id를 넣었을 때 회수한다.
+ * v1에서 실제로 겪은 사고다 — 프롬프트로 못을 박아도 모델은 가끔 어긴다.
+ * 응답 전체를 훑어 통 안의 id를 등장 순서대로 건진다.
  */
-export function rescueIds(out) {
-  const opts = Array.isArray(out.options) ? out.options.map(String) : []
-  const strays = opts.filter((o) => byId.has(o.trim()))
-  return {
-    ids: [...(Array.isArray(out.pickedIds) ? out.pickedIds : []), ...strays],
-    options: opts.filter((o) => !byId.has(o.trim())),
-    rescued: strays.length,
+export function rescueIds(obj) {
+  const found = []
+  const walk = (v) => {
+    if (typeof v === 'string') { if (VALID.has(v)) found.push(v); return }
+    if (Array.isArray(v)) { v.forEach(walk); return }
+    if (v && typeof v === 'object') { Object.values(v).forEach(walk) }
   }
+  walk(obj)
+  return [...new Set(found)]
 }
 
-/** 규칙 기반 폴백 — 티어별로 골고루 채운다. */
-export function fallbackPick(box, n = 24) {
-  const T = tiersOf(box)
-  const per = Math.ceil(n / TIERS.length)
-  return TIERS.flatMap((t) => {
-    const xs = [...T[t]].sort((a, b) => a.price - b.price)
-    const step = Math.max(1, Math.floor(xs.length / per))
-    return xs.filter((_, i) => i % step === 0).slice(0, per)
+/** 통 안의 id만 남긴다. 환각 id 차단 (I9). */
+export const keepValid = (ids) => (Array.isArray(ids) ? ids.filter((x) => VALID.has(x)) : [])
+
+async function callOpenAI(messages, key) {
+  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: MODEL, messages, temperature: 0.4,
+      response_format: { type: 'json_object' },
+    }),
+    signal: AbortSignal.timeout(20000),
   })
+  if (!res.ok) throw new Error(`OpenAI HTTP ${res.status}`)
+  const j = await res.json()
+  return JSON.parse(j.choices[0].message.content)
 }
 
-/**
- * ③ 구성 검증 — 실패하면 폴백으로 되돌린다(fail closed).
- *
- * 가격 하한만 보면 부족하다는 것을 실측에서 배웠다. AI가 "주방 살림 위주로"에
- * 비싼 가전만 20개 골랐더니 collapseUp이 전부 S로 합쳐 기저 등급이 비었고,
- * 2,000원 내고 20만원짜리를 100% 받는 상자가 만들어졌다. 하한은 지켜졌지만
- * 단위경제가 무너진 것이다. 그래서 기저 등급 존재를 불변식으로 올렸다.
- */
-export function assertFloor(box, tiers) {
-  for (const t of TIERS)
-    for (const it of tiers[t])
-      if (it.price < box.entry)
-        throw new Error(`하한 위반: ${it.name} ${it.price}원 < 참여비 ${box.entry}원`)
-  if (tiers.C.length < MIN_TIER_ITEMS)
-    throw new Error(`기저 등급이 ${tiers.C.length}개 — 상자가 성립하지 않습니다.`)
-  if (TIERS.filter((t) => tiers[t].length).length < 2)
-    throw new Error('등급이 하나뿐이라 확률이 의미를 잃습니다.')
-  return true
-}
+const PREF_SYSTEM = `너는 포켓몬 카드 수집을 돕는다. 사용자의 취향 설명을 읽고 통 안의 카드 순위를 매긴다.
 
-/**
- * 큐레이션 결과를 박스 구성으로 바꾼다.
- * 후보가 모자라면 폴백으로 대체하고 **문장도 함께 다시 쓴다**.
- * 화면에 없는 것을 문장이 주장하면 안 되기 때문이다.
- */
-export function composeBox(box, picked, reply) {
-  const base = tiersOf(box) // 전체 풀 기준
-  /**
-   * 취향은 **기본 등급(C·B)만** 정하고, 최고 등급(S·A)은 상자가 고정한다.
-   *
-   * 처음에는 전 등급을 AI에게 맡겼는데, "손주 줄 것도 넣어서"처럼 상위 상품과
-   * 무관한 취향을 말하면 S 티어가 통째로 비어 최고 등급 확률이 0%가 됐다.
-   * 상자의 간판이 대화 한 줄로 사라지는 건 제품이 아니다. 실제 블라인드박스도
-   * 특상은 고정이고 나머지가 바뀐다. 개인화는 90% 이상 실제로 받게 되는
-   * 기본 등급에 거는 편이 효과도 크다.
-   */
-  const build = (items) => {
-    const cur = tiersOf(box, items.map((i) => i.id))
-    const useB = cur.B.length >= MIN_TIER_ITEMS
-    // C도 B와 같은 폴백을 준다. C만 무보호라 후보가 얇은 취향(칩으로 앱이
-    // 직접 제시한 것 포함)이 전면 폴백으로 떨어져 "짤 수 없다"고 거절됐다.
-    const useC = cur.C.length >= MIN_TIER_ITEMS
-    return {
-      tiers: collapseUp({
-        S: base.S, A: base.A,
-        B: useB ? cur.B : base.B,
-        C: useC ? cur.C : base.C,
-      }),
-      // 취향이 실제로 반영된 등급 수. 0이면 개인화가 없었다는 뜻이므로
-      // "좁혔다"고 주장하면 안 된다 — 전면 폴백으로 처리한다.
-      personalized: (useB ? 1 : 0) + (useC ? 1 : 0),
-    }
-  }
-  const fallback = (why) => {
-    const items = fallbackPick(box)
-    const { tiers } = build(items)
-    assertFloor(box, tiers) // 폴백마저 깨지면 그건 데이터 문제다. 숨기지 않는다.
-    return {
-      tiers, items, usedFallback: true, why,
-      reply: '말씀하신 쪽으로는 상자를 짤 수 없어서, 이 박스의 기본 구성으로 담았어요.',
-    }
-  }
+반드시 이 JSON 형식으로만 답한다:
+{"ranking": ["카드id", "카드id", ...], "why": "한 문장 설명"}
 
-  if (picked.length < MIN_BOX_ITEMS) return fallback(`후보 ${picked.length}개`)
+규칙:
+- ranking에는 **주어진 목록의 id만** 넣는다. 새 id를 지어내지 않는다.
+- ranking 외의 필드에 카드 id를 넣지 않는다. why는 사람이 읽는 문장이지 id 목록이 아니다.
+- 상위 12개만 넣으면 된다. 나머지는 서버가 채운다.
+- 비싼 순으로 나열하지 마라. 사용자가 말한 취향을 기준으로 정렬한다.`
 
-  const { tiers, personalized } = build(picked)
-  if (personalized === 0) return fallback('취향 후보가 기저 등급 밴드에 없음')
-  try {
-    assertFloor(box, tiers)
-  } catch (e) {
-    // 구성이 성립하지 않으면 목록과 문장을 함께 되돌린다.
-    // 화면에 없는 것을 문장이 주장하면 안 된다.
-    return fallback(e.message)
-  }
-  return { tiers, items: picked, reply, usedFallback: false, why: null }
-}
+const ASK_SYSTEM = `너는 포켓몬 카드를 처음 접한 30~40대 보호자에게 설명한다.
+상대는 시세도 은어(SAR, UR, PSA, 오리파 등)도 모른다. 쉬운 말로, 과장 없이 답한다.
 
-/**
- * 화면이 그대로 렌더할 형태로 직렬화.
- * 취향을 좁히면 티어 평균 시가가 바뀌므로 확률도 바뀐다. 곡선이 base 확률을
- * 그리고 있으면 둘이 어긋나므로, 1~10명 확률표를 통째로 다시 계산해서 준다.
- */
-export function serializeTiers(box, tiers, teamSize) {
-  const m = tierMeanRetail(tiers)
-  const odds = oddsOf(box, teamSize, teamSize, tiers)
-  const oddsByTeam = Object.fromEntries(
-    Array.from({ length: 10 }, (_, i) => [i + 1, oddsOf(box, i + 1, i + 1, tiers)])
-  )
-  const evByTeam = Object.fromEntries(
-    Array.from({ length: 10 }, (_, i) => [
-      i + 1,
-      +(TIERS.reduce((s, t) => s + oddsByTeam[i + 1][t] * m[t], 0) / box.entry).toFixed(3),
-    ])
-  )
-  return {
-    odds,
-    oddsByTeam,
-    evByTeam,
-    tiers: TIERS.map((t) => ({
-      tier: t,
-      band: BANDS[t].map((x) => Math.round(box.entry * x)),
-      count: tiers[t].length,
-      meanRetail: Math.round(m[t]),
-      samples: [...tiers[t]]
-        .sort((a, b) => (t === 'S' || t === 'A' ? b.price - a.price : a.price - b.price))
-        .slice(0, 6),
-    })),
-  }
-}
+반드시 이 JSON 형식으로만 답한다:
+{"answer": "설명 문장", "terms": [{"term":"용어","means":"뜻"}]}
 
-/* ── OpenAI ───────────────────────────────────────────────── */
-async function askOpenAI(apiKey, messages) {
-  const call = () =>
-    fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify({
-        model: MODEL,
-        temperature: 0.2,
-        response_format: { type: 'json_object' },
-        // 직전 과제에서 220으로 조였다가 JSON이 잘려 502가 났다. 넉넉히 준다.
-        max_tokens: 700,
-        messages,
-      }),
-      signal: AbortSignal.timeout(20000),
-    })
-
-  let r = await call()
-  if (r.status === 429) {
-    await new Promise((s) => setTimeout(s, 2500))
-    r = await call()
-  }
-  if (!r.ok) throw new Error(`OpenAI ${r.status}`)
-  const j = await r.json()
-  const raw = j.choices?.[0]?.message?.content ?? ''
-  try {
-    return JSON.parse(raw)
-  } catch {
-    // 잘린 JSON에서도 id는 건져낸다. 502를 내는 것보다 낫다.
-    const ids = raw.match(/"([a-z]\d{4,})"/g)?.map((s) => s.replace(/"/g, '')) || []
-    return { reply: '', question: null, options: [], axis: '', pickedIds: ids, partial: true }
-  }
-}
+규칙:
+- 주어진 카드 데이터(이름·시세·등급)에 근거해서 답한다. 시세를 지어내지 않는다.
+- 카드 id를 answer나 terms에 넣지 않는다.
+- 투자를 권유하지 않는다. "오른다"고 단정하지 않는다.`
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).json({ error: 'POST만 허용합니다.' })
+  if (req.method !== 'POST') return res.status(405).json({ error: 'POST만 받는다' })
+  const { action, roomId, memberId, taste, question, cardId, target } = req.body || {}
+  const key = process.env.OPENAI_API_KEY
 
-  const apiKey = process.env.OPENAI_API_KEY
-  const { messages, boxId, teamSize } = req.body || {}
-  const box = getBox(boxId)
-  if (!box) return res.status(400).json({ error: '없는 박스입니다.' })
-  const n = Math.min(10, Math.max(1, Math.floor(Number(teamSize) || 1)))
-
-  const history = (Array.isArray(messages) ? messages : [])
-    .slice(-MAX_MESSAGES)
-    .filter((m) => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string')
-    .map((m) => ({ role: m.role, content: m.content.slice(0, MAX_CHARS) }))
-  if (!history.length) return res.status(400).json({ error: '대화 내용이 필요합니다.' })
-
-  try {
-    let out = { reply: '', question: null, options: [], axis: '', pickedIds: [] }
-
-    if (apiKey) {
-      out = await askOpenAI(apiKey, [
-        { role: 'system', content: SYSTEM },
-        {
-          role: 'system',
-          content: `[${box.name} 후보 — id|등급|이름|가격]\n${candidateBlock(box)}`,
-        },
-        // 되묻기는 첫 턴에만. 두 번째부터는 코드가 막는다.
-        ...(history.filter((m) => m.role === 'user').length >= 2
-          ? [{ role: 'system', content: '이번 턴에는 되묻지 말고 바로 구성해라. question은 null.' }]
-          : []),
-        ...history,
-      ])
-    } else {
-      // 키가 없어도 화면이 죽지 않는다. 규칙 기반으로 내려앉고 그 사실을 밝힌다.
-      out = {
-        reply: 'AI 키가 없어 기본 구성으로 담았어요.',
-        question: null, options: [], axis: '기본 구성', pickedIds: [],
+  if (action === 'prefs') {
+    let ranking = [], why = '', source = 'rule'
+    if (key) {
+      try {
+        const out = await callOpenAI([
+          { role: 'system', content: PREF_SYSTEM },
+          { role: 'user', content: JSON.stringify({ 취향: taste || '특별한 취향 없음', 지목: target ?? null, 통: catalog() }) },
+        ], key)
+        ranking = keepValid(out.ranking)
+        // 가드: 모델이 ranking을 비우고 다른 필드에 id를 흘렸을 때 회수한다 (v1 사고)
+        if (ranking.length === 0) {
+          const rescued = rescueIds(out)
+          if (rescued.length) { ranking = rescued; why = (out.why || '') + ' (순위 필드가 비어 있어 응답 전체에서 회수했다)' }
+        }
+        if (!why) why = typeof out.why === 'string' ? out.why : ''
+        source = ranking.length ? 'openai' : 'rule'
+      } catch (e) {
+        source = 'rule'
+        why = `AI 호출 실패로 시세 순으로 채웠다 (${e.message})`
       }
+    } else {
+      why = 'OPENAI_API_KEY가 없어 시세 내림차순으로 채웠다. 이 상태에서는 전원의 선호가 같아져 교환이 거의 일어나지 않는다.'
     }
 
-    const salvaged = rescueIds(out)
-    const picked = joinIds(salvaged.ids)
-    const composed = composeBox(box, picked, String(out.reply || '').slice(0, 120))
+    // 누락분은 언제나 서버가 채운다. 목록이 불완전하면 개별 합리성이 깨진다.
+    const prefs = completePrefs({ target: target ?? null, aiRanked: ranking, universe: UNIVERSE })
 
-    // 되묻기 정책을 프롬프트가 아니라 코드로 강제한다.
-    const userTurns = history.filter((m) => m.role === 'user').length
-    const question = userTurns >= 2 || composed.usedFallback ? null : (out.question || null)
-
+    if (roomId && memberId) {
+      await mutateRoom(roomId, (r) => {
+        const m = r.members.find((x) => x.id === memberId)
+        if (!m) return null
+        m.aiPrefs = ranking
+        m.aiWhy = why
+        m.aiSource = source
+        r.rev++
+        return r
+      })
+    }
     return res.status(200).json({
-      reply: composed.reply || '이렇게 담아봤어요.',
-      question,
-      options: question ? salvaged.options.slice(0, 4).map((s) => String(s).slice(0, 14)) : [],
-      rescuedIds: salvaged.rescued,
-      axis: String(out.axis || '').slice(0, 12),
-      // 개봉 때 이 구성 그대로 뽑도록 id를 돌려준다. 서버는 받은 id를 다시 조인한다.
-      //
-      // 반드시 **화면에 그린 4개 등급 전체**를 보낸다. 처음엔 LLM 픽(C·B)만
-      // 보냈는데, open이 그 id로 재조인하면 S·A가 비어 화면은 0.280%를
-      // 보여주면서 실제 추첨은 S 후보 0개에서 뽑았다 — 이 제품이 가장
-      // 피해야 할 종류의 어긋남이다.
-      pickedIds: TIERS.flatMap((t) => composed.tiers[t].map((i) => i.id)),
-      pickedCount: composed.items.length,
-      llmPicked: picked.length,
-      usedFallback: composed.usedFallback,
-      fallbackReason: composed.why,
-      aiEnabled: Boolean(apiKey),
-      ...serializeTiers(box, composed.tiers, n),
+      source, why,
+      aiRanking: ranking,
+      prefs,
+      names: Object.fromEntries(prefs.slice(0, 20).map((id) => {
+        const c = UNIVERSE.find((x) => x.id === id)
+        return [id, { name: c.name, price: c.price, tier: c.tier }]
+      })),
+      note: source === 'openai'
+        ? `ChatGPT(${MODEL})가 상위 ${ranking.length}개를 정하고 나머지는 서버가 시세 내림차순으로 채웠다. 순위는 직접 고칠 수 있다.`
+        : '규칙 기반(시세 내림차순)으로 채웠다. AI 응답이 아니다.',
     })
-  } catch (e) {
-    return res.status(500).json({ error: `구성 실패: ${e.message}` })
-  }
-}
-
-/* ── 자체 검증 (네트워크 없이) ─────────────────────────────── */
-if (process.argv[1]?.endsWith('curate.js')) {
-  const { strict: assert } = await import('node:assert')
-  const box = getBox('charizard')
-  let n = 0
-  const ok = (l, c, e = '') => { n++; if (!c) throw new Error(`✗ ${l}${e ? ' — ' + e : ''}`) }
-
-  // ① 환각 id 차단
-  const real = POOL.items.slice(0, 5).map((i) => i.id)
-  const mixed = joinIds([...real, 'd99999999', '없는거', null, 42])
-  ok('없는 id는 조용히 탈락', mixed.length === 5, `${mixed.length}건`)
-
-  // ② 후보가 모자라면 폴백 + 문장 재작성
-  const thin = composeBox(box, joinIds(real.slice(0, 2)), 'AI가 쓴 원래 문장')
-  ok('폴백 발동', thin.usedFallback)
-  ok('폴백 시 문장도 다시 쓴다', thin.reply !== 'AI가 쓴 원래 문장', thin.reply)
-  ok('폴백 구성도 하한 유지', TIERS.every((t) => thin.tiers[t].every((i) => i.price >= box.entry)))
-
-  // ③ 정상 큐레이션은 문장을 건드리지 않는다
-  const wide = composeBox(box, fallbackPick(box, 24), '주방 살림 위주로 담았어요.')
-  ok('정상일 땐 문장 유지', wide.reply === '주방 살림 위주로 담았어요.')
-  ok('정상 구성도 하한 유지', assertFloor(box, wide.tiers))
-
-  // ④ 하한을 깨는 구성은 막는다
-  const cheap = POOL.items.filter((i) => i.price < box.entry)
-  ok('참여비보다 싼 상품이 풀에 존재', cheap.length > 0, `${cheap.length}건`)
-  assert.throws(() => assertFloor(box, { S: [], A: [], B: [], C: cheap.slice(0, 5) }))
-  ok('하한 위반은 throw', true)
-
-  // ⑤ 큐레이션 후에도 확률의 성질이 유지된다
-  const s = serializeTiers(box, wide.tiers, 7)
-  ok('확률 합 1', Math.abs(TIERS.reduce((a, t) => a + s.odds[t], 0) - 1) < 1e-9)
-  ok('확률 음수 없음', TIERS.every((t) => s.odds[t] >= 0))
-
-  // ⑥ options에 섞여 온 id 회수 (실측에서 나온 결함)
-  const strayIds = POOL.items.slice(10, 14).map((i) => i.id)
-  const r1 = rescueIds({ pickedIds: [], options: [...strayIds, '국물 요리 위주'] })
-  ok('options의 상품 id를 회수', r1.ids.length === 4, `${r1.ids.length}건`)
-  ok('회수 후 options에는 문구만', r1.options.length === 1 && r1.options[0] === '국물 요리 위주')
-  ok('회수 건수 보고', r1.rescued === 4)
-  const r2 = rescueIds({ pickedIds: ['x'], options: ['주방 위주', '먹거리 위주'] })
-  ok('정상 options는 건드리지 않는다', r2.options.length === 2 && r2.rescued === 0)
-
-  // ⑦ 기저 등급을 비우는 구성은 폴백으로 되돌린다 (실측에서 나온 결함)
-  const pricey = POOL.items.filter((i) => i.price >= box.entry * 100).slice(0, 20)
-  ok('비싼 것만 20개 골라도 후보 수는 충분', pricey.length >= MIN_BOX_ITEMS)
-  const collapsed = composeBox(box, pricey, 'AI 문장')
-  ok('기저 등급이 비면 폴백', collapsed.usedFallback, collapsed.why || '')
-  ok('폴백 시 문장도 교체', collapsed.reply !== 'AI 문장')
-  ok('폴백 결과는 기저 등급을 갖는다', collapsed.tiers.C.length >= MIN_TIER_ITEMS)
-  assert.throws(() => assertFloor(box, { S: pricey, A: [], B: [], C: [] }), /기저 등급/)
-
-  // ⑧ 화면 ↔ 추첨 왕복 불변식 (실측에서 나온 결함)
-  // 응답의 pickedIds를 open.js처럼 재조인하면 화면에 그린 구성과 같아야 한다.
-  // 예전엔 LLM 픽(C·B)만 보내서, 화면은 S 0.280%를 보여주며 실제 추첨은
-  // S 후보 0개에서 뽑았다.
-  {
-    const { tiersOf: reJoin } = await import('./_draw.js')
-    const roundIds = TIERS.flatMap((t) => wide.tiers[t].map((i) => i.id))
-    const re = reJoin(box, roundIds)
-    ok('왕복: 최고 등급이 비지 않는다', re.S.length > 0, `S ${re.S.length}개`)
-    ok('왕복: 기저 등급 하한 유지', re.C.length >= MIN_TIER_ITEMS, `C ${re.C.length}개`)
-    for (const t of TIERS)
-      ok(`왕복: ${t} 구성 일치`, re[t].length === wide.tiers[t].length,
-        `${re[t].length} ≠ ${wide.tiers[t].length}`)
-  }
-  ok('기저 등급 없음은 throw', true)
-
-  // ⑧ 빈 티어를 뽑으면 아래로 내려간다 (위로 올리면 단위경제가 무너진다)
-  {
-    const { drawOne } = await import('./_draw.js')
-    const holed = { S: pricey.slice(0, 3), A: [], B: [], C: fallbackPick(box).filter((i) => i.price < box.entry * 1.5) }
-    const P = { S: 0, A: 1, B: 0, C: 0 } // A를 100%로 강제. A는 비어 있다.
-    const got = drawOne(box, P, holed, 'seed-hole')
-    ok('빈 A를 뽑으면 아래(B/C)로 내려간다', got.tier !== 'S', `실제 ${got.tier}`)
   }
 
-  // ⑨ 프롬프트 블록
-  const blk = candidateBlock(box)
-  ok('후보 블록 생성', blk.split('\n').length >= MIN_BOX_ITEMS)
-  ok('후보 블록에 가격 포함', /\|\d+$/m.test(blk))
+  if (action === 'ask') {
+    const card = cardId ? UNIVERSE.find((c) => c.id === cardId) : null
+    if (!key) {
+      return res.status(200).json({
+        source: 'rule',
+        answer: card
+          ? `${card.name}은(는) 이 통에서 ${card.tier}등급이고 크롤 시세가 ${card.price.toLocaleString('ko-KR')}원이다. 자세한 설명은 AI 키가 없어 제공할 수 없다.`
+          : 'OPENAI_API_KEY가 없어 규칙 기반으로만 답한다. 통 안의 카드를 고르면 등급과 시세를 알려준다.',
+        terms: [],
+        note: 'AI 응답이 아니다. 규칙 기반 폴백이다.',
+      })
+    }
+    try {
+      const out = await callOpenAI([
+        { role: 'system', content: ASK_SYSTEM },
+        { role: 'user', content: JSON.stringify({ 질문: question, 카드: card ?? null, 통_요약: catalog().slice(0, 40) }) },
+      ], key)
+      return res.status(200).json({
+        source: 'openai', model: MODEL,
+        answer: typeof out.answer === 'string' ? out.answer : '',
+        terms: Array.isArray(out.terms) ? out.terms.slice(0, 6) : [],
+        note: `ChatGPT(${MODEL})가 크롤 데이터를 근거로 답했다.`,
+      })
+    } catch (e) {
+      return res.status(200).json({ source: 'rule', answer: `AI 호출에 실패했다 (${e.message}).`, terms: [], note: 'AI 응답이 아니다.' })
+    }
+  }
 
-  console.log(`✓ curate 자체 검증 ${n}건 통과 — 후보 블록 ${blk.split('\n').length}행`)
+  return res.status(400).json({ error: `모르는 action: ${action}` })
 }

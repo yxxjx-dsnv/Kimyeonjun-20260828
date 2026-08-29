@@ -1,149 +1,152 @@
 /**
- * POST /api/room — 방 만들기·합류·뽑기 수 변경·준비 완료·상태 조회.
+ * POST /api/room — 방 생성·합류·지목·준비·조회.
+ *   body { action: 'create'|'join'|'target'|'ready'|'state', ... }
  *
- * 준비 카운트를 서버가 소유한다. 클라이언트가 "다 눌렀다"고 주장해도
- * 개봉되지 않는다. 전원이 눌러야만 열리는 것이 이 제품의 핵심이라
- * 그 판정을 프론트에 두지 않는다.
+ * 지목은 확률을 건드리지 않는다. TTC의 1순위 선호가 될 뿐이다.
+ * "지목하면 잘 나온다"는 어떤 경로도 만들지 않는다 — 만드는 순간 확률이
+ * 재고 ÷ 구좌가 아니게 된다(I1).
  */
-import { getBox, oddsOf, evMultiple, TEAM_MAX, MAX_DRAWS_PER_PERSON } from './_draw.js'
-import { readRoom, writeRoom, mutateRoom, newId, kvEnabled, counter } from './_room.js'
+import { BOX, TEAM_MAX, slotsOf, remainingFrom, tierCountsOf } from './_box.js'
+import { fmtPct, naturalFreq, rng } from './_draw.js'
+import { readRoom, writeRoom, mutateRoom, newId, newRoom, kvEnabled } from './_room.js'
 
-const NAME_MAX = 12
+const ALL_CARD_IDS = [...new Set(slotsOf().map((s) => s.id))]
+const CARD_IDS = new Set(ALL_CARD_IDS)
 
-/** 다음에 열 포맷 후보. 크롤 풀의 group 필드를 그대로 쓴다. */
-export const VOTE_CHOICES = ['card', 'uniform', 'prize', 'daily']
-export const VOTE_LABEL = { card: '포켓몬 카드', uniform: '유니폼', prize: '건강식품', daily: '생필품' }
-export async function readVotes() {
-  const out = {}
-  for (const c of VOTE_CHOICES) out[c] = await counter(`olbox:vote:${c}`)
-  return out
-}
-const clean = (s, fallback) => {
-  const t = String(s ?? '').replace(/\s+/g, ' ').trim().slice(0, NAME_MAX)
-  return t || fallback
-}
-const clampDraws = (d) =>
-  Math.min(MAX_DRAWS_PER_PERSON, Math.max(1, Math.floor(Number(d) || 1)))
-
-export const teamSizeOf = (s) => s.members.length
-export const teamDrawsOf = (s) => s.members.reduce((a, m) => a + m.draws, 0)
-export const readyCountOf = (s) => s.members.filter((m) => m.ready).length
-export const allReady = (s) => s.members.length > 0 && s.members.every((m) => m.ready)
-
-/** 클라이언트에 내보내는 형태. 확률은 서버가 계산해서 함께 준다. */
-export function publicState(s) {
-  const box = getBox(s.boxId)
-  const n = teamSizeOf(s)
-  const draws = teamDrawsOf(s)
+/** 클라이언트에 내려보내는 방 상태. 통 상태와 갱신된 확률을 함께 준다(I3). */
+export function view(room) {
+  const remaining = remainingFrom(room.drawn)
+  const counts = tierCountsOf(remaining)
+  const readyCount = room.members.filter((m) => m.ready).length
   return {
-    roomId: s.roomId,
-    boxId: s.boxId,
-    phase: s.phase,
-    rev: s.rev,
-    members: s.members.map(({ id, name, sim, draws, ready }) => ({ id, name, sim, draws, ready })),
-    teamSize: n,
-    teamDraws: draws,
-    readyCount: readyCountOf(s),
-    teamMax: TEAM_MAX,
-    maxDrawsPerPerson: MAX_DRAWS_PER_PERSON,
-    // 지금 이 팀 구성으로 계산한 확률. 화면의 막대와 곡선 위 점이 이 값을 쓴다.
-    odds: oddsOf(box, n, draws),
-    evMultiple: +evMultiple(box, n).toFixed(3),
-    live: kvEnabled(),
+    id: room.id, boxId: room.boxId, rev: room.rev, round: room.round,
+    capacity: TEAM_MAX,
+    members: room.members.map((m) => ({
+      id: m.id, name: m.name, ready: !!m.ready, target: m.target ?? null,
+      hasAiPrefs: Array.isArray(m.aiPrefs) && m.aiPrefs.length > 0, aiSource: m.aiSource ?? null,
+    })),
+    readyCount,
+    allReady: room.members.length > 0 && readyCount === room.members.length,
+    opened: !!room.opened,
+    openResults: room.openResults,
+    trade: room.trade,
+    /** 지목 집계 — 같은 카드를 몇 명이 원하는지. 교환 전환율이 여기 달려 있다. */
+    targets: room.members.reduce((m, x) => (x.target ? ((m[x.target] = (m[x.target] || 0) + 1), m) : m), {}),
+    live: {
+      drawn: room.drawn.length,
+      left: remaining.length,
+      tiers: Object.entries(counts).map(([tier, K]) => {
+        const p = remaining.length ? K / remaining.length : null
+        return { tier, K, N: remaining.length, p, pct: fmtPct(p), freq: naturalFreq(p, BOX.N) }
+      }),
+    },
+    storage: kvEnabled() ? 'kv' : 'memory',
   }
 }
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).json({ error: 'POST만 허용합니다.' })
-  const { action, roomId, boxId, memberId, name, draws, sim } = req.body || {}
+  if (req.method !== 'POST') return res.status(405).json({ error: 'POST만 받는다' })
+  const { action, roomId, memberId, name, cardId, ready } = req.body || {}
 
-  try {
-    if (action === 'create') {
-      const box = getBox(boxId)
-      if (!box) return res.status(400).json({ error: '없는 박스입니다.' })
-      const id = newId()
-      const mid = newId(8)
-      const state = {
-        roomId: id,
-        boxId: box.id,
-        rev: 1,
-        createdAt: Date.now(),
-        phase: 'gather',
-        members: [
-          { id: mid, name: clean(name, '나'), sim: false, draws: 1, ready: false, at: Date.now() },
-        ],
-      }
-      await writeRoom(id, state)
-      return res.status(200).json({ memberId: mid, state: publicState(state) })
-    }
-
-    if (!roomId) return res.status(400).json({ error: 'roomId가 필요합니다.' })
-
-    if (action === 'state') {
-      const s = await readRoom(roomId)
-      if (!s) return res.status(404).json({ error: '방을 찾을 수 없습니다.' })
-      return res.status(200).json({ state: publicState(s) })
-    }
-
-    if (action === 'join') {
-      const mid = newId(8)
-      const next = await mutateRoom(roomId, (s) => {
-        if (s.phase !== 'gather') return null
-        if (s.members.length >= TEAM_MAX) return null
-        s.members.push({
-          id: mid,
-          name: clean(name, `팀원${s.members.length + 1}`),
-          sim: Boolean(sim),
-          draws: 1,
-          ready: false,
-          at: Date.now(),
-        })
-        s.rev++
-        return s
-      })
-      if (!next) return res.status(404).json({ error: '방을 찾을 수 없습니다.' })
-      if (next.phase !== 'gather') return res.status(409).json({ error: '이미 개봉된 방입니다.' })
-      if (!next.members.some((m) => m.id === mid))
-        return res.status(409).json({ error: `정원(${TEAM_MAX}명)이 찼습니다.` })
-      return res.status(200).json({ memberId: mid, state: publicState(next) })
-    }
-
-    if (action === 'draws' || action === 'ready' || action === 'unready') {
-      const next = await mutateRoom(roomId, (s) => {
-        if (s.phase !== 'gather') return null
-        const me = s.members.find((m) => m.id === memberId)
-        if (!me) return null
-        if (action === 'draws') {
-          // 뽑기 수를 바꾸면 팀 물량이 바뀌어 전원의 확률표가 움직인다.
-          // 그래서 준비 상태를 되돌린다 — 모르는 사이에 조건이 바뀌면 안 된다.
-          me.draws = clampDraws(draws)
-          for (const m of s.members) m.ready = false
-        } else {
-          me.ready = action === 'ready'
-        }
-        s.rev++
-        return s
-      })
-      if (!next) return res.status(404).json({ error: '방 또는 참여자를 찾을 수 없습니다.' })
-      return res.status(200).json({ state: publicState(next) })
-    }
-
-    /**
-     * 다음 회차에 어떤 포맷을 열지 고객이 정한다.
-     * 올박스는 매주 포맷이 바뀌므로, 그 결정을 고객에게 넘기는 것이
-     * "함께 문제를 해결한다"의 가장 작은 구현이다.
-     * INCR은 원자적이라 방 상태처럼 read-modify-write 재시도가 필요 없다.
-     */
-    if (action === 'vote') {
-      const choice = String(req.body?.choice || '').slice(0, 16)
-      if (!VOTE_CHOICES.includes(choice))
-        return res.status(400).json({ error: '없는 선택지입니다.' })
-      await counter(`olbox:vote:${choice}`, 1)
-      return res.status(200).json({ votes: await readVotes() })
-    }
-
-    return res.status(400).json({ error: `알 수 없는 action: ${action}` })
-  } catch (e) {
-    return res.status(500).json({ error: `방 처리 실패: ${e.message}` })
+  if (action === 'create') {
+    const id = newId()
+    const room = newRoom(id, BOX.crawledAt ? 'olbox' : 'olbox')
+    const me = { id: newId(4), name: (name || '방장').slice(0, 12), ready: false, target: null }
+    room.members.push(me)
+    room.rev = 1
+    await writeRoom(id, room)
+    return res.status(201).json({ ...view(room), you: me.id })
   }
+
+  if (!roomId) return res.status(400).json({ error: 'roomId가 필요하다' })
+
+  if (action === 'state') {
+    const room = await readRoom(roomId)
+    if (!room) return res.status(404).json({ error: '방이 없다' })
+    return res.status(200).json(view(room))
+  }
+
+  if (action === 'join') {
+    let error = null
+    const room = await mutateRoom(roomId, (r) => {
+      if (r.opened) { error = { code: 409, msg: '이미 개봉된 방이다' }; return null }
+      if (r.members.length >= TEAM_MAX) { error = { code: 409, msg: `정원 ${TEAM_MAX}명을 넘을 수 없다` }; return null }
+      r.members.push({ id: newId(4), name: (name || `참여자${r.members.length + 1}`).slice(0, 12), ready: false, target: null })
+      r.rev++
+      return r
+    })
+    if (!room) return res.status(404).json({ error: '방이 없다' })
+    if (error) return res.status(error.code).json({ error: error.msg, ...view(room) })
+    return res.status(200).json({ ...view(room), you: room.members.at(-1).id })
+  }
+
+  if (action === 'target') {
+    // 통 안에 없는 카드는 거절한다. 클라이언트가 보낸 id를 믿지 않는다.
+    if (!CARD_IDS.has(cardId)) return res.status(400).json({ error: '통 안에 없는 카드다' })
+    let error = null
+    const room = await mutateRoom(roomId, (r) => {
+      if (r.opened) { error = { code: 409, msg: '개봉 후에는 지목을 바꿀 수 없다' }; return null }
+      const m = r.members.find((x) => x.id === memberId)
+      if (!m) { error = { code: 404, msg: '참여자가 없다' }; return null }
+      m.target = cardId // 참여자당 1개. 덮어쓴다.
+      r.rev++
+      return r
+    })
+    if (!room) return res.status(404).json({ error: '방이 없다' })
+    if (error) return res.status(error.code).json({ error: error.msg, ...view(room) })
+    return res.status(200).json(view(room))
+  }
+
+  /**
+   * 시뮬 팀원의 취향. **Phase 3에서 측정한 것에 대한 대응이다.**
+   *
+   * 선호를 지목 + 시세 내림차순으로만 채우면 전원의 선호가 같아지고, TTC는 선호가
+   * 엇갈릴 때만 사이클을 만들므로 교환이 거의 일어나지 않는다(개선율 10.5% vs 68.4%).
+   * 실제로 데모에서 "성립한 교환이 없습니다"만 나왔다.
+   *
+   * 진짜 사용자는 각자 다른 것을 모으므로 선호가 엇갈린다(E4 — 커뮤니티 교환이
+   * 실재하는 이유가 그것이다). 시뮬 팀원에게도 각자 다른 순서를 준다.
+   * **시뮬레이션이므로 화면에 시뮬 배지를 단다(I13).** 실제 사용자라면 이 자리를
+   * 지목과 ChatGPT가 채운다.
+   */
+  if (action === 'simPrefs') {
+    let error = null
+    const room = await mutateRoom(roomId, (r) => {
+      if (r.opened) { error = { code: 409, msg: '개봉 후에는 바꿀 수 없다' }; return null }
+      const ids = ALL_CARD_IDS
+      for (const m of r.members) {
+        if (m.id === memberId) continue   // 나는 내가 정한다. 시뮬로 덮지 않는다.
+        const rand = rng(`${r.id}|${m.id}|taste`)
+        const shuffled = ids.slice()
+        for (let i = shuffled.length - 1; i > 0; i--) {
+          const j = Math.floor(rand() * (i + 1))
+          ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+        }
+        m.target = m.target ?? shuffled[0]
+        m.aiPrefs = shuffled
+        m.aiSource = 'sim'
+      }
+      r.rev++
+      return r
+    })
+    if (!room) return res.status(404).json({ error: '방이 없다' })
+    if (error) return res.status(error.code).json({ error: error.msg, ...view(room) })
+    return res.status(200).json(view(room))
+  }
+
+  if (action === 'ready') {
+    let error = null
+    const room = await mutateRoom(roomId, (r) => {
+      const m = r.members.find((x) => x.id === memberId)
+      if (!m) { error = { code: 404, msg: '참여자가 없다' }; return null }
+      m.ready = ready !== false
+      r.rev++
+      return r
+    })
+    if (!room) return res.status(404).json({ error: '방이 없다' })
+    if (error) return res.status(error.code).json({ error: error.msg, ...view(room) })
+    return res.status(200).json(view(room))
+  }
+
+  return res.status(400).json({ error: `모르는 action: ${action}` })
 }

@@ -1,134 +1,267 @@
 /**
- * 방 → 준비 → 개봉 흐름 검증. HTTP 서버 없이 핸들러를 직접 구동한다.
- *   node tests/room.test.mjs
+ * 서버 테스트 — 프레임워크 없이. `node tests/room.test.mjs`
  *
- * 이 제품의 핵심 주장 세 개를 잠근다.
- *   ① 한 명이라도 안 누르면 열리지 않는다 (409)
- *   ② 정산 차액은 절대 음수가 될 수 없다 (꽝 없음)
- *   ③ 같은 방을 다시 열면 같은 결과가 나온다 (재추첨 불가)
+ * 네트워크를 타지 않는다. KV 환경변수가 없으면 api/_room.js가 메모리로 내려앉고,
+ * OPENAI_API_KEY가 없으면 api/curate.js가 규칙 기반으로 내려앉는다.
+ * 환각 id 차단만 fetch를 모킹해서 확인한다.
  */
-import boxesHandler from '../api/boxes.js'
-import roomHandler from '../api/room.js'
-import openHandler from '../api/open.js'
-import { TEAM_MAX, MAX_DRAWS_PER_PERSON, BOXES } from '../api/_draw.js'
+import assert from 'node:assert/strict'
+import room from '../api/room.js'
+import open from '../api/open.js'
+import trade from '../api/trade.js'
+import curate, { keepValid, rescueIds } from '../api/curate.js'
+import boxes from '../api/boxes.js'
+import { TEAM_MAX, slotsOf } from '../api/_box.js'
 
-let fail = 0
-const check = (label, cond, extra = '') => {
-  // 근거는 실패했을 때만 붙인다. 통과 로그에 붙으면 실패처럼 읽힌다.
-  console.log(`${cond ? '✓' : '✗ 실패'} ${label}${!cond && extra ? ' — ' + extra : ''}`)
-  if (!cond) fail++
+// KV·AI 없이 도는지 확인하기 위해 명시적으로 지운다.
+delete process.env.KV_REST_API_URL
+delete process.env.KV_REST_API_TOKEN
+const REAL_KEY = process.env.OPENAI_API_KEY
+delete process.env.OPENAI_API_KEY
+
+let pass = 0
+const fails = []
+const t = (name, fn) => {
+  try { fn(); pass++; console.log(`  ✓ ${name}`) }
+  catch (e) { fails.push(name); console.log(`  ✗ ${name}\n      ${e.message}`) }
+}
+const ta = async (name, fn) => {
+  try { await fn(); pass++; console.log(`  ✓ ${name}`) }
+  catch (e) { fails.push(name); console.log(`  ✗ ${name}\n      ${e.message}`) }
 }
 
-const res = () => {
-  const r = { code: 200, body: null, headers: {} }
-  r.status = (c) => ((r.code = c), r)
-  r.json = (b) => ((r.body = b), r)
-  r.setHeader = (k, v) => ((r.headers[k] = v), r)
-  return r
+/** Vercel 핸들러 규약을 흉내내는 최소 shim. */
+const call = async (handler, body, query = {}) => {
+  let code = 200, payload = null
+  await handler({ method: 'POST', body, query }, {
+    status(c) { code = c; return this },
+    setHeader() { return this },
+    json(b) { payload = b },
+  })
+  return { code, body: payload }
 }
-const post = async (h, body) => {
-  const r = res()
-  await h({ method: 'POST', body }, r)
-  return r
-}
-
-// ── 1. 박스 목록 ──────────────────────────────────────────────
-{
-  const r = res()
-  await boxesHandler({ method: 'GET' }, r)
-  check('GET /api/boxes 200', r.code === 200)
-  check(`박스 ${BOXES.length}종`, r.body.boxes.length === BOXES.length, `${r.body.boxes.length}종`)
-  const b = r.body.boxes[1]
-  check('팀 1~10 확률표 전부 존재', Object.keys(b.oddsByTeam).length === TEAM_MAX)
-  check('확률 합 1', Math.abs(Object.values(b.oddsByTeam[7]).reduce((a, x) => a + x, 0) - 1) < 1e-9)
-  check('참여비 = 최고상품가 ÷ 200', b.topRetail === b.entry * 200)
-  check('티어 4개 전부 채워짐', b.tiers.every((t) => t.count > 0), b.tiers.map((t) => `${t.tier}:${t.count}`).join(' '))
-  check('C 티어 하한 = 참여비', b.tiers.find((t) => t.tier === 'C').band[0] === b.entry)
-  check('수식 파라미터 공개', r.body.formula.costRatio.CR_MIN === 0.38)
-  check('회사 손익분기 6명', r.body.companyBEP === 6)
-  const wrong = res()
-  await boxesHandler({ method: 'POST' }, wrong)
-  check('POST는 405', wrong.code === 405)
+const get = async (handler, query = {}) => {
+  let code = 200, payload = null
+  await handler({ method: 'GET', query }, {
+    status(c) { code = c; return this }, setHeader() { return this }, json(b) { payload = b },
+  })
+  return { code, body: payload }
 }
 
-// ── 2. 방 만들기와 합류 ────────────────────────────────────────
-const created = await post(roomHandler, { action: 'create', boxId: 'charizard', name: '김연준' })
-check('방 생성 200', created.code === 200)
-const roomId = created.body.state.roomId
-const me = created.body.memberId
-check('생성 직후 1명', created.body.state.teamSize === 1)
-check('phase=gather', created.body.state.phase === 'gather')
+const CARDS = [...new Map(slotsOf().map((s) => [s.id, s])).values()]
 
-const mates = []
-for (let i = 0; i < 3; i++) {
-  const j = await post(roomHandler, { action: 'join', roomId, name: `팀원${i + 1}`, sim: true })
-  mates.push(j.body.memberId)
-}
-const s4 = (await post(roomHandler, { action: 'state', roomId })).body.state
-check('4명 합류', s4.teamSize === 4, `${s4.teamSize}명`)
-check('팀이 커지자 S 확률 상승', s4.odds.S > created.body.state.odds.S,
-  `${(created.body.state.odds.S * 100).toFixed(4)}% → ${(s4.odds.S * 100).toFixed(4)}%`)
+console.log('─────── 방 · 게이트 · 개봉 · 교환 ───────')
 
-const bad = await post(roomHandler, { action: 'create', boxId: '없는박스' })
-check('없는 박스는 400', bad.code === 400)
+let R = null, ME = null
+await ta('방 생성 → 201, 방장이 참여자로 들어간다', async () => {
+  const r = await call(room, { action: 'create', name: '나' })
+  assert.equal(r.code, 201)
+  assert.equal(r.body.members.length, 1)
+  R = r.body.id; ME = r.body.you
+})
 
-// ── 3. 전원이 눌러야만 열린다 ──────────────────────────────────
-{
-  const early = await post(openHandler, { roomId })
-  check('아무도 안 눌렀으면 409', early.code === 409)
-}
-for (const id of [me, ...mates.slice(0, 2)]) await post(roomHandler, { action: 'ready', roomId, memberId: id })
-{
-  const s = (await post(roomHandler, { action: 'state', roomId })).body.state
-  check('3/4 준비', s.readyCount === 3 && s.teamSize === 4)
-  const r = await post(openHandler, { roomId })
-  check('3/4에서는 409 — 한 명이라도 안 누르면 안 열린다', r.code === 409,
-    `readyCount=${r.body.readyCount}/${r.body.teamSize}`)
-}
+await ta(`정원 ${TEAM_MAX}명까지 join 성공`, async () => {
+  for (let i = 2; i <= TEAM_MAX; i++) {
+    const r = await call(room, { action: 'join', roomId: R, name: `참여자${i}` })
+    assert.equal(r.code, 200, `${i}번째 join이 ${r.code}`)
+  }
+  const s = await call(room, { action: 'state', roomId: R })
+  assert.equal(s.body.members.length, TEAM_MAX)
+})
 
-// 뽑기 수를 바꾸면 전원의 준비가 풀린다 (모르는 사이 조건이 바뀌면 안 된다)
-{
-  const r = await post(roomHandler, { action: 'draws', roomId, memberId: mates[2], draws: 3 })
-  check('뽑기 수 변경 시 준비 초기화', r.body.state.readyCount === 0)
-  check('팀 물량 반영 (4명 6뽑기)', r.body.state.teamDraws === 6, `${r.body.state.teamDraws}`)
-  const over = await post(roomHandler, { action: 'draws', roomId, memberId: mates[2], draws: 99 })
-  check('개인 뽑기 상한 5회', over.body.state.members.find((m) => m.id === mates[2]).draws === MAX_DRAWS_PER_PERSON)
-}
+await ta('정원 초과 join → 409', async () => {
+  const r = await call(room, { action: 'join', roomId: R, name: '초과' })
+  assert.equal(r.code, 409)
+})
 
-// ── 4. 개봉 ───────────────────────────────────────────────────
-for (const id of [me, ...mates]) await post(roomHandler, { action: 'ready', roomId, memberId: id })
-const opened = await post(openHandler, { roomId })
-check('4/4 준비되면 200', opened.code === 200, `code=${opened.code}`)
-const R = opened.body
-check('참여자 수만큼 결과', R.results.length === 4)
-check('뽑기 수만큼 상품', R.results.reduce((a, r) => a + r.picks.length, 0) === R.teamDraws)
-check('정산 차액 전원 0 이상 — 꽝 없음',
-  R.results.every((r) => r.settle.delta >= 0),
-  R.results.map((r) => `${r.name}:${r.settle.delta.toLocaleString()}`).join(' '))
-check('모든 상품 시가 ≥ 참여비',
-  R.results.every((r) => r.picks.every((p) => p.item.price >= R.entry)))
-check('상품에 이미지·링크 존재',
-  R.results.every((r) => r.picks.every((p) => p.item.url && p.item.name)))
+await ta('통 안에 없는 카드 지목 → 400', async () => {
+  const r = await call(room, { action: 'target', roomId: R, memberId: ME, cardId: 'd999999999' })
+  assert.equal(r.code, 400)
+})
 
-// ── 5. 재추첨 불가 ────────────────────────────────────────────
-{
-  const again = await post(openHandler, { roomId })
-  check('같은 방 두 번 열면 같은 결과 — 재추첨 불가',
-    JSON.stringify(again.body.results) === JSON.stringify(R.results))
-  const late = await post(roomHandler, { action: 'join', roomId, name: '지각', sim: true })
-  check('개봉 후 합류 차단', late.code === 409, `code=${late.code}`)
-}
+await ta('지목은 참여자당 1개, 덮어쓴다', async () => {
+  await call(room, { action: 'target', roomId: R, memberId: ME, cardId: CARDS[0].id })
+  const r = await call(room, { action: 'target', roomId: R, memberId: ME, cardId: CARDS[1].id })
+  assert.equal(r.body.members.find((m) => m.id === ME).target, CARDS[1].id)
+  assert.equal(Object.values(r.body.targets).reduce((a, b) => a + b, 0), 1)
+})
 
-// ── 6. 정원 ───────────────────────────────────────────────────
-{
-  const c = await post(roomHandler, { action: 'create', boxId: 'starter', name: '방장' })
-  const rid = c.body.state.roomId
-  for (let i = 1; i < TEAM_MAX; i++) await post(roomHandler, { action: 'join', roomId: rid, sim: true })
-  const s = (await post(roomHandler, { action: 'state', roomId: rid })).body.state
-  check(`정원 ${TEAM_MAX}명`, s.teamSize === TEAM_MAX, `${s.teamSize}명`)
-  const over = await post(roomHandler, { action: 'join', roomId: rid, sim: true })
-  check('정원 초과 합류는 409', over.code === 409)
-}
+await ta('개봉 전 trade → 409', async () => {
+  const r = await call(trade, { roomId: R })
+  assert.equal(r.code, 409)
+})
 
-console.log(fail === 0 ? '\n✅ 전부 통과' : `\n❌ 실패 ${fail}건`)
-process.exit(fail === 0 ? 0 : 1)
+let stateBefore = null
+await ta(`${TEAM_MAX - 1}/${TEAM_MAX} 준비에서 open → 409 (서버가 게이트를 소유한다, I8)`, async () => {
+  const s = await call(room, { action: 'state', roomId: R })
+  for (const m of s.body.members.slice(0, TEAM_MAX - 1)) {
+    await call(room, { action: 'ready', roomId: R, memberId: m.id, ready: true })
+  }
+  stateBefore = (await call(room, { action: 'state', roomId: R })).body
+  assert.equal(stateBefore.readyCount, TEAM_MAX - 1)
+  const r = await call(open, { roomId: R })
+  assert.equal(r.code, 409)
+  assert.match(r.body.error, /전원이 준비/)
+  assert.equal(r.body.waiting.length, 1)
+})
+
+let opened = null
+await ta('전원 준비 후 open → 200', async () => {
+  const s = await call(room, { action: 'state', roomId: R })
+  await call(room, { action: 'ready', roomId: R, memberId: s.body.members.at(-1).id, ready: true })
+  const r = await call(open, { roomId: R })
+  assert.equal(r.code, 200)
+  assert.equal(r.body.opened, true)
+  assert.equal(r.body.openResults.length, TEAM_MAX)
+  opened = r.body
+})
+
+t('개봉 결과가 전부 통 안의 실제 카드', () => {
+  const ids = new Set(CARDS.map((c) => c.id))
+  assert.ok(opened.openResults.every((x) => ids.has(x.cardId)))
+})
+
+t('꽝 없음 1층 — 뽑힌 모든 카드가 참여비 이상', () => {
+  assert.ok(opened.openResults.every((x) => x.price >= 10000))
+})
+
+t('비복원 — 통 재고가 실제로 줄었다 (I3)', () => {
+  assert.equal(stateBefore.live.left, 1000)
+  assert.equal(opened.live.left, 1000 - TEAM_MAX)
+  assert.equal(opened.live.drawn, TEAM_MAX)
+})
+
+t('비복원 — 확률이 갱신됐다 (I3)', () => {
+  const before = stateBefore.live.tiers.find((x) => x.tier === 'C')
+  const after = opened.live.tiers.find((x) => x.tier === 'C')
+  assert.equal(before.N, 1000)
+  assert.equal(after.N, 1000 - TEAM_MAX)
+  // 남은 구좌가 줄었으므로 같은 재고라면 확률이 오르고, 재고도 줄었다면 그에 맞게 바뀐다.
+  assert.notEqual(before.pct, after.pct, '확률 문자열이 그대로면 갱신되지 않은 것이다')
+  const drawnC = opened.openResults.filter((x) => x.tier === 'C').length
+  assert.equal(after.K, before.K - drawnC, '남은 재고가 뽑힌 만큼 정확히 줄어야 한다')
+})
+
+t('개봉 직전 확률이 결과에 기록돼 있다 (화면의 비복원 시각화 근거)', () => {
+  const first = opened.openResults[0], last = opened.openResults.at(-1)
+  assert.equal(first.slotsBefore, 1000)
+  assert.equal(last.slotsBefore, 1000 - (TEAM_MAX - 1))
+  assert.ok(first.oddsBefore.S.pct.endsWith('%'))
+})
+
+await ta('같은 방 2회 개봉 → 동일 결과 (멱등)', async () => {
+  const again = await call(open, { roomId: R })
+  assert.equal(again.code, 200)
+  assert.equal(again.body.idempotent, true)
+  assert.deepEqual(again.body.openResults, opened.openResults)
+  assert.equal(again.body.live.left, 1000 - TEAM_MAX, '두 번 열어서 통이 두 번 깎이면 안 된다')
+})
+
+let traded = null
+await ta('개봉 후 trade → 200, 아무도 나빠지지 않는다 (I5)', async () => {
+  const r = await call(trade, { roomId: R })
+  assert.equal(r.code, 200)
+  assert.equal(r.body.trade.results.length, TEAM_MAX)
+  assert.equal(r.body.trade.noneWorse, true)
+  assert.ok(r.body.trade.results.every((x) => !x.worse))
+  traded = r.body.trade
+})
+
+t('교환 사이클은 길이 2 이상만 화면에 나간다', () => {
+  assert.ok(traded.cycles.every((c) => c.length >= 2))
+})
+
+await ta('trade 2회 호출 → 동일 결과 (멱등)', async () => {
+  const again = await call(trade, { roomId: R })
+  assert.equal(again.body.idempotent, true)
+  assert.deepEqual(again.body.trade, traded)
+})
+
+await ta('개봉된 방에 join → 409', async () => {
+  const r = await call(room, { action: 'join', roomId: R, name: '늦은사람' })
+  assert.equal(r.code, 409)
+})
+
+console.log('\n─────── ChatGPT 가드 (I9) ───────')
+
+t('환각 id 차단 — 통 밖 id는 버린다', () => {
+  const ok = CARDS[0].id
+  assert.deepEqual(keepValid([ok, 'd000000000', 'hallucinated', CARDS[1].id]), [ok, CARDS[1].id])
+  assert.deepEqual(keepValid('배열이 아님'), [])
+})
+
+t('rescue — 모델이 엉뚱한 필드에 id를 넣어도 회수한다 (v1 사고)', () => {
+  const bad = { ranking: [], why: '설명', options: [CARDS[2].id, CARDS[3].id], nested: { x: ['없는id', CARDS[4].id] } }
+  assert.deepEqual(rescueIds(bad), [CARDS[2].id, CARDS[3].id, CARDS[4].id])
+})
+
+await ta('키 없으면 규칙 기반으로 내려앉고 그 사실을 표기한다', async () => {
+  const r = await call(curate, { action: 'prefs', taste: '리자몽이 좋다' })
+  assert.equal(r.body.source, 'rule')
+  assert.match(r.body.note, /AI 응답이 아니다/)
+  assert.equal(r.body.prefs.length, CARDS.length, '누락분은 서버가 전부 채운다')
+})
+
+await ta('선호 목록이 항상 통 전체를 덮는다 (개별 합리성의 전제)', async () => {
+  const r = await call(curate, { action: 'prefs', taste: '아무거나', target: CARDS[5].id })
+  assert.equal(r.body.prefs[0], CARDS[5].id, '지목이 1순위')
+  assert.equal(new Set(r.body.prefs).size, CARDS.length)
+})
+
+await ta('AI가 환각 id만 돌려줘도 통이 무너지지 않는다 (fetch 모킹)', async () => {
+  process.env.OPENAI_API_KEY = 'test-key'
+  const realFetch = globalThis.fetch
+  globalThis.fetch = async () => ({
+    ok: true,
+    json: async () => ({ choices: [{ message: { content: JSON.stringify({ ranking: ['가짜1', '가짜2'], why: '지어낸 순위' }) } }] }),
+  })
+  try {
+    const r = await call(curate, { action: 'prefs', taste: 'x', target: CARDS[6].id })
+    assert.deepEqual(r.body.aiRanking, [], '환각 id는 전부 버려져야 한다')
+    assert.equal(r.body.source, 'rule', 'AI 순위가 하나도 안 남으면 규칙 기반으로 표기한다')
+    assert.equal(r.body.prefs[0], CARDS[6].id)
+    assert.equal(new Set(r.body.prefs).size, CARDS.length, '통은 그대로 온전하다')
+  } finally { globalThis.fetch = realFetch; delete process.env.OPENAI_API_KEY }
+})
+
+await ta('AI가 ranking을 비우고 다른 필드에 id를 흘려도 회수한다 (fetch 모킹)', async () => {
+  process.env.OPENAI_API_KEY = 'test-key'
+  const realFetch = globalThis.fetch
+  globalThis.fetch = async () => ({
+    ok: true,
+    json: async () => ({ choices: [{ message: { content: JSON.stringify({ ranking: [], why: '설명', options: [CARDS[7].id, CARDS[8].id] }) } }] }),
+  })
+  try {
+    const r = await call(curate, { action: 'prefs', taste: 'x' })
+    assert.deepEqual(r.body.aiRanking, [CARDS[7].id, CARDS[8].id])
+    assert.equal(r.body.source, 'openai')
+    assert.match(r.body.why, /회수/)
+  } finally { globalThis.fetch = realFetch; delete process.env.OPENAI_API_KEY }
+})
+
+console.log('\n─────── /api/boxes ───────')
+
+await ta('통 구성과 확률표를 내려주고, 캐시 헤더가 s-maxage=60', async () => {
+  let header = null
+  await boxes({ method: 'GET', query: {} }, {
+    status() { return this }, setHeader(k, v) { if (k === 'Cache-Control') header = v; return this },
+    json(b) { assert.equal(b.odds.length, 4); assert.equal(b.box.N, 1000) },
+  })
+  assert.match(header, /s-maxage=60/)
+  assert.match(header, /stale-while-revalidate=600/)
+})
+
+await ta('roomId를 주면 그 방의 현재 통 상태를 함께 준다', async () => {
+  const r = await get(boxes, { roomId: R })
+  assert.equal(r.body.live.left, 1000 - TEAM_MAX)
+  assert.equal(r.body.live.drawn, TEAM_MAX)
+})
+
+await ta('없는 방을 물으면 live는 null (조용히 지어내지 않는다)', async () => {
+  const r = await get(boxes, { roomId: 'nosuchroom' })
+  assert.equal(r.body.live, null)
+})
+
+if (REAL_KEY) process.env.OPENAI_API_KEY = REAL_KEY
+console.log(`\n  ${pass}개 통과${fails.length ? ` · ${fails.length}건 실패: ${fails.join(', ')}` : ''}`)
+if (fails.length) process.exitCode = 1
