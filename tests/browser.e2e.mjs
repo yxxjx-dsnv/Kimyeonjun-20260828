@@ -318,6 +318,15 @@ check('천장은 공시 대상', sheet.includes('천장(보장)'))
   check('OPS에 설계 이유', opsText.includes('부스트는 어디서 나오나'))
   check('OPS에 이점 설명', opsText.includes('이 설계의 이점'))
   check('OPS에 학술·규제 근거', opsText.includes('Bass (1969)') && opsText.includes('게임산업법'))
+  // CTA가 스크롤 중 본문 바닥에 딱 붙는지 — 캐스케이드 순서 버그로 72px 떠 있던 적이 있다
+  await dp.evaluate(() => { document.querySelector('.body').scrollTop = 300 })
+  await dp.waitForTimeout(250)
+  const ctaGap = await dp.evaluate(() => {
+    const cta = document.querySelector('.cta').getBoundingClientRect()
+    const body = document.querySelector('.body').getBoundingClientRect()
+    return Math.round(body.bottom) - Math.round(cta.bottom)
+  })
+  check('CTA가 본문 바닥에 밀착', Math.abs(ctaGap) <= 1, `${ctaGap}px 떠 있음`)
   await desk.close()
 }
 
