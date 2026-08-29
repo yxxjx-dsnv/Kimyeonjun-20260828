@@ -13,6 +13,8 @@ import {
   GROUPBUYS, FREE_SHARE, gbItem, gbCostRatio, gbDiscount, gbPayRatio, gbFreeOdds, gbFreeCount,
   DAILIES, dailyItem, dailyCost, dailyNetPerPlay, dailyBreakEvenPlays, dailyWinOdds,
   dailyBlankOdds, dailyPlaysToExhaust, baseOdds, teamBoost, stockTotal,
+  RAFFLES, rfItem, rfPrice, rfDiscount, rfOdds,
+  SAVEUPS, svPrize, svOdds,
 } from './_draw.js'
 import { readVotes, VOTE_LABEL } from './room.js'
 import { counter } from './_room.js'
@@ -135,6 +137,38 @@ export function homeSample(per = 24) {
   })
 }
 
+/** ④ 래플 — 응모 현황은 실시간 카운터에서. */
+export async function buildRaffles() {
+  const { todayKey } = await import('./_room.js')
+  const day = todayKey()
+  return Promise.all(RAFFLES.map(async (r) => {
+    const item = rfItem(r)
+    const entrants = await counter(`olbox:raffle:${r.id}:${day}:n`)
+    return {
+      id: r.id, name: r.name, blurb: r.blurb,
+      item, listPrice: item.price, rafflePrice: rfPrice(r),
+      discountPct: +(rfDiscount(r) * 100).toFixed(1),
+      stock: r.stock, entrants,
+      odds: +(rfOdds(r, Math.max(1, entrants)) * 100).toFixed(2),
+    }
+  }))
+}
+
+/** ⑤ 무손실 적금 — 풀 합계는 시뮬 기반 + 실시간 적립. */
+export async function buildSaveups() {
+  return Promise.all(SAVEUPS.map(async (sv) => {
+    const added = await counter(`olbox:saveup:${sv.id}:pool`)
+    const total = sv.sim.total + added
+    return {
+      id: sv.id, name: sv.name, blurb: sv.blurb,
+      apr: sv.apr, unit: sv.unit, myMax: sv.myMax,
+      members: sv.sim.members, total,
+      prize: svPrize(sv, total),
+      oddsPerUnit: +(svOdds(sv, sv.unit, total) * 100).toFixed(4),
+    }
+  }))
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'GET만 허용합니다.' })
   // s-maxage=3600을 걸었다가 배포해도 화면이 한 시간 동안 안 바뀌었다
@@ -147,6 +181,8 @@ export default async function handler(req, res) {
     boxes: buildBoxes(),
     groupbuys: buildGroupbuys(),
     dailies: await buildDailies(),
+    raffles: await buildRaffles(),
+    saveups: await buildSaveups(),
     votes: await readVotes(),
     voteLabel: VOTE_LABEL,
     // 홈 탭 그리드용. 크롤 데이터가 올박스 밖에서도 화면에 쓰인다.

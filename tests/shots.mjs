@@ -105,7 +105,7 @@ await shot(page, 'ob17_dresult', 820)                 // ⑰ 뽑기 결과 + 투
 await page.goto(BASE, { waitUntil: 'domcontentloaded' })
 await page.waitForSelector('.gbcard', { timeout: 20000 })
 await shot(page, 'ob10_list2', 900)                   // ⑩ 목록 전체(박스 + 공동구매)
-await page.click('.gbcard')
+await page.click('.gbcard:has(.gbcard__tag:not(.gbcard__tag--rf):not(.gbcard__tag--sv))')
 await page.waitForSelector('.gbnow')
 await page.focus('.gbslider input')
 for (let i = 0; i < 25; i++) await page.keyboard.press('ArrowRight')  // 20 → 45명

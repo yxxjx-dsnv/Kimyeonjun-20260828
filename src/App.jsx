@@ -149,7 +149,7 @@ function StubTab({ title, body }) {
 }
 
 /* ─────────────────────────── 올박스 ─────────────────────────── */
-function BoxList({ boxes, groupbuys, dailies, onPick, onPickGroup, onPickDaily, companyBEP, votes, voteLabel }) {
+function BoxList({ boxes, groupbuys, dailies, raffles, saveups, onPick, onPickGroup, onPickDaily, onPickRaffle, onPickSaveup, votes, voteLabel }) {
   return (
     <>
       {votes && Object.values(votes).some((v) => v > 0) && (
@@ -212,6 +212,51 @@ function BoxList({ boxes, groupbuys, dailies, onPick, onPickGroup, onPickDaily, 
       <ul className="blist">
         {dailies.map((d) => (
           <li key={d.id}><DailyCard d={d} onPick={onPickDaily} /></li>
+        ))}
+      </ul>
+
+      {/* ④ 래플 — 선착순 대신 추첨. 응모가 무료라 낙첨 손실이 0이다.
+          (배분 공정성: 봇·오픈런이 이기는 선착순의 대안 — SNKRS·무신사 선례) */}
+      <h2 className="lead2">0원 응모 래플</h2>
+      <p className="lead2__s">선착순 대신 추첨으로 드려요. 응모는 무료, 낙첨해도 잃는 게 없어요.</p>
+      <ul className="blist">
+        {(raffles || []).map((r) => (
+          <li key={r.id}>
+            <button className="card gbcard" onClick={() => onPickRaffle(r.id)}>
+              <span className="gbcard__row">
+                {r.item.image && <img className="gbcard__thumb" src={r.item.image} alt="" loading="lazy" />}
+                <span className="gbcard__b">
+                  <span className="gbcard__tag gbcard__tag--rf">무료 응모</span>
+                  <span className="gbcard__name">{r.name}</span>
+                  <span className="gbcard__it">{r.item.name}</span>
+                  <span className="gbcard__odds">
+                    <s>{won(r.listPrice)}</s> → <b>{won(r.rafflePrice)}</b>{` (${r.discountPct}%↓) · ${r.stock}개 한정`}
+                  </span>
+                </span>
+              </span>
+            </button>
+          </li>
+        ))}
+      </ul>
+
+      {/* ⑤ 무손실 적금 — 이자 풀만 추첨, 원금 보존 (Premium Bonds 방식) */}
+      <h2 className="lead2">잃지 않는 적금</h2>
+      <p className="lead2__s">이자만 모아 매주 추첨해요. 꽝이어도 <b>원금은 100% 그대로</b>.</p>
+      <ul className="blist">
+        {(saveups || []).map((s) => (
+          <li key={s.id}>
+            <button className="card gbcard" onClick={() => onPickSaveup(s.id)}>
+              <span className="gbcard__row">
+                <span className="svcoin" aria-hidden="true">₩</span>
+                <span className="gbcard__b">
+                  <span className="gbcard__tag gbcard__tag--sv">원금 보장</span>
+                  <span className="gbcard__name">{s.name}</span>
+                  <span className="gbcard__it">{`지금 ${s.members.toLocaleString()}명이 ${won(s.total)} 모았어요`}</span>
+                  <span className="gbcard__odds">{`이번 주 상금 ${won(s.prize)}`}</span>
+                </span>
+              </span>
+            </button>
+          </li>
         ))}
       </ul>
 
@@ -391,11 +436,59 @@ export default function App() {
   const backToList = () => {
     clearTimers(); setScene(false); setPhase('list'); setBoxId(null); setRoom(null); setResult(null); setCurated(null)
     setGbId(null); setGbResult(null); setDailyId(null); setDailyResult(null)
+    setRaffleId(null); setRfEnter(null); setRfResult(null)
+    setSaveupId(null); setSvState(null); setSvResult(null)
   }
 
   const daily = data?.dailies?.find((d) => d.id === dailyId) || null
   const openDaily = (id) => {
     setDailyId(id); setDailyResult(null); setBoxId(null); setGbId(null); setPhase('daily')
+  }
+
+  /* ── ④ 래플 ── */
+  const [raffleId, setRaffleId] = useState(null)
+  const [rfEnter, setRfEnter] = useState(null)   // 응모 결과(내 번호·현황)
+  const [rfResult, setRfResult] = useState(null) // 추첨 결과
+  const raffle = data?.raffles?.find((r) => r.id === raffleId) || null
+  const openRaffle = (id) => {
+    setRaffleId(id); setRfEnter(null); setRfResult(null)
+    setBoxId(null); setGbId(null); setDailyId(null); setPhase('raffle')
+  }
+  const callRaffle = async (action) => {
+    setBusy(true); setErr(null)
+    try {
+      const r = await fetch('/api/open', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ kind: 'raffle', raffleId, action, memberId: myId.current, myIndex: rfEnter?.myIndex }),
+      })
+      const j = await r.json()
+      if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`)
+      if (action === 'enter') setRfEnter(j)
+      else setRfResult(j)
+    } catch (e) { setErr(e.message) } finally { setBusy(false) }
+  }
+
+  /* ── ⑤ 무손실 적금 ── */
+  const [saveupId, setSaveupId] = useState(null)
+  const [svState, setSvState] = useState(null)   // 내 적립·풀·상금·확률
+  const [svResult, setSvResult] = useState(null)
+  const saveup = data?.saveups?.find((s) => s.id === saveupId) || null
+  const openSaveup = (id) => {
+    setSaveupId(id); setSvState(null); setSvResult(null)
+    setBoxId(null); setGbId(null); setDailyId(null); setPhase('saveup')
+  }
+  const callSaveup = async (action, amount) => {
+    setBusy(true); setErr(null)
+    try {
+      const r = await fetch('/api/open', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ kind: 'saveup', saveupId, action, amount, memberId: myId.current }),
+      })
+      const j = await r.json()
+      if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`)
+      if (action === 'deposit') { setSvState(j); setSvResult(null) }
+      else setSvResult(j)
+    } catch (e) { setErr(e.message) } finally { setBusy(false) }
   }
   /** 데일리 뽑기 — 서버가 일일 한도와 재고를 소유한다. */
   const playDaily = async () => {
@@ -573,10 +666,130 @@ export default function App() {
       </>
     )
   }
+  else if (phase === 'raffle' && raffle) {
+    const live = rfResult || rfEnter || raffle
+    body = (
+      <>
+        <button className="back" onClick={backToList}>← 목록</button>
+        <header className="bhead">
+          <h2>{raffle.name}</h2>
+          <p>응모 무료 · {raffle.stock}개 한정 특가</p>
+        </header>
+        <div className="gbhero">
+          {raffle.item.image && <img src={raffle.item.image} alt="" />}
+          <div>
+            <p className="gbhero__nm">{raffle.item.name}</p>
+            <p className="gbhero__pr">
+              <s>{won(raffle.listPrice)}</s> <b>{won(raffle.rafflePrice)}</b>
+              <em>{` ${raffle.discountPct}%↓`}</em>
+            </p>
+          </div>
+        </div>
+        <div className="gbnow">
+          <div><b>{live.entrants ?? raffle.entrants}명</b><span>지금까지 응모</span></div>
+          <div><b>{raffle.stock}개</b><span>당첨 수량</span></div>
+          <div className="hi"><b>{(live.odds ?? raffle.odds)}%</b><span>지금 당첨 확률</span></div>
+        </div>
+
+        {rfResult ? (
+          <div className={`dres ${rfResult.win ? 'is-win' : 'is-blank'}`}>
+            <b>{rfResult.win ? '당첨!' : '아쉽지만 다음 기회에'}</b>
+            <p>
+              {rfResult.win
+                ? `${won(rfResult.rafflePrice)}에 구매할 수 있어요 — ${won(rfResult.listPrice - rfResult.rafflePrice)} 아꼈어요`
+                : '응모는 무료였으니 잃은 건 0원이에요. 내일 또 응모할 수 있어요.'}
+            </p>
+            <p className="seed">추첨 결과는 저장되며 변경되지 않아요</p>
+          </div>
+        ) : rfEnter ? (
+          <>
+            <p className="gatenote">{`응모 완료! 내 응모 번호는 ${rfEnter.myIndex}번이에요`}</p>
+            <button className="btn btn--go" onClick={() => callRaffle('draw')} disabled={busy}>
+              추첨 결과 보기
+            </button>
+          </>
+        ) : (
+          <button className="btn btn--go" onClick={() => callRaffle('enter')} disabled={busy}>
+            무료로 응모하기
+          </button>
+        )}
+
+        <details className="deco">
+          <summary>확률 안내 및 유의사항</summary>
+          <ul className="deco__ul">
+            <li>{`당첨 확률 = 수량 ${raffle.stock}개 ÷ 응모자 수 (응모가 늘면 내려가요)`}</li>
+            <li>1인 1일 1회 응모할 수 있어요</li>
+            <li>응모는 무료 — 낙첨해도 잃는 것이 없어요</li>
+            <li>선착순이 아니라 추첨이라 새로고침 경쟁이 필요 없어요</li>
+          </ul>
+        </details>
+      </>
+    )
+  }
+  else if (phase === 'saveup' && saveup) {
+    const my = svState?.my ?? 0
+    const total = svState?.total ?? saveup.total
+    const prize = svState?.prize ?? saveup.prize
+    body = (
+      <>
+        <button className="back" onClick={backToList}>← 목록</button>
+        <header className="bhead">
+          <h2>{saveup.name}</h2>
+          <p>이자만 모아 추첨 · 원금은 언제나 100%</p>
+        </header>
+        <div className="gbnow">
+          <div><b>{won(my)}</b><span>내 적립</span></div>
+          <div><b>{won(total)}</b><span>{`${saveup.members.toLocaleString()}명이 모은 돈`}</span></div>
+          <div className="hi"><b>{won(prize)}</b><span>이번 주 상금</span></div>
+        </div>
+        <p className="gatenote">
+          {my > 0
+            ? `지금 내 당첨 확률 ${svState.odds}% — 적립할수록 올라가요`
+            : '1,000원 = 응모권 1장이에요'}
+        </p>
+        <div className="draws">
+          <span>적립하기</span>
+          {[1000, 5000, 10000].map((a) => (
+            <button key={a} className="chip" disabled={busy || my + a > saveup.myMax}
+              onClick={() => callSaveup('deposit', a)}>{`+${a.toLocaleString()}`}</button>
+          ))}
+          <em>데모라 실제 결제는 없어요</em>
+        </div>
+
+        {svResult ? (
+          <div className={`dres ${svResult.win ? 'is-win' : 'is-blank'}`}>
+            <b>{svResult.win ? `축하해요! ${won(svResult.prize)} 당첨` : '이번 주는 아쉽네요'}</b>
+            <p>
+              {svResult.win
+                ? `원금 ${won(svResult.settle.refund)}에 상금까지 함께 받아요`
+                : `원금 ${won(svResult.settle.refund)}은 그대로예요 — 다음 주 추첨에 자동 응모돼요`}
+            </p>
+            <p className="seed">추첨 결과는 저장되며 변경되지 않아요</p>
+          </div>
+        ) : (
+          <button className="btn btn--go" onClick={() => callSaveup('draw')} disabled={busy || my <= 0}>
+            이번 주 추첨 보기
+          </button>
+        )}
+
+        <details className="deco">
+          <summary>확률 안내 및 유의사항</summary>
+          <ul className="deco__ul">
+            <li>{`상금 = 전체 적립액 × 연 ${(saveup.apr * 100).toFixed(0)}% ÷ 52주 (이자만 모아요)`}</li>
+            <li>당첨 확률 = 내 적립 ÷ 전체 적립 (1,000원 = 1장)</li>
+            <li><b>낙첨해도 원금은 100% 돌려받아요</b></li>
+            <li>영국 Premium Bonds(1956~)와 같은 방식이에요</li>
+          </ul>
+        </details>
+      </>
+    )
+  }
   else if (phase === 'list' || !box) body = (
     <BoxList boxes={data.boxes} groupbuys={data.groupbuys || []} dailies={data.dailies || []}
+      raffles={data.raffles || []} saveups={data.saveups || []}
       onPick={openBox} onPickGroup={openGroup} onPickDaily={openDaily}
-      companyBEP={data.companyBEP} votes={votes} voteLabel={data.voteLabel} />
+      onPickRaffle={openRaffle} onPickSaveup={openSaveup}
+      votes={votes} voteLabel={data.voteLabel} />
   )
   else if (phase === 'result' && result) {
     const mine = result.results.find((r) => r.memberId === room.memberId) || result.results[0]
@@ -726,7 +939,9 @@ export default function App() {
     <Shell tab={tab} setTab={setTab} pool={data.pool}
       ops={tab === 'olbox' ? (
         <OpsRail box={box} teamSize={teamSize} odds={odds} oddsByTeam={oddsByTeam}
-          evByTeam={evByTeam} teamMax={teamMax} gb={gb} gbTeam={gbTeam} daily={daily} />
+          evByTeam={evByTeam} teamMax={teamMax} gb={gb} gbTeam={gbTeam} daily={daily}
+          rf={raffle ? { ...raffle, ...(rfResult || rfEnter || {}) } : null}
+          sv={saveup ? { ...saveup, ...(svResult || svState || {}) } : null} />
       ) : null}>
       {/* 초기 로드 이후의 실패(개봉·데일리·발주)가 조용히 삼켜지던 문제.
           성공 경로가 setErr(null)로 지우므로 여기 남아 있으면 진짜 실패다. */}
@@ -803,10 +1018,12 @@ function BriefRail({ pool }) {
       </section>
 
       <section className="brief__sec">
-        <h3>세 가지 형식</h3>
+        <h3>다섯 가지 형식</h3>
         <ul>
           <li><b>팀 뽑기</b> — 무엇을 받을지가 확률. 꽝 없음</li>
           <li><b>데일리 100원</b> — 당첨/꽝이 확률. 하루 한 번</li>
+          <li><b>래플</b> — 누가 특가에 살지가 확률. 응모 0원</li>
+          <li><b>무손실 적금</b> — 누가 이자 상금을 받을지가 확률. 원금 보존</li>
           <li><b>팀구매</b> — 얼마를 낼지가 확률. 몇 명은 0원</li>
         </ul>
         <p className="brief__dim">
@@ -852,9 +1069,9 @@ function Shell({ tab, setTab, children, ops, pool }) {
    보는 이 패널이 실시간 수치를 전부 노출한다 — 참여자가 늘 때 확률이
    곡선 위에서 어떻게 움직이는지 그대로 보인다. 폰과 같은 서버 값을 쓰므로
    두 화면이 어긋날 수 없다. */
-function OpsRail({ box, teamSize, odds, oddsByTeam, evByTeam, teamMax, gb, gbTeam, daily }) {
+function OpsRail({ box, teamSize, odds, oddsByTeam, evByTeam, teamMax, gb, gbTeam, daily, rf, sv }) {
   const n = Math.max(1, teamSize || 1)
-  const idle = !box && !gb && !daily
+  const idle = !box && !gb && !daily && !rf && !sv
   return (
     <aside className="ops" aria-label="실무자 실시간 지표">
       <p className="ops__tag">OPS · 실무자 화면</p>
@@ -867,7 +1084,9 @@ function OpsRail({ box, teamSize, odds, oddsByTeam, evByTeam, teamMax, gb, gbTea
             <p className="opsw__eq">
               팀 뽑기 → 재고 비율 × 부스트<br />
               데일리 → 1 / 손익분기 회수<br />
-              팀구매 → 대량 매입 할인 여력
+              팀구매 → 대량 매입 할인 여력<br />
+              래플 → 수량 ÷ 응모자<br />
+              적금 → 내 적립 ÷ 전체 적립
             </p>
             <p className="opsw__body">
               <b>사람이 손으로 적은 확률이 하나도 없습니다.</b> 전부 서버
@@ -973,6 +1192,62 @@ function OpsRail({ box, teamSize, odds, oddsByTeam, evByTeam, teamMax, gb, gbTea
               무료 당첨 인원으로 나눕니다. 안 당첨돼도 <b>정가보다 싸게 산 상품</b>이
               오므로 재산상 손실이 0 — 사행성 요건이 성립하지 않습니다.
             </p>
+          </div>
+        </>
+      )}
+      {rf && (
+        <>
+          <h4 className="ops__h">{rf.name}</h4>
+          <div className="ops__kpis">
+            <div><em>응모</em><b>{(rf.entrants ?? 0).toLocaleString()}명</b></div>
+            <div><em>수량</em><b>{rf.stock}개</b></div>
+            <div><em>당첨확률</em><b>{rf.odds}%</b></div>
+            <div><em>할인</em><b>{rf.discountPct}%</b></div>
+          </div>
+          <div className="opsw">
+            <div className="opsw__name">확률이 나오는 식</div>
+            <p className="opsw__eq">
+              P(당첨) = 수량 ÷ 응모자<br />
+              = {rf.stock} ÷ {Math.max(1, rf.entrants ?? 1).toLocaleString()}
+              {' = '}<b>{rf.odds}%</b>
+            </p>
+            <p className="opsw__body">
+              숨길 것이 없는 나눗셈입니다. 응모가 늘면 확률이 내려가는 것까지
+              화면에 그대로 보입니다.
+            </p>
+          </div>
+          <div className="opsw">
+            <div className="opsw__name">왜 선착순이 아니라 추첨인가</div>
+            <p className="opsw__body">
+              선착순 특가는 <b>봇과 새로고침 경쟁</b>이 이깁니다 — 나이키가 SNKRS를
+              추첨으로 바꾼 이유입니다. 추첨은 접속 시점과 무관하게 공정하고,
+              응모가 무료라 <b>낙첨 손실이 0원</b>입니다.
+            </p>
+            <p className="opsw__ref">특가 재원: 만석 선발주 원가율 — 팀구매와 같은 곡선의 끝값 (할인율을 지어내지 않음)</p>
+          </div>
+        </>
+      )}
+      {sv && (
+        <>
+          <h4 className="ops__h">{sv.name}</h4>
+          <div className="ops__kpis">
+            <div><em>내 적립</em><b>{won(sv.my ?? 0)}</b></div>
+            <div><em>전체 풀</em><b>{won(sv.total)}</b></div>
+            <div><em>주간 상금</em><b>{won(sv.prize)}</b></div>
+            <div><em>내 확률</em><b>{sv.odds ?? 0}%</b></div>
+          </div>
+          <div className="opsw">
+            <div className="opsw__name">확률과 상금이 나오는 식</div>
+            <p className="opsw__eq">
+              상금 = 풀 × 연 3% ÷ 52주 = {won(sv.prize)}<br />
+              P(당첨) = 내 적립 ÷ 풀
+              {sv.my > 0 && <> = {won(sv.my)} ÷ {won(sv.total)} = <b>{sv.odds}%</b></>}
+            </p>
+            <p className="opsw__body">
+              <b>이자만 모아 상금으로, 원금은 그대로.</b> 기대값은 일반 적금과 같고
+              분산만 재배분됩니다 — 잃는 사람이 구조적으로 없는 복권입니다.
+            </p>
+            <p className="opsw__ref">Prize-Linked Savings — Kearney·Tufano·Guryan·Hurst (NBER WP16433) · 영국 Premium Bonds 1956~</p>
           </div>
         </>
       )}

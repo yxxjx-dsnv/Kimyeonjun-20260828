@@ -64,7 +64,11 @@ const meta = await (await fetch(`${BASE}/api/boxes`)).json()
 await page.goto(BASE, { waitUntil: 'networkidle' })
 await page.waitForSelector('.bcard', { timeout: 20000 })
 check(`랜덤박스 ${meta.boxes.length}종 노출`, (await page.$$('.bcard')).length === meta.boxes.length)
-check(`공동구매 ${meta.groupbuys.length}종 노출`, (await page.$$('.gbcard')).length === meta.groupbuys.length)
+// 래플·적금 카드도 .gbcard 셸을 쓰므로 '상품 확정' 태그로 공동구매만 센다
+check(`공동구매 ${meta.groupbuys.length}종 노출`,
+  (await page.$$('.gbcard__tag:not(.gbcard__tag--rf):not(.gbcard__tag--sv)')).length === meta.groupbuys.length)
+check(`래플 ${meta.raffles.length}종 노출`, (await page.$$('.gbcard__tag--rf')).length === meta.raffles.length)
+check(`적금 ${meta.saveups.length}종 노출`, (await page.$$('.gbcard__tag--sv')).length === meta.saveups.length)
 check('탭바에 올박스', await page.isVisible('.tabbar__b.is-center'))
 
 // 2. 박스 진입 — 상세는 '지금 확률' 한 카드만 보여준다
@@ -144,7 +148,7 @@ check('가로 넘침 없음 — 개봉 결과', (await spill(page)).length === 0
 {
   const gb = meta.groupbuys[0]
   await page.goto(BASE, { waitUntil: 'networkidle' })
-  await page.click('.gbcard')
+  await page.click('.gbcard:has(.gbcard__tag:not(.gbcard__tag--rf):not(.gbcard__tag--sv))')
   await page.waitForSelector('.gbnow', { timeout: 10000 })
   const read = async () => (await page.$$eval('.gbnow b', (e) => e.map((x) => x.textContent)))
   const at20 = await read()
@@ -190,6 +194,39 @@ check('가로 넘침 없음 — 개봉 결과', (await spill(page)).length === 0
   check('당첨 또는 꽝이 나온다', ['당첨!', '꽝'].includes(t), t)
   check('투표 카드 등장', await page.isVisible('.vote'))
   check('가로 넘침 없음 — 데일리', (await spill(page)).length === 0, (await spill(page)).join(' | '))
+}
+
+// 9-b. ④ 래플 — 응모 무료·중복 409·낙첨 손실 0
+{
+  await page.goto(BASE, { waitUntil: 'domcontentloaded' })
+  await page.waitForSelector('.gbcard__tag--rf', { timeout: 20000 })
+  await page.click('.gbcard__tag--rf')
+  await page.waitForSelector('.gbnow', { timeout: 10000 })
+  check('래플: 정가 취소선 + 래플가', /↓/.test(await page.textContent('.gbhero__pr')))
+  await page.click('text=무료로 응모하기')
+  await page.waitForSelector('text=응모 완료', { timeout: 10000 })
+  check('래플: 응모 번호 발급', /\d+번/.test(await page.textContent('.gatenote')))
+  await page.click('text=추첨 결과 보기')
+  await page.waitForSelector('.dres', { timeout: 10000 })
+  const rfT = await page.textContent('.dres')
+  check('래플: 당첨 또는 무손실 낙첨', /당첨|잃은 건 0원/.test(rfT), rfT.slice(0, 40))
+  check('가로 넘침 없음 — 래플', (await spill(page)).length === 0, (await spill(page)).join(' | '))
+}
+
+// 9-c. ⑤ 무손실 적금 — 적립 → 확률 → 추첨 → 원금 보존
+{
+  await page.goto(BASE, { waitUntil: 'domcontentloaded' })
+  await page.waitForSelector('.gbcard__tag--sv', { timeout: 20000 })
+  await page.click('.gbcard__tag--sv')
+  await page.waitForSelector('.gbnow', { timeout: 10000 })
+  await page.click('text=+5,000')
+  await page.waitForSelector('text=내 당첨 확률', { timeout: 10000 })
+  check('적금: 적립하면 확률이 뜬다', /[\d.]+%/.test(await page.textContent('.gatenote')))
+  await page.click('text=이번 주 추첨 보기')
+  await page.waitForSelector('.dres', { timeout: 10000 })
+  const svT = await page.textContent('.dres')
+  check('적금: 원금 보존 명시', svT.includes('원금') && svT.includes('5,000'), svT.slice(0, 60))
+  check('가로 넘침 없음 — 적금', (await spill(page)).length === 0, (await spill(page)).join(' | '))
 }
 
 // 10. 뽑기 통과 천장

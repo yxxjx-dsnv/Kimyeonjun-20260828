@@ -148,6 +148,97 @@ export const GROUPBUYS = [
   },
 ]
 
+/**
+ * ④ 래플 — 선착순의 공정한 대안.
+ *
+ * 인기 상품 특가는 보통 선착순인데, 선착순은 봇과 새로고침 경쟁이 이긴다
+ * (나이키가 SNKRS를 선착순에서 추첨으로 바꾼 이유). 올박스 래플은
+ * **응모 무료·추첨 배분**이다. 낙첨해도 잃는 것이 0원이다.
+ *
+ * 특가의 재원: 래플 물량은 만석 공동구매와 같은 조건으로 **선발주가 확정된
+ * 재고**다. 만석 원가율로 매입했으므로 만석가로 팔 수 있고, 수량만 재고로
+ * 제한된다. 즉 할인율을 지어내지 않는다 — 같은 곡선의 끝값이다.
+ */
+export const RAFFLES = [
+  {
+    id: 'raffle-pack',
+    name: '포켓몬 하이클래스팩 래플',
+    blurb: '0원 응모. 당첨되면 특가에 살 수 있는 권리를 드려요.',
+    match: /하이클래스/,
+    group: 'card',
+    stock: 3, // 특가로 풀리는 수량
+    crAtFull: 0.62, // 선발주(만석) 매입 원가율 — 카드류는 유통 마진이 얇아 보수적으로
+  },
+]
+
+/** 래플 상품 — 크롤 풀에서 매칭되는 가장 비싼 것. */
+export const rfItem = (r) =>
+  POOL.items.filter((i) => i.group === r.group && r.match.test(i.name)).sort((a, b) => b.price - a.price)[0]
+
+/** 래플가 = 원가율 / (1 − 마진). 판매가에도 마진이 남는 지점 — 회사가 손해보지 않는 하한. */
+export const rfPayRatio = (r) => r.crAtFull / (1 - MARGIN)
+export const rfPrice = (r) => Math.round(rfItem(r).price * rfPayRatio(r))
+export const rfDiscount = (r) => 1 - rfPayRatio(r)
+
+/** 당첨 확률 = 수량 ÷ 응모자. 응모가 늘수록 내려간다 — 숨길 것 없는 나눗셈. */
+export const rfOdds = (r, entrants) => Math.min(1, r.stock / Math.max(1, entrants))
+
+/**
+ * 래플 추첨 — 응모 순번(1..entrants) 중 stock개를 시드로 뽑는다.
+ * 시드가 (래플, 날짜, 응모자 수)로 고정되어 마감 후 재추첨이 불가능하다.
+ */
+export function rfDraw(r, entrants, day) {
+  const k = Math.min(r.stock, Math.max(0, entrants))
+  const rnd = rngFor(`${r.id}|${day}|${entrants}`)
+  const order = Array.from({ length: entrants }, (_, i) => i + 1)
+  for (let i = order.length - 1; i > 0; i--) {
+    const j = Math.floor(rnd() * (i + 1))
+    ;[order[i], order[j]] = [order[j], order[i]]
+  }
+  return new Set(order.slice(0, k))
+}
+
+export const getRaffle = (id) => RAFFLES.find((x) => x.id === id) || null
+
+/**
+ * ⑤ 무손실 적금 — 이자를 모아 상금으로, 원금은 그대로.
+ *
+ * Prize-Linked Savings: 각자 받을 이자를 풀에 모아 추첨으로 한 명에게
+ * 몰아준다. 낙첨자는 **원금을 전액 돌려받는다** — 기대값은 일반 적금과
+ * 같고 분산만 재배분된다. 영국 Premium Bonds(1956~)가 이 구조로 국민
+ * 저축상품이 됐고, 미국 Save to Win 실증에서 저축 유인이 확인됐다.
+ *
+ * 확률 = 내 적립 ÷ 전체 적립 (1,000원 = 티켓 1장, Premium Bonds 방식).
+ * 상금 = 전체 적립 × 주간 이자율. 어느 것도 손으로 적지 않는다.
+ */
+export const SAVEUPS = [
+  {
+    id: 'saveup',
+    name: '잃지 않는 올박스 적금',
+    blurb: '이자만 모아 추첨해요. 꽝이어도 원금은 100% 그대로.',
+    apr: 0.03, // 연 이자율 가정 — 시중 파킹통장 수준
+    unit: 1000, // 티켓 1장 단위
+    myMax: 10000, // 데모에서 1인 적립 상한
+    // 데모용 시뮬 참여 풀. 실서비스에선 실제 적립 합계가 이 자리에 온다.
+    sim: { members: 412, total: 3_296_000 },
+  },
+]
+
+export const svPrize = (sv, total) => Math.round(total * (sv.apr / 52))
+export const svOdds = (sv, my, total) => (total > 0 ? my / total : 0)
+
+/**
+ * 주간 추첨 — 당첨 티켓 하나를 뽑는다. 데모에서 내 티켓은 풀의 맨 뒤
+ * 구간(가장 최근 적립)이다. 시드 = (적금, 주차, 전체액)으로 고정.
+ */
+export function svDraw(sv, my, total, week) {
+  const rnd = rngFor(`${sv.id}|${week}|${total}`)
+  const ticket = Math.floor(rnd() * total)
+  return { ticket, win: ticket >= total - my }
+}
+
+export const getSaveup = (id) => SAVEUPS.find((x) => x.id === id) || null
+
 // ───────────────────── 풀 → 티어 구성 ─────────────────────
 const byId = new Map(POOL.items.map((i) => [i.id, i]))
 
@@ -621,12 +712,55 @@ if (process.argv[1]?.endsWith('_draw.js')) {
 
   // ── 캠페인 id 전역 유일성 (시드 충돌 방지) ──────────────
   {
-    const ids = [...BOXES, ...DAILIES, ...GROUPBUYS].map((c) => c.id)
+    const ids = [...BOXES, ...DAILIES, ...GROUPBUYS, ...RAFFLES, ...SAVEUPS].map((c) => c.id)
     ok('캠페인 id 전역 유일', new Set(ids).size === ids.length, ids.join(','))
   }
 
   // ── 공동구매형 ──────────────────────────────────────────
   console.log('')
+  // ── ④ 래플 검사 ──
+  for (const r of RAFFLES) {
+    const it = rfItem(r)
+    ok(`${r.id} 상품 존재`, Boolean(it), r.match.source)
+    ok(`${r.id} 래플가 < 정가`, rfPrice(r) < it.price, `${rfPrice(r)} vs ${it.price}`)
+    ok(`${r.id} 래플가에도 마진 보존`, rfPrice(r) >= it.price * r.crAtFull, '원가 밑으로 팔지 않는다')
+    // 확률은 응모자에 단조감소, 수량 이하 응모면 전원 당첨
+    let prev = 2
+    for (const e of [1, 2, 3, 5, 10, 50, 500]) {
+      const o = rfOdds(r, e)
+      ok(`${r.id} 확률 단조감소(${e})`, o <= prev + 1e-12, `${o}`)
+      prev = o
+    }
+    ok(`${r.id} 수량 이하 응모 = 전원 당첨`, rfOdds(r, r.stock) === 1)
+    // 추첨: 결정론·당첨 수·범위
+    const w1 = rfDraw(r, 40, 'dayX')
+    ok(`${r.id} 같은 시드 = 같은 당첨`, [...rfDraw(r, 40, 'dayX')].join() === [...w1].join())
+    ok(`${r.id} 당첨 수 = min(수량,응모)`, w1.size === Math.min(r.stock, 40), `${w1.size}`)
+    ok(`${r.id} 당첨 번호 범위`, [...w1].every((x) => x >= 1 && x <= 40))
+    // 10만 회 표본에서 개별 응모자의 당첨 빈도가 공시 확률과 맞는가
+    let hit = 0
+    const N = 20000
+    for (let i = 0; i < N; i++) if (rfDraw(r, 40, `d${i}`).has(7)) hit++
+    const exp = r.stock / 40
+    ok(`${r.id} 실측 확률 ≈ 공시`, Math.abs(hit / N - exp) < 0.01, `${(hit / N * 100).toFixed(2)}% vs ${(exp * 100).toFixed(2)}%`)
+  }
+
+  // ── ⑤ 무손실 적금 검사 ──
+  for (const sv of SAVEUPS) {
+    const total = sv.sim.total + 5000
+    ok(`${sv.id} 상금 = 이자풀`, svPrize(sv, total) === Math.round(total * sv.apr / 52))
+    ok(`${sv.id} 상금이 원금을 침범하지 않음`, svPrize(sv, total) < total * sv.apr, '이자 범위 안')
+    ok(`${sv.id} 확률 = 지분 비례`, Math.abs(svOdds(sv, 5000, total) - 5000 / total) < 1e-12)
+    ok(`${sv.id} 전액이 내 돈이면 확률 1`, svOdds(sv, total, total) === 1)
+    ok(`${sv.id} 같은 시드 = 같은 추첨`, svDraw(sv, 5000, total, 'w1').ticket === svDraw(sv, 5000, total, 'w1').ticket)
+    // 실측: 내 지분 비율만큼 당첨되는가
+    let win = 0
+    const M2 = 20000
+    for (let i = 0; i < M2; i++) if (svDraw(sv, 5000, total, `w${i}`).win) win++
+    ok(`${sv.id} 실측 확률 ≈ 지분`, Math.abs(win / M2 - 5000 / total) < 0.005,
+      `${(win / M2 * 100).toFixed(3)}% vs ${(5000 / total * 100).toFixed(3)}%`)
+  }
+
   for (const gb of GROUPBUYS) {
     const it = gbItem(gb)
     ok(`${gb.id} 대표 상품 존재`, Boolean(it))

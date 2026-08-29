@@ -957,3 +957,15 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
   margin-top: var(--s2); padding-top: var(--s2); border-top: 1px dashed var(--hair);
   font-size: var(--fs-micro); line-height: 1.5; color: var(--muted);
 }
+
+/* ── ④⑤ 카드 소품 ─────────────────────────────────────────── */
+.gbcard__tag--rf { background: #fff0e4; color: #a05a00; }
+.gbcard__tag--sv { background: #e6f5ec; color: var(--good); }
+.svcoin {
+  flex: none; width: 64px; height: 64px; border-radius: var(--r2);
+  display: grid; place-items: center;
+  background: linear-gradient(135deg, var(--gold-soft), var(--gold));
+  color: #6b4a00; font-size: var(--fs-title); font-weight: 800;
+}
+.gbhero__pr s { color: var(--muted); font-weight: 500; margin-right: var(--s2); }
+.gbhero__pr em { font-style: normal; color: var(--brand); font-weight: 800; }

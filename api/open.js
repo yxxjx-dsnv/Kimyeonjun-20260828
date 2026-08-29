@@ -11,6 +11,8 @@ import {
   getBox, collapseUp, tiersOf, oddsOf, drawOne, TIERS, TEAM_MAX, MAX_DRAWS_PER_PERSON, byId,
   getGroupbuy, gbItem, gbPayRatio, gbDiscount, gbFreeOdds, gbFreeCount, gbDraw,
   getDaily, dailyDraw, dailyWinOdds, dailyBlankOdds, baseOdds, teamBoost,
+  getRaffle, rfItem, rfPrice, rfDiscount, rfOdds, rfDraw,
+  getSaveup, svPrize, svOdds, svDraw,
 } from './_draw.js'
 
 import { readRoom, mutateRoom, counter, todayKey } from './_room.js'
@@ -206,6 +208,91 @@ async function resolveDaily(body) {
   }
 }
 
+/**
+ * ④ 래플 — 응모는 무료, 배분은 추첨.
+ * 서버가 게이트를 소유한다: 1인 1응모(중복 409). 응모자 수는 원자적 카운터.
+ */
+async function resolveRaffle(body) {
+  const r = getRaffle(body.raffleId)
+  if (!r) return null
+  const who = String(body.memberId || 'anon').slice(0, 24)
+  const day = todayKey()
+  const item = rfItem(r)
+
+  if (body.action === 'enter') {
+    const times = await counter(`olbox:raffle:${r.id}:${day}:${who}`, 1)
+    if (times > 1) {
+      await counter(`olbox:raffle:${r.id}:${day}:${who}`, -1)
+      return { over: true, reason: 'already' }
+    }
+    const entrants = await counter(`olbox:raffle:${r.id}:${day}:n`, 1)
+    return {
+      kind: 'raffle', raffleId: r.id, name: r.name, item,
+      listPrice: item.price, rafflePrice: rfPrice(r), discountPct: +(rfDiscount(r) * 100).toFixed(1),
+      stock: r.stock, entrants, myIndex: entrants,
+      odds: +(rfOdds(r, entrants) * 100).toFixed(2),
+    }
+  }
+
+  // draw(데모 마감): 응모자 수 기준으로 시드 추첨. 같은 날 같은 응모 수면 결과가 같다.
+  const entered = await counter(`olbox:raffle:${r.id}:${day}:${who}`)
+  if (entered < 1) return { over: true, reason: 'notEntered' }
+  const entrants = await counter(`olbox:raffle:${r.id}:${day}:n`)
+  const winners = rfDraw(r, entrants, day)
+  const myIndex = Math.max(1, Math.floor(Number(body.myIndex) || 0))
+  const win = winners.has(myIndex)
+  return {
+    kind: 'raffle', raffleId: r.id, name: r.name, item,
+    listPrice: item.price, rafflePrice: rfPrice(r), discountPct: +(rfDiscount(r) * 100).toFixed(1),
+    stock: r.stock, entrants, myIndex, win,
+    odds: +(rfOdds(r, entrants) * 100).toFixed(2),
+    // 낙첨해도 잃은 것이 0원 — 이 형식의 정체성
+    settle: { paid: 0, saved: win ? item.price - rfPrice(r) : 0 },
+  }
+}
+
+/**
+ * ⑤ 무손실 적금 — 적립·추첨. 원금은 어떤 경우에도 그대로다.
+ * 내 적립과 시뮬 풀을 원자적 카운터로 합산한다.
+ */
+async function resolveSaveup(body) {
+  const sv = getSaveup(body.saveupId)
+  if (!sv) return null
+  const who = String(body.memberId || 'anon').slice(0, 24)
+
+  if (body.action === 'deposit') {
+    const amt = Math.floor(Number(body.amount) || 0)
+    if (amt <= 0 || amt % sv.unit !== 0) return { over: true, reason: 'badAmount' }
+    const cur = await counter(`olbox:saveup:${sv.id}:${who}`)
+    if (cur + amt > sv.myMax) return { over: true, reason: 'cap', my: cur }
+    const my = await counter(`olbox:saveup:${sv.id}:${who}`, amt)
+    const added = await counter(`olbox:saveup:${sv.id}:pool`, amt)
+    const total = sv.sim.total + added
+    return {
+      kind: 'saveup', saveupId: sv.id, name: sv.name,
+      my, total, members: sv.sim.members + 1,
+      prize: svPrize(sv, total),
+      odds: +(svOdds(sv, my, total) * 100).toFixed(3),
+    }
+  }
+
+  // draw(데모 주간 추첨)
+  const my = await counter(`olbox:saveup:${sv.id}:${who}`)
+  if (my <= 0) return { over: true, reason: 'noDeposit' }
+  const added = await counter(`olbox:saveup:${sv.id}:pool`)
+  const total = sv.sim.total + added
+  const week = todayKey().slice(0, 7)
+  const d = svDraw(sv, my, total, week)
+  return {
+    kind: 'saveup', saveupId: sv.id, name: sv.name,
+    my, total, prize: svPrize(sv, total),
+    odds: +(svOdds(sv, my, total) * 100).toFixed(3),
+    win: d.win, ticket: d.ticket,
+    // 무손실 불변식 — 낙첨이어도 환급 = 원금 전액
+    settle: { deposited: my, refund: my, prize: d.win ? svPrize(sv, total) : 0 },
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST만 허용합니다.' })
   const { roomId, sim, kind } = req.body || {}
@@ -216,6 +303,27 @@ export default async function handler(req, res) {
     if (out.over)
       return res.status(409).json({
         error: out.reason === 'soldout' ? '재고가 모두 소진되어 이번 회차는 끝났습니다.' : '오늘은 이미 참여하셨습니다.',
+        ...out,
+      })
+    return res.status(200).json(out)
+  }
+  if (kind === 'raffle') {
+    const out = await resolveRaffle(req.body)
+    if (!out) return res.status(400).json({ error: '없는 래플입니다.' })
+    if (out.over)
+      return res.status(409).json({
+        error: out.reason === 'already' ? '이미 응모하셨어요. 내일 다시 응모할 수 있어요.' : '먼저 응모해 주세요.',
+        ...out,
+      })
+    return res.status(200).json(out)
+  }
+  if (kind === 'saveup') {
+    const out = await resolveSaveup(req.body)
+    if (!out) return res.status(400).json({ error: '없는 적금입니다.' })
+    if (out.over)
+      return res.status(409).json({
+        error: out.reason === 'cap' ? '데모에서는 1만원까지 적립할 수 있어요.'
+          : out.reason === 'badAmount' ? '1,000원 단위로 적립할 수 있어요.' : '먼저 적립해 주세요.',
         ...out,
       })
     return res.status(200).json(out)
