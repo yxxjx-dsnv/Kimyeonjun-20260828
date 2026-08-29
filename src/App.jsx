@@ -108,9 +108,13 @@ export default function App() {
 
   const askAi = async () => {
     setBusy('ai')
-    const r = await api('/api/curate', { action: 'prefs', roomId: room.id, memberId: me, taste, target: myTarget })
-    setAi(r.data); setBusy('')
-    if (r.data?.id === undefined) act({ action: 'state', roomId: room.id })
+    const r = await api('/api/curate', { action: 'prefs', taste, target: myTarget })
+    setAi(r.data)
+    // curate는 방을 건드리지 않는다(배포본에서 함수가 갈라지기 때문). 저장은 room이 한다.
+    if (r.ok && r.data?.aiRanking?.length) {
+      await act({ action: 'setPrefs', roomId: room.id, memberId: me, prefs: r.data.aiRanking, source: r.data.source })
+    }
+    setBusy('')
   }
   const askTerm = async () => {
     setBusy('ask')
@@ -135,7 +139,7 @@ export default function App() {
    */
   const openBox = async () => {
     setBusy('open'); setGateMsg(null)
-    const r = await api('/api/open', { roomId: room.id })
+    const r = await api('/api/room', { action: 'open', roomId: room.id })
     if (r.status === 409) {
       setGateMsg({ status: 409, error: r.data.error, waiting: r.data.waiting })
       if (r.data.id) setRoom(r.data)
@@ -159,7 +163,7 @@ export default function App() {
 
   const doTrade = async () => {
     setBusy('trade')
-    const r = await api('/api/trade', { roomId: room.id })
+    const r = await api('/api/room', { action: 'trade', roomId: room.id })
     if (r.ok) setRoom(r.data)
     setBusy('')
   }

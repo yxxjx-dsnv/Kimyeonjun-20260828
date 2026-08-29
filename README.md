@@ -110,10 +110,10 @@ api/_draw.js           확률 엔진         ← 같음. self-check 15항목
 api/_trade.js          교환 엔진 (TTC)   ← 같음. self-check 12항목
 api/_room.js           방 저장소 (KV REST + 메모리 폴백)
 api/boxes.js           GET  통 구성 · 확률표 · 갱신 확률 · 계산 근거
-api/room.js            POST create | join | target | ready | simPrefs | state
-api/open.js            POST 개봉 (전원 준비 전 409, 비복원 갱신, 멱등)
-api/trade.js           POST 교환 (개봉 전 409, 멱등)
-api/curate.js          POST ChatGPT — 선호 순위 생성 · 카드 용어·시세 설명
+api/room.js            POST 방에 관한 모든 동작 — create | join | target | simPrefs |
+                       setPrefs | ready | open | trade | state
+                       (한 파일인 이유는 아래 "겪은 어려움" ⑬)
+api/curate.js          POST ChatGPT — 선호 순위 생성 · 카드 용어·시세 설명 (상태 없음)
 
 src/App.jsx            화면 8개
 src/parts.jsx          표시 전용 조각. 확률을 계산하지도 포맷하지도 않는다
@@ -132,7 +132,7 @@ tests/shots/           화면 9장
 | 요건 | 구현 |
 |---|---|
 | 프론트엔드 **React + JavaScript** | Vite + React 18. `.ts`/`.tsx` 0건, TypeScript 의존성 0건 |
-| 백엔드 **Node.js + JavaScript** | Vercel 서버리스 함수 6개 (`api/*.js`) |
+| 백엔드 **Node.js + JavaScript** | Vercel 서버리스 함수 3개 (`api/room.js` · `api/boxes.js` · `api/curate.js`) + 공유 모듈 5개 |
 | 대화형 AI에 **ChatGPT API** | [`api/curate.js:55`](api/curate.js) — `api.openai.com/v1/chat/completions`, `gpt-4o-mini`, raw fetch, JSON 모드. **Claude API 사용 0건** |
 | **크롤 데이터 활용 (3중)** | ① 통 구성 [`api/_box.js:64`](api/_box.js) ② TTC 선호 폴백·시세 병기 [`api/_trade.js:185`](api/_trade.js) ③ ChatGPT 프롬프트 입력 [`api/curate.js:102,163`](api/curate.js) |
 | **외부 접속 배포** | https://albox-alwayz.vercel.app |
@@ -444,7 +444,38 @@ JSX에 손으로 적혀 있었습니다. 엔진을 고쳐도 화면은 안 바�
 **해결**: `padding-block`으로 바꿔 정의 순서와 무관하게 만들고, 회귀를 검사로 고정했습니다.
 한글이 "통이 안 보입 / 니다"로 잘리던 것도 `word-break: keep-all`로 고쳤습니다.
 
-### ⑫ self-check가 조용히 실행되지 않았고, 자기 자신을 위반으로 판정했습니다
+### ⑫ 배포본에서 개봉이 404로 죽었습니다 — 로컬에서는 전부 통과했는데
+
+**문제**: 로컬 테스트 103항목과 E2E 46단계가 전부 통과한 코드를 배포했더니,
+평가자가 클릭하는 순서로 4단계째에서 `404 "방이 없다"`가 났습니다.
+
+**원인**: **Vercel은 라우트마다 별개의 서버리스 함수를 띄웁니다.**
+KV 환경변수가 없을 때 쓰는 메모리 폴백은 **함수 안에서만** 공유됩니다.
+`/api/room`이 만든 방을 `/api/open`은 볼 수 없었습니다. `/api/curate`가 저장한
+AI 선호 순위도 마찬가지로 교환에 도달하지 못하고 있었습니다.
+로컬 서버는 한 프로세스라 전부 같은 메모리를 봤고, 그래서 로컬에서는 안 보였습니다.
+
+**해결**: 방을 바꾸는 동작을 `api/room.js` 한 함수로 모았습니다
+(create/join/target/simPrefs/setPrefs/ready/open/trade/state).
+`api/curate.js`는 방을 건드리지 않고 **순위를 계산해 돌려주기만** 하도록 바꿨고,
+저장은 클라이언트가 `setPrefs`로 넘기되 **서버가 그 id를 통 안의 것으로 다시 검증**합니다.
+부수효과가 없어져서 테스트하기도 쉬워졌습니다.
+
+> **배운 것**: 로컬의 "한 프로세스"가 배포본의 "여러 함수"를 흉내내지 못합니다.
+> 그리고 이번에도 **배포한 뒤 실제 URL에서 클릭해봐서** 발견했습니다.
+
+### ⑬ 배포본 캐시 검사가 배포본에서만 실패했습니다
+
+**문제**: `/api/boxes`의 `s-maxage=60`을 헤더 문자열로 검사했는데, 로컬에서는
+통과하고 배포본에서는 `cache-control: public`만 와서 실패했습니다.
+
+**원인**: **Vercel은 `s-maxage`와 `stale-while-revalidate`를 엣지에서 소비하고
+클라이언트 응답에서 제거합니다.** 캐시는 정상 작동하는데 헤더로는 안 보입니다.
+
+**해결**: 재려던 것은 "헤더에 그렇게 적혀 있는가"가 아니라 "실제로 캐시되는가"였습니다.
+같은 URL을 두 번 요청해 `x-vercel-cache`가 `MISS → HIT`가 되는지로 바꿨습니다.
+
+### ⑭ self-check가 조용히 실행되지 않았고, 자기 자신을 위반으로 판정했습니다
 
 **문제 (a)**: 메인 모듈 판별을 `import.meta.url`과 `process.argv[1]`의 문자열 비교로 했는데,
 경로에 한글이 있어 `import.meta.url`만 퍼센트 인코딩돼 절대 같아지지 않았습니다.
@@ -471,7 +502,7 @@ JSX에 손으로 적혀 있었습니다. 엔진을 고쳐도 화면은 안 바�
 | 팀원 9명 | **시뮬.** 배지 표시 |
 | 팀원의 취향(선호 순위) | **시뮬.** 시드 기반 셔플. 실제 사용자라면 지목 + ChatGPT가 채웁니다 |
 | 교환 전환율 · 개선율 | **시뮬.** 10만 회 |
-| 멀티 디바이스 방 | **시뮬.** KV 연동 코드는 있고 환경변수만 붙이면 켜집니다 |
+| 멀티 디바이스 방 | **시뮬.** KV 연동 코드는 있고 환경변수(`KV_REST_API_URL`·`KV_REST_API_TOKEN`)만 붙이면 켜집니다. 지금은 서버리스 인스턴스 메모리를 쓰므로 여러 인스턴스로 스케일되면 방이 갈라집니다 |
 | 결제 · 배송 | **미구현** |
 
 ### 한계

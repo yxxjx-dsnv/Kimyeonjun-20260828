@@ -7,8 +7,6 @@
  */
 import assert from 'node:assert/strict'
 import room from '../api/room.js'
-import open from '../api/open.js'
-import trade from '../api/trade.js'
 import curate, { keepValid, rescueIds } from '../api/curate.js'
 import boxes from '../api/boxes.js'
 import { TEAM_MAX, slotsOf } from '../api/_box.js'
@@ -86,8 +84,20 @@ await ta('지목은 참여자당 1개, 덮어쓴다', async () => {
   assert.equal(Object.values(r.body.targets).reduce((a, b) => a + b, 0), 1)
 })
 
+await ta('setPrefs — 클라이언트가 보낸 순위도 서버가 다시 거른다 (I9)', async () => {
+  // curate.js는 배포본에서 방을 건드릴 수 없다(라우트마다 별개 함수라 메모리가 갈라진다).
+  // 그래서 클라이언트가 순위를 넘기는데, 넘어온 것을 믿지 않고 통 안의 id만 남긴다.
+  const r = await call(room, {
+    action: 'setPrefs', roomId: R, memberId: ME,
+    prefs: [CARDS[3].id, '환각id', CARDS[4].id, 'd000000000'],
+  })
+  assert.equal(r.code, 200)
+  assert.equal(r.body.kept, 2, '통 밖 id 2개가 걸러져야 한다')
+  assert.equal(r.body.members.find((m) => m.id === ME).hasAiPrefs, true)
+})
+
 await ta('개봉 전 trade → 409', async () => {
-  const r = await call(trade, { roomId: R })
+  const r = await call(room, { action: 'trade', roomId: R })
   assert.equal(r.code, 409)
 })
 
@@ -99,7 +109,7 @@ await ta(`${TEAM_MAX - 1}/${TEAM_MAX} 준비에서 open → 409 (서버가 게�
   }
   stateBefore = (await call(room, { action: 'state', roomId: R })).body
   assert.equal(stateBefore.readyCount, TEAM_MAX - 1)
-  const r = await call(open, { roomId: R })
+  const r = await call(room, { action: 'open', roomId: R })
   assert.equal(r.code, 409)
   assert.match(r.body.error, /전원이 준비/)
   assert.equal(r.body.waiting.length, 1)
@@ -109,7 +119,7 @@ let opened = null
 await ta('전원 준비 후 open → 200', async () => {
   const s = await call(room, { action: 'state', roomId: R })
   await call(room, { action: 'ready', roomId: R, memberId: s.body.members.at(-1).id, ready: true })
-  const r = await call(open, { roomId: R })
+  const r = await call(room, { action: 'open', roomId: R })
   assert.equal(r.code, 200)
   assert.equal(r.body.opened, true)
   assert.equal(r.body.openResults.length, TEAM_MAX)
@@ -150,7 +160,7 @@ t('개봉 직전 확률이 결과에 기록돼 있다 (화면의 비복원 시�
 })
 
 await ta('같은 방 2회 개봉 → 동일 결과 (멱등)', async () => {
-  const again = await call(open, { roomId: R })
+  const again = await call(room, { action: 'open', roomId: R })
   assert.equal(again.code, 200)
   assert.equal(again.body.idempotent, true)
   assert.deepEqual(again.body.openResults, opened.openResults)
@@ -159,7 +169,7 @@ await ta('같은 방 2회 개봉 → 동일 결과 (멱등)', async () => {
 
 let traded = null
 await ta('개봉 후 trade → 200, 아무도 나빠지지 않는다 (I5)', async () => {
-  const r = await call(trade, { roomId: R })
+  const r = await call(room, { action: 'trade', roomId: R })
   assert.equal(r.code, 200)
   assert.equal(r.body.trade.results.length, TEAM_MAX)
   assert.equal(r.body.trade.noneWorse, true)
@@ -172,7 +182,7 @@ t('교환 사이클은 길이 2 이상만 화면에 나간다', () => {
 })
 
 await ta('trade 2회 호출 → 동일 결과 (멱등)', async () => {
-  const again = await call(trade, { roomId: R })
+  const again = await call(room, { action: 'trade', roomId: R })
   assert.equal(again.body.idempotent, true)
   assert.deepEqual(again.body.trade, traded)
 })

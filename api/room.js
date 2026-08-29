@@ -1,16 +1,28 @@
 /**
- * POST /api/room — 방 생성·합류·지목·준비·조회.
- *   body { action: 'create'|'join'|'target'|'ready'|'state', ... }
+ * POST /api/room — 방에 관한 모든 동작.
+ *   body { action: 'create'|'join'|'target'|'simPrefs'|'ready'|'open'|'trade'|'state', ... }
+ *
+ * ## 왜 한 파일에 다 있나 — 배포본에서 겪은 것
+ * 처음에는 open과 trade를 별도 라우트(api/open.js, api/trade.js)로 뒀다. 로컬에서는
+ * 전부 통과했는데 **배포본에서 개봉이 404 "방이 없다"로 죽었다.**
+ * Vercel에서는 라우트마다 별개의 서버리스 함수가 뜨고, KV 환경변수가 없을 때 쓰는
+ * 메모리 폴백은 **함수 안에서만** 공유된다. /api/room이 만든 방을 /api/open은 볼 수 없다.
+ *
+ * 방을 바꾸는 동작을 한 함수로 모으면 같은 인스턴스가 같은 메모리를 본다.
+ * KV 환경변수를 붙이면 이 제약 자체가 사라지지만, 없이도 데모가 돌아야 한다.
+ * (여러 인스턴스로 스케일되면 여전히 갈라진다 — README에 한계로 적었다.)
  *
  * 지목은 확률을 건드리지 않는다. TTC의 1순위 선호가 될 뿐이다.
  * "지목하면 잘 나온다"는 어떤 경로도 만들지 않는다 — 만드는 순간 확률이
  * 재고 ÷ 구좌가 아니게 된다(I1).
  */
 import { BOX, TEAM_MAX, slotsOf, remainingFrom, tierCountsOf } from './_box.js'
-import { fmtPct, naturalFreq, rng } from './_draw.js'
+import { openRound, fmtPct, naturalFreq, rng } from './_draw.js'
+import { ttc, completePrefs, tradeSeed } from './_trade.js'
 import { readRoom, writeRoom, mutateRoom, newId, newRoom, kvEnabled } from './_room.js'
 
 const ALL_CARD_IDS = [...new Set(slotsOf().map((s) => s.id))]
+const UNIVERSE = [...new Map(slotsOf().map((s) => [s.id, s])).values()]
 const CARD_IDS = new Set(ALL_CARD_IDS)
 
 /** 클라이언트에 내려보내는 방 상태. 통 상태와 갱신된 확률을 함께 준다(I3). */
@@ -44,6 +56,113 @@ export function view(room) {
   }
 }
 
+
+/**
+ * 개봉. 전원 게이트 판정을 **서버가 소유한다**(I8).
+ * "한 명이라도 안 누르면 안 열린다"가 제품의 주장이므로 판정을 프론트에 두지 않는다.
+ * 프론트의 버튼 비활성화는 편의이지 보증이 아니다. 여기서 방 상태를 다시 읽어 센다.
+ *
+ * 비복원(I3): 뽑힌 구좌는 통에서 빠지고 다음 조회부터 갱신된 확률이 내려간다.
+ * 멱등: 같은 방을 다시 열면 저장된 결과를 그대로 돌려준다. 통을 두 번 깎지 않는다.
+ */
+async function doOpen(res, roomId) {
+  const room = await readRoom(roomId)
+  if (!room) return res.status(404).json({ error: '방이 없다' })
+  if (room.opened) return res.status(200).json({ ...view(room), idempotent: true })
+
+  const total = room.members.length
+  const ready = room.members.filter((m) => m.ready).length
+  if (total === 0) return res.status(409).json({ error: '참여자가 없다', ready, total })
+  if (ready < total) {
+    return res.status(409).json({
+      error: `전원이 준비해야 열린다. ${ready}/${total}명 준비됨`,
+      ready, total,
+      waiting: room.members.filter((m) => !m.ready).map((m) => m.name),
+      ...view(room),
+    })
+  }
+
+  const next = await mutateRoom(roomId, (r) => {
+    if (r.opened) return null
+    const out = openRound({
+      roomId: r.id, boxId: r.boxId,
+      participantIds: r.members.map((m) => m.id),
+      round: r.round + 1,
+      remaining: remainingFrom(r.drawn),
+    })
+    r.round += 1
+    r.opened = true
+    r.drawn = [...r.drawn, ...out.results.map((x) => x.i)]
+    r.openResults = out.results.map((x) => {
+      const m = r.members.find((mm) => mm.id === x.participantId)
+      return {
+        memberId: x.participantId, name: m?.name ?? x.participantId,
+        i: x.i, tier: x.tier, cardId: x.id, name_: x.name, price: x.price, image: x.image,
+        slotsBefore: x.slotsBefore,
+        oddsBefore: Object.fromEntries(Object.entries(x.oddsBefore).map(([g, p]) =>
+          [g, { p, pct: fmtPct(p), freq: naturalFreq(p, BOX.N) }])),
+      }
+    })
+    r.rev++
+    return r
+  })
+  if (!next) return res.status(409).json({ error: '이미 개봉됐다' })
+  return res.status(200).json(view(next))
+}
+
+/**
+ * 교환. 개봉이 끝난 방에서만 동작한다 — 뽑지도 않은 것을 교환할 수 없다.
+ * 회차당 1회이고 재실행 요청은 저장된 같은 결과를 돌려준다(멱등).
+ *
+ * 선호는 SPEC §5.4대로 조립한다: 지목 → ChatGPT 순위 → 시세 내림차순으로 서버가 채움.
+ * 마지막 단계가 없으면 목록이 불완전해지고 개별 합리성이 깨진다.
+ */
+async function doTrade(res, roomId) {
+  const room = await readRoom(roomId)
+  if (!room) return res.status(404).json({ error: '방이 없다' })
+  if (!room.opened) return res.status(409).json({ error: '개봉 전에는 교환할 수 없다' })
+  if (room.trade) return res.status(200).json({ ...view(room), idempotent: true })
+
+  const next = await mutateRoom(roomId, (r) => {
+    if (r.trade) return null
+    const participants = r.members.map((m) => {
+      const got = r.openResults.find((x) => x.memberId === m.id)
+      return {
+        id: m.id,
+        holding: got.cardId,
+        prefs: completePrefs({ target: m.target, aiRanked: m.aiPrefs || [], universe: UNIVERSE }),
+      }
+    })
+    const out = ttc(participants, tradeSeed(r.id, r.round))
+    const byId = new Map(UNIVERSE.map((c) => [c.id, c]))
+    r.trade = {
+      seed: tradeSeed(r.id, r.round),
+      cycles: out.tradeCycles.map((c) => c.map((id) =>
+        ({ id, name: r.members.find((m) => m.id === id)?.name ?? id }))),
+      results: out.results.map((x) => {
+        const m = r.members.find((mm) => mm.id === x.id)
+        const b = byId.get(x.before), a = byId.get(x.after)
+        return {
+          memberId: x.id, name: m?.name ?? x.id,
+          before: b ? { id: b.id, name: b.name, price: b.price, tier: b.tier, image: b.image } : null,
+          after: a ? { id: a.id, name: a.name, price: a.price, tier: a.tier, image: a.image } : null,
+          rankBefore: x.rankBefore, rankAfter: x.rankAfter,
+          improved: x.improved, same: x.same, worse: x.worse, gain: x.gain,
+          gotTarget: a?.id === m?.target,
+        }
+      }),
+      improvedCount: out.results.filter((x) => x.improved).length,
+      // 개별 합리성은 정리로 보장되지만 매 라운드 확인해서 내려보낸다 —
+      // "알고리즘이 보장한다"는 화면 문구의 근거가 주석이 아니라 실행 결과여야 한다.
+      noneWorse: out.results.every((x) => !x.worse),
+    }
+    r.rev++
+    return r
+  })
+  if (!next) return res.status(409).json({ error: '이미 교환됐다' })
+  return res.status(200).json(view(next))
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST만 받는다' })
   const { action, roomId, memberId, name, cardId, ready } = req.body || {}
@@ -59,6 +178,30 @@ export default async function handler(req, res) {
   }
 
   if (!roomId) return res.status(400).json({ error: 'roomId가 필요하다' })
+
+  /**
+   * AI가 만든 선호 순위를 방에 저장한다. 클라이언트가 넘기지만 **서버가 다시 거른다**
+   * — 통 안에 없는 id는 버린다(I9). 클라이언트가 보낸 것을 믿지 않는다.
+   */
+  if (action === 'setPrefs') {
+    let error = null
+    const clean = Array.isArray(req.body?.prefs) ? req.body.prefs.filter((x) => CARD_IDS.has(x)) : []
+    const room = await mutateRoom(roomId, (r) => {
+      if (r.opened) { error = { code: 409, msg: '개봉 후에는 바꿀 수 없다' }; return null }
+      const m = r.members.find((x) => x.id === memberId)
+      if (!m) { error = { code: 404, msg: '참여자가 없다' }; return null }
+      m.aiPrefs = clean
+      m.aiSource = req.body?.source ?? 'openai'
+      r.rev++
+      return r
+    })
+    if (!room) return res.status(404).json({ error: '방이 없다' })
+    if (error) return res.status(error.code).json({ error: error.msg, ...view(room) })
+    return res.status(200).json({ ...view(room), kept: clean.length })
+  }
+
+  if (action === 'open') return doOpen(res, roomId)
+  if (action === 'trade') return doTrade(res, roomId)
 
   if (action === 'state') {
     const room = await readRoom(roomId)

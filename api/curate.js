@@ -17,13 +17,20 @@
  *   사용자가 화면에서 순위를 직접 고칠 수 있다. AI는 초안일 뿐이다.
  * 프롬프트는 부탁이고 가드가 보증이다. 아래 rescue/필터가 가드다.
  *
+ * ## 이 함수는 방을 건드리지 않는다
+ * 처음에는 여기서 방에 선호 순위를 직접 저장했다. **배포본에서 그 저장이 사라졌다** —
+ * Vercel은 라우트마다 별개의 서버리스 함수를 띄우고, KV 없이 쓰는 메모리 폴백은
+ * 함수 안에서만 공유되기 때문이다. curate가 저장한 것을 room은 볼 수 없었다.
+ * 이제 여기서는 순위를 **계산해서 돌려주기만** 하고, 저장은 클라이언트가
+ * /api/room의 setPrefs로 넘긴다. 서버가 그 id를 통 안의 것으로 다시 검증한다.
+ * 부수효과가 없어져서 테스트하기도 쉬워졌다.
+ *
  * ## AI가 장식이 아닌 이유 (Phase 3 측정)
  * 선호가 동질이면 TTC가 사이클을 만들지 못해 교환이 거의 일어나지 않는다
  * (개선율 10.5% vs 68.4%). 선호를 이질적으로 만드는 것이 이 기능의 실제 일이다.
  */
 import { slotsOf } from './_box.js'
 import { completePrefs } from './_trade.js'
-import { mutateRoom } from './_room.js'
 
 const UNIVERSE = [...new Map(slotsOf().map((s) => [s.id, s])).values()]
 const VALID = new Set(UNIVERSE.map((c) => c.id))
@@ -120,17 +127,6 @@ export default async function handler(req, res) {
     // 누락분은 언제나 서버가 채운다. 목록이 불완전하면 개별 합리성이 깨진다.
     const prefs = completePrefs({ target: target ?? null, aiRanked: ranking, universe: UNIVERSE })
 
-    if (roomId && memberId) {
-      await mutateRoom(roomId, (r) => {
-        const m = r.members.find((x) => x.id === memberId)
-        if (!m) return null
-        m.aiPrefs = ranking
-        m.aiWhy = why
-        m.aiSource = source
-        r.rev++
-        return r
-      })
-    }
     return res.status(200).json({
       source, why,
       aiRanking: ranking,

@@ -145,8 +145,29 @@ ok('시뮬 배지가 화면에 있다 (I13)', (await page.locator('.badge.sim').
 console.log('\n─── 응답 헤더 · 콘솔 ───')
 const boxesRes = await page.request.get(`${BASE}/api/boxes${CACHE_BUST}`)
 const cc = boxesRes.headers()['cache-control'] || ''
-ok('/api/boxes 캐시가 s-maxage=60', /s-maxage=60/.test(cc), cc)
-ok('/api/boxes에 stale-while-revalidate가 있다', /stale-while-revalidate=600/.test(cc))
+
+/**
+ * 캐시를 헤더 문자열로 확인하면 배포본에서 실패한다.
+ * **Vercel은 s-maxage와 stale-while-revalidate를 엣지에서 소비하고 클라이언트
+ * 응답에서 제거한다.** 로컬 서버에서는 그대로 남는다. 헤더만 보면 검사가
+ * 로컬에서는 통과하고 정작 중요한 배포본에서는 실패한다.
+ * 재려던 것은 "헤더에 그렇게 적혀 있는가"가 아니라 "실제로 캐시되는가"다.
+ */
+if (/s-maxage/.test(cc)) {
+  ok('/api/boxes 캐시가 s-maxage=60 (원본 헤더)', /s-maxage=60/.test(cc), cc)
+  ok('/api/boxes에 stale-while-revalidate=600', /stale-while-revalidate=600/.test(cc))
+} else {
+  // 엣지가 헤더를 걷어낸 경우 — 동작으로 확인한다. 같은 URL 2회 → 두 번째가 HIT.
+  const probe = `${BASE}/api/boxes?cacheprobe=e2e`
+  await page.request.get(probe)
+  await new Promise((r) => setTimeout(r, 1200))
+  const second = await page.request.get(probe)
+  const hdr = second.headers()
+  const hit = /HIT/i.test(hdr['x-vercel-cache'] || '') || Number(hdr['age'] || 0) > 0
+  ok('엣지가 /api/boxes를 실제로 캐시한다 (s-maxage는 엣지가 소비)', hit,
+    `x-vercel-cache=${hdr['x-vercel-cache']} age=${hdr['age']}`)
+  ok('캐시 헤더가 public이다', /public/.test(cc), cc)
+}
 const bj = await boxesRes.json()
 ok('배포본이 이번 크롤 데이터를 쓴다', bj.box?.crawledAt?.startsWith('2026-08-29'), bj.box?.crawledAt)
 ok('통 구성이 코드와 일치한다', bj.box?.N === 1000 && bj.box?.tiers?.length === 4)
