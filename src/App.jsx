@@ -1169,7 +1169,7 @@ function OpsRail({ box, teamSize, odds, oddsByTeam, evByTeam, teamMax, gb, gbTea
               연속 미당첨자를 보호합니다. 재미 장치가 아니라 <b>규제가 공시하라고
               명시한 소비자 보호 장치</b>라 확률표에 조건을 함께 적습니다.
             </p>
-            <p className="opsw__ref">게임산업법 시행령(2024.3.22) — 보장형 시스템·연속 시행 공시 대상</p>
+            <p className="opsw__ref">게임산업법 시행령(2024.3.22) — 천장(보장)·변동 확률 공시 대상</p>
           </div>
 
           <OddsTable oddsByTeam={oddsByTeam} evByTeam={evByTeam} teamMax={teamMax} teamSize={n} />

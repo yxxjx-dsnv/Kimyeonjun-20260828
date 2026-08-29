@@ -219,7 +219,7 @@ check('가로 넘침 없음 — 개봉 결과', (await spill(page)).length === 0
   await page.waitForSelector('.gbcard__tag--sv', { timeout: 20000 })
   await page.click('.gbcard__tag--sv')
   await page.waitForSelector('.gbnow', { timeout: 10000 })
-  await page.click('text=+5,000')
+  await page.click('.draws .chip:nth-child(3)')
   await page.waitForSelector('text=내 당첨 확률', { timeout: 10000 })
   check('적금: 적립하면 확률이 뜬다', /[\d.]+%/.test(await page.textContent('.gatenote')))
   await page.click('text=이번 주 추첨 보기')
@@ -265,7 +265,7 @@ check('포맷별 정직성 설명', sheet.includes('일부 형식의 속성'))
 check('꽝 없는 형식의 3층 구조', sheet.includes('수집 단계에서'))
 check('꽝 있는 형식도 명시', sheet.includes('이 형식에는 꽝이 있습니다'))
 check('확률 출처 3가지', sheet.includes('재고 비율') && sheet.includes('손익분기') && sheet.includes('할인 여력'))
-check('천장은 공시 대상', sheet.includes('보장형 시스템'))
+check('천장은 공시 대상', sheet.includes('천장(보장)'))
 
 // 12. 데스크톱 셸 — 폰이 '기기'로 보여야 한다.
 // 프레임에 높이 상한이 없어 홈 그리드에서 3,885px까지 자랐던 적이 있다.
