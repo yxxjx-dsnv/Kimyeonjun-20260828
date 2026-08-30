@@ -198,20 +198,22 @@ const meNo = (await page.locator('.order__row b').first().textContent()).trim()
 ok('주문내역이 서버 상태로 복구된다', meNo === orderNo, `${meNo} = ${orderNo}`)
 ok('받은 카드가 주문내역에 있다', await page.locator('.order__card').isVisible())
 
-console.log('\n─── 공동구매(②) — 마감 실재, 웃돈 0 ───')
+console.log('\n─── 공동구매(②) — 마감 실재, 가격 인상 없음 ───')
 await page.locator('.tabbar__b.is-center').click()
 // 진행 중 주문이 있으면 흐름 화면이 뜬다 — 목록으로 돌아가는 길이 있어야 한다
 await page.getByText('올박스 목록').first().click().catch(() => {})
 await page.getByText('브랜드 공동구매').first().click()
 await page.waitForSelector('.pricebox')
 ok('회차 마감 시계가 있다', await page.locator('.tk').first().isVisible())
-ok('웃돈 0원이 명시된다', await page.getByText('웃돈 0원').first().isVisible())
 const gDeal = API.deals.find((d) => d.kind === 'group')
+const gShown = (await page.locator('.pricebox__big').textContent()).trim()
+ok('공동구매가가 정가와 같다', gDeal.topCard.priceLine.includes(gShown) && gDeal.price.discount === null,
+  `화면 ${gShown} · ${gDeal.topCard.priceLine} · 할인율 ${gDeal.price.discount}`)
 await page.waitForSelector('.livebar', { timeout: 8000 })
-ok('실시간 참여자 수와 환불 확률이 함께 보인다',
+ok('실시간 참여자 수와 당첨 확률이 함께 보인다',
   /명 참여/.test(await page.locator('.livebar__n').textContent()),
   (await page.locator('.livebar__row').textContent()).replace(/\s+/g, ' '))
-ok('환불 구간표가 서버 값 그대로다', (await page.locator('.body tbody tr').count()) === gDeal.milestones.length,
+ok('당첨 구간표가 서버 값 그대로다', (await page.locator('.body tbody tr').count()) === gDeal.milestones.length,
   `${await page.locator('.body tbody tr').count()}행 = ${gDeal.milestones.length}구간`)
 await page.getByText('공동구매 참여하기').click()
 ok('접수가 시뮬로 표기된다 (I13)', (await page.locator('.notice .simtag').count()) >= 1)

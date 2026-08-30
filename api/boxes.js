@@ -63,12 +63,11 @@ export function buildDeals(now) {
     // 지어내면 "확률로 포장한 가격 인상을 피했다"는 논증 전체가 무너진다.
     price: {
       big: won(G.PRICE), strike: null, discount: null,
-      sub: `정가 ${won(G.LIST)} · 웃돈 0원`,
+      sub: `정가와 같은 가격이에요`,
       bands: null,
     },
     oddsLine: `${G.M_MAX}명이 모이면 ${G.milestones([G.M_MAX])[0].freq} · 전액 무료`,
     milestones: G.milestones(),
-    ceilLine: `당첨 확률은 최대 ${G.fmtPct(G.CEIL)}까지 올라갑니다`,
     live: G.liveOf(now),
     dir: 'up', dirLine: '사람이 모일수록 당첨 인원이 늘어납니다',
     deadlineAt: G.roundDeadline(now), round: gRound,

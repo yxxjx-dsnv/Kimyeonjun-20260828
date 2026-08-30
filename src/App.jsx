@@ -506,16 +506,18 @@ function HonestySheet({ sel, conversion, oripa, room, teamSize, onClose }) {
 
         <dt>③ 안 나오면 팀 안에서 바꿉니다</dt>
         <dd>
-          Gale의 Top Trading Cycles입니다. <b>아무도 교환 전보다 나빠지지 않고</b>,
-          <b> 선호를 거짓으로 말해도 이득이 없습니다</b> — 둘 다 정리로 보장됩니다.
-          <br />다만 전환은 100%가 아닙니다.
-          {` 같은 것을 원한 사람이 1명이면 ${conversion.models.heterogeneous.rows[0].movedPct}, 전원이면 ${conversion.models.heterogeneous.rows[3].movedPct}입니다.`}
+          받은 카드를 보고 <b>직접 교환을 요청</b>하고, 상대가 수락하면 바뀝니다.
+          양쪽이 수락해야 성사되므로 <b>아무도 교환 전보다 나빠지지 않습니다</b>.
+          <br />다만 교환이 늘 성사되지는 않습니다.
+          {`같은 것을 원한 사람이 1명이면 ${conversion.models.heterogeneous.rows[0].movedPct}, 전원이면 ${conversion.models.heterogeneous.rows[3].movedPct}가 바뀝니다.`}
+          <br />이 값은 팀 전체를 한 번에 맞췄을 때의 <b>상한</b>을 Gale의 Top Trading Cycles로
+          계산한 것입니다(<code>api/_trade.js</code>). 직접 요청으로는 이보다 더 바뀔 수 없습니다.
         </dd>
 
         <dt>④ 꽝이 없는 이유는 두 층입니다</dt>
         <dd>
           1층 — 가장 낮은 등급의 최저가도 참여비 이상입니다({won(box.fee)}).
-          <br />2층 — 교환 후에도 아무도 나빠지지 않는 것이 <b>정리로</b> 보장됩니다.
+          <br />2층 — 교환은 양쪽이 수락해야 성사되므로, 교환 후에도 아무도 나빠지지 않습니다.
           <br />2층이 있어서 1층을 <b>카드 안에서만</b> 잡을 수 있습니다. 생필품을 섞을 필요가 없습니다.
         </dd>
       </dl>
@@ -928,7 +930,6 @@ function GroupScreen({ deal, onBack }) {
       <section className="pricebox">
         <b className="pricebox__big">{deal.price.big}</b>
         <span className="pricebox__sub">{deal.price.sub}</span>
-        <span className="pricebox__floor">{deal.ceilLine}</span>
       </section>
 
       <section className="hsec">
@@ -976,7 +977,6 @@ function GroupScreen({ deal, onBack }) {
             <p>마감 시점의 인원으로 당첨자가 확정됩니다. 당첨되면 제품을 무료로 받으세요.</p>
           </div>
         )}
-        <p className="cta__note">당첨되면 전액 무료 · 공동구매가는 정가를 넘지 않습니다</p>
       </div>
     </>
   )
