@@ -888,6 +888,23 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
 .tablewrap td.n { font-variant-numeric: tabular-nums; }
 .tablewrap td.hi { font-weight: 800; }
 .freq { display: block; font-size: var(--fs-micro); color: var(--muted); font-weight: 400; }
+
+/* 확률표 — 한 화면에 들어와야 한다. 가로 스크롤이 필요하면 표가 아니라 벽이다. */
+.tablewrap--odds td, .tablewrap--odds th { white-space: normal; padding: 9px 8px; }
+.tablewrap--odds td:first-child { width: 5.6em; }
+.tablewrap--odds td:first-child .freq { white-space: nowrap; }
+.tablewrap--odds .freq { line-height: 1.35; margin-top: 2px; }
+.omul {
+  display: block; margin-top: 5px; padding-top: 5px;
+  border-top: 1px dashed var(--hair);
+  font-size: var(--fs-label); font-weight: 800; color: var(--brand);
+  font-variant-numeric: tabular-nums;
+}
+.omul em {
+  display: block; font-style: normal; font-size: var(--fs-micro);
+  font-weight: 400; color: var(--muted); line-height: 1.35; margin-top: 1px;
+}
+.ocell { vertical-align: top; }
 .unknown { color: var(--muted); font-weight: 800; }
 /* 대조 뷰 — 오리파 칸이 물음표로 남는 것이 이 표의 목적이다. 빗금으로 '알 수 없음'을 표시한다. */
 .compare th:nth-child(2), .compare td:nth-child(2) {
@@ -1045,16 +1062,24 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
 .tshow__pr { display: block; margin-top: 2px; font-size: var(--fs-micro); font-weight: 800; font-variant-numeric: tabular-nums; }
 .tshow__foot { margin-top: var(--s3); padding-top: var(--s2); border-top: 1px dashed var(--hair); font-size: var(--fs-micro); color: var(--muted); font-variant-numeric: tabular-nums; }
 
-/* 검증으로 가는 문 — 1,000칸은 여기 뒤에 있다 */
+/* 검증으로 가는 문 — 1,000칸은 여기 뒤에 있다.
+   점선 테두리는 '만들다 만 자리'로 읽혔다. 실선 카드로 바꾸고
+   버튼이 무엇을 보여주는지(=오리파가 못 하는 것)를 문구가 말하게 한다. */
 .verify {
-  display: flex; align-items: center; gap: var(--s2); width: 100%;
+  display: flex; align-items: center; gap: var(--s3); width: 100%;
   margin-top: var(--s4); padding: var(--s3) var(--s4);
-  background: var(--band); border: 1px dashed var(--muted); border-radius: var(--r2);
-  text-align: left; font-size: var(--fs-label); color: var(--ink-2);
+  background: var(--paper); border: 1px solid var(--ink); border-radius: var(--r2);
+  text-align: left; font-size: var(--fs-label); color: var(--ink);
 }
-.verify:hover { border-color: var(--brand); color: var(--brand); }
-.verify__n { font-weight: 900; font-variant-numeric: tabular-nums; }
-.verify__t { flex: 1; }
+.verify:hover { border-color: var(--brand); }
+.verify:hover .verify__go { color: var(--brand); }
+.verify__n {
+  flex: none; display: grid; place-items: center; width: 42px; height: 42px;
+  border-radius: 10px; background: var(--ink); color: #fff;
+}
+.verify__n svg { width: 22px; height: 22px; }
+.verify__t { flex: 1; font-weight: 700; line-height: 1.4; }
+.verify__t em { display: block; font-style: normal; font-weight: 400; font-size: var(--fs-micro); color: var(--muted); margin-top: 2px; }
 .verify__go { font-size: var(--fs-lead); color: var(--muted); }
 .sheet__verify { margin: var(--s4) 0; }
 .sheet__verify h4 { margin-bottom: var(--s2); }

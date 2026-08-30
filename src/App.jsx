@@ -607,9 +607,18 @@ function TeamDetail({ sel, deal, teamSize, setTeamSize, busy, onBack, onBuy, onS
           <TierShowcase key={t.tier} tier={t} hero={t.tier === 'S'}
             pct={odds[i].soloPct} freq={odds[i].soloFreq} />
         ))}
+        {/* 오리파가 못 하는 일이 이것이다. 버튼 문구가 '무엇을 볼 수 있는지'를 말한다. */}
         <button type="button" className="verify" onClick={onSheet}>
-          <span className="verify__n">{`${box.N.toLocaleString('ko-KR')}구좌`}</span>
-          <span className="verify__t">전부 그려서 보여드립니다 · 직접 세어보기</span>
+          <span className="verify__n" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+              <rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" />
+              <rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" />
+            </svg>
+          </span>
+          <span className="verify__t">
+            {`${box.N.toLocaleString('ko-KR')}구좌를 직접 세어보기`}
+            <em>어떤 카드가 몇 구좌인지 하나도 빠짐없이 화면에 있습니다</em>
+          </span>
           <span className="verify__go" aria-hidden="true">›</span>
         </button>
       </section>
@@ -843,10 +852,10 @@ function DailyScreen({ deal, onBack }) {
         ) : (
           <div className="notice">
             <h3>응모가 접수되었습니다 <SimBadge what="응모 — 집계는 저장되지 않습니다" /></h3>
-            <p>자정에 응모자 전체에서 비복원 추첨합니다. 결과 통지는 이 MVP에서 구현하지 않았습니다.</p>
+            <p>자정에 응모자 전체에서 비복원으로 추첨합니다. 결과 통지는 이 MVP에서 구현하지 않았습니다.</p>
           </div>
         )}
-        <p className="cta__note">응모는 0원입니다 — 안 되어도 잃는 것이 없습니다</p>
+        <p className="cta__note">응모에는 비용이 들지 않습니다 · 당첨 시 1,000원에 구매합니다</p>
       </div>
     </>
   )

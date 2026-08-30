@@ -273,23 +273,31 @@ export function RevealCard({ r, mine, fee, delay }) {
    K=1인 등급만 "정확히 n배"이고 나머지는 아니다 — 그것을 그대로 표시한다. */
 export function OddsTable({ odds, n }) {
   return (
-    <div className="tablewrap">
+    /* 5열이면 390px에서 가로 스크롤이 생겨 한눈에 안 들어온다.
+       재고는 등급 칸으로, 배수는 팀 칸으로 접어 **3열**로 맞춘다.
+       서버가 만든 문자열은 하나도 버리지 않는다(I4). */
+    <div className="tablewrap tablewrap--odds">
       <table>
         <thead>
-          <tr><th>등급</th><th>재고</th><th>혼자</th><th>{`팀 ${n}명`}</th><th>혼자 대비</th></tr>
+          <tr><th>등급</th><th>혼자</th><th>{`팀 ${n}명`}</th></tr>
         </thead>
         <tbody>
           {odds.map((o) => {
             const t = o.team[n - 1]
             return (
               <tr key={o.tier}>
-                <td><span className={`tier tier--${o.tier}`}>{o.tier}</span></td>
-                <td className="n">{`${o.K.toLocaleString('ko-KR')}장`}</td>
+                <td className="ocell">
+                  <span className={`tier tier--${o.tier}`}>{o.tier}</span>
+                  <span className="freq">{`재고 ${o.K.toLocaleString('ko-KR')}장`}</span>
+                </td>
                 <td className="n">{o.soloPct}<span className="freq">{o.soloFreq}</span></td>
-                <td className="n hi">{t.pct}<span className="freq">{t.freq}</span></td>
                 <td className="n hi">
-                  {t.mul}
-                  <span className="freq">{o.exactlyLinear ? '재고가 1장이라 정확히 n배' : '재고가 여러 장이라 n배보다 작다'}</span>
+                  {t.pct}
+                  <span className="freq">{t.freq}</span>
+                  <span className="omul">
+                    {t.mul}
+                    <em>{o.exactlyLinear ? '재고가 1장이라 정확히 n배' : '재고가 여러 장이라 n배보다 작다'}</em>
+                  </span>
                 </td>
               </tr>
             )
@@ -300,7 +308,6 @@ export function OddsTable({ odds, n }) {
   )
 }
 
-/** 갱신 확률표. —는 확률 0이 아니라 성립 불가능한 상태다 (I17). */
 export function UpdateTable({ updates, tiers }) {
   const js = updates[tiers[0]].map((r) => r.j)
   return (

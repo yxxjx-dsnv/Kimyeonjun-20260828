@@ -75,13 +75,15 @@ export function buildDeals(now) {
 
   const dDeal = {
     kind: 'daily', id: 'daily',
-    title: '0원 응모 특가', subtitle: '오늘 자정 추첨 · 응모는 공짜',
+    title: '0원 응모 특가', subtitle: '오늘 자정 추첨 · 응모는 무료입니다',
     image: D.ITEM?.image ?? null,
     topCard: { name: D.ITEM?.name ?? '', priceLine: `정가 ${won(D.LIST)}` },
     price: {
       big: won(D.DEAL), strike: won(D.LIST),
       discount: `-${Math.round((1 - D.DEAL / D.LIST) * 100)}%`,
-      sub: `응모 ${won(D.ENTRY)} · 당첨되지 않아도 잃는 것 없음`,
+      // 큰 활자 1,000원은 **당첨됐을 때 사는 값**이다. 그 말을 안 하면
+      // "응모 0원"과 정면으로 충돌해 읽는 사람이 무엇을 내는지 모른다.
+      sub: `당첨되면 이 가격에 구매합니다 · 응모는 무료입니다`,
       bands: null,
     },
     oddsLine: `특가 ${D.SLOTS}개 · 응모자 수에 따라 확률이 정해집니다`,
