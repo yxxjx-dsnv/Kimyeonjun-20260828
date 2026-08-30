@@ -2,12 +2,12 @@
  * 서버 테스트 — 프레임워크 없이. `node tests/room.test.mjs`
  *
  * 네트워크를 타지 않는다. KV 환경변수가 없으면 api/_room.js가 메모리로 내려앉고,
- * OPENAI_API_KEY가 없으면 api/curate.js가 규칙 기반으로 내려앉는다.
+ * OPENAI_API_KEY가 없으면 api/ask.js가 문서 발췌 폴백으로 내려앉는다.
  * 환각 id 차단만 fetch를 모킹해서 확인한다.
  */
 import assert from 'node:assert/strict'
 import room from '../api/room.js'
-import curate, { keepValid, rescueIds } from '../api/curate.js'
+import ask, { rank, fallbackAnswer } from '../api/ask.js'
 import boxes from '../api/boxes.js'
 import { TEAM_MAX, slotsOf } from '../api/_box.js'
 
@@ -192,61 +192,90 @@ await ta('개봉된 방에 join → 409', async () => {
   assert.equal(r.code, 409)
 })
 
-console.log('\n─────── ChatGPT 가드 (I9) ───────')
+console.log('\n─────── ChatGPT Q&A (I9·I13) ───────')
 
-t('환각 id 차단 — 통 밖 id는 버린다', () => {
-  const ok = CARDS[0].id
-  assert.deepEqual(keepValid([ok, 'd000000000', 'hallucinated', CARDS[1].id]), [ok, CARDS[1].id])
-  assert.deepEqual(keepValid('배열이 아님'), [])
+t('검색 — 질문이 관련 문서 섹션을 찾는다', () => {
+  const hits = rank('오리파의 문제가 뭔가요')
+  assert.ok(hits.length > 0)
+  assert.ok(hits.slice(0, 3).some((s) => /오리파/.test(s.title + s.text)))
 })
 
-t('rescue — 모델이 엉뚱한 필드에 id를 넣어도 회수한다 (v1 사고)', () => {
-  const bad = { ranking: [], why: '설명', options: [CARDS[2].id, CARDS[3].id], nested: { x: ['없는id', CARDS[4].id] } }
-  assert.deepEqual(rescueIds(bad), [CARDS[2].id, CARDS[3].id, CARDS[4].id])
+t('검색 — 한국어 조사를 접두 일치로 흡수한다', () => {
+  // "올웨이즈인가요"는 문서에 없지만 "올웨이즈"는 있다. 접두 매칭이 없으면 0건이 된다.
+  const hits = rank('왜 올웨이즈인가요?')
+  assert.ok(hits.length > 0, '조사 붙은 질문이 0건이면 안 된다')
+  assert.ok(hits.slice(0, 3).some((s) => /올웨이즈/.test(s.title + s.text)))
 })
 
-await ta('키 없으면 규칙 기반으로 내려앉고 그 사실을 표기한다', async () => {
-  const r = await call(curate, { action: 'prefs', taste: '리자몽이 좋다' })
-  assert.equal(r.body.source, 'rule')
-  assert.match(r.body.note, /AI 응답이 아니다/)
-  assert.equal(r.body.prefs.length, CARDS.length, '누락분은 서버가 전부 채운다')
+t('폴백 — 키 없이도 문서 발췌를 그대로 준다. 지어내지 않는다', () => {
+  const r = fallbackAnswer('교환은 어떻게 동작하나요')
+  assert.equal(r.source, 'fallback')
+  assert.ok(r.refs.length >= 1, '어느 문서에서 왔는지 표기한다')
+  assert.match(r.answer, /【/, '발췌 원문 형식이어야 한다')
 })
 
-await ta('선호 목록이 항상 통 전체를 덮는다 (개별 합리성의 전제)', async () => {
-  const r = await call(curate, { action: 'prefs', taste: '아무거나', target: CARDS[5].id })
-  assert.equal(r.body.prefs[0], CARDS[5].id, '지목이 1순위')
-  assert.equal(new Set(r.body.prefs).size, CARDS.length)
+t('폴백 — 문서에 없는 주제는 없다고 말한다', () => {
+  const r = fallbackAnswer('zzqqxx 배당률')
+  assert.ok(r.refs.length === 0 || /찾지 못했/.test(r.answer))
 })
 
-await ta('AI가 환각 id만 돌려줘도 통이 무너지지 않는다 (fetch 모킹)', async () => {
+await ta('키 없으면 폴백으로 내려앉고 그 사실을 표기한다 (I13)', async () => {
+  delete process.env.OPENAI_API_KEY
+  const r = await call(ask, { question: '확률은 어떻게 정해지나요' })
+  assert.equal(r.code, 200)
+  assert.equal(r.body.source, 'fallback')
+})
+
+await ta('빈 질문은 400', async () => {
+  const r = await call(ask, { question: '   ' })
+  assert.equal(r.code, 400)
+})
+
+await ta('키가 있으면 ChatGPT 응답 + 근거 섹션 목록 (fetch 모킹)', async () => {
   process.env.OPENAI_API_KEY = 'test-key'
   const realFetch = globalThis.fetch
-  globalThis.fetch = async () => ({
-    ok: true,
-    json: async () => ({ choices: [{ message: { content: JSON.stringify({ ranking: ['가짜1', '가짜2'], why: '지어낸 순위' }) } }] }),
-  })
+  let sentBody = null
+  globalThis.fetch = async (url, opt) => {
+    sentBody = JSON.parse(opt.body)
+    return { ok: true, json: async () => ({ choices: [{ message: { content: '지원자는 확률을 재고 나누기 구좌로 정의했다 [1]' } }] }) }
+  }
   try {
-    const r = await call(curate, { action: 'prefs', taste: 'x', target: CARDS[6].id })
-    assert.deepEqual(r.body.aiRanking, [], '환각 id는 전부 버려져야 한다')
-    assert.equal(r.body.source, 'rule', 'AI 순위가 하나도 안 남으면 규칙 기반으로 표기한다')
-    assert.equal(r.body.prefs[0], CARDS[6].id)
-    assert.equal(new Set(r.body.prefs).size, CARDS.length, '통은 그대로 온전하다')
-  } finally { globalThis.fetch = realFetch; delete process.env.OPENAI_API_KEY }
-})
-
-await ta('AI가 ranking을 비우고 다른 필드에 id를 흘려도 회수한다 (fetch 모킹)', async () => {
-  process.env.OPENAI_API_KEY = 'test-key'
-  const realFetch = globalThis.fetch
-  globalThis.fetch = async () => ({
-    ok: true,
-    json: async () => ({ choices: [{ message: { content: JSON.stringify({ ranking: [], why: '설명', options: [CARDS[7].id, CARDS[8].id] }) } }] }),
-  })
-  try {
-    const r = await call(curate, { action: 'prefs', taste: 'x' })
-    assert.deepEqual(r.body.aiRanking, [CARDS[7].id, CARDS[8].id])
+    const r = await call(ask, { question: '확률은 어떻게 정해지나요' })
     assert.equal(r.body.source, 'openai')
-    assert.match(r.body.why, /회수/)
+    assert.ok(r.body.refs.length >= 1)
+    assert.match(sentBody.messages[0].content, /지어내지 않는다/, '시스템 프롬프트가 문서 밖 답변을 금지한다')
+    assert.match(sentBody.messages[0].content, /문서 발췌/, '컨텍스트가 실제로 실린다')
   } finally { globalThis.fetch = realFetch; delete process.env.OPENAI_API_KEY }
+})
+
+await ta('OpenAI 오류 시 폴백으로 내려앉는다', async () => {
+  process.env.OPENAI_API_KEY = 'test-key'
+  const realFetch = globalThis.fetch
+  globalThis.fetch = async () => ({ ok: false, status: 500 })
+  try {
+    const r = await call(ask, { question: '교환은 어떻게 동작하나요' })
+    assert.equal(r.code, 200)
+    assert.equal(r.body.source, 'fallback')
+  } finally { globalThis.fetch = realFetch; delete process.env.OPENAI_API_KEY }
+})
+
+console.log('\n─────── 다통 (통 선택) ───────')
+
+await ta('boxId로 방을 만들면 그 통에서 뽑는다', async () => {
+  const c = await call(room, { action: 'create', name: '나', boxId: 'starter' })
+  assert.equal(c.code, 201)
+  assert.equal(c.body.boxId, 'starter')
+  const rid = c.body.id, me = c.body.you
+  await call(room, { action: 'ready', roomId: rid, memberId: me, ready: true })
+  const o = await call(room, { action: 'open', roomId: rid })
+  assert.equal(o.code, 200)
+  // 입문 통은 참여비 5,000원 — 뽑힌 카드가 그 통의 밴드 안에 있어야 한다
+  assert.ok(o.body.openResults[0].price >= 5000, '입문 통 꽝없음 1층')
+})
+
+await ta('없는 boxId는 400 — 조용히 기본 통으로 바꿔치기하지 않는다', async () => {
+  const c = await call(room, { action: 'create', name: '나', boxId: 'no-such-box' })
+  assert.equal(c.code, 400)
 })
 
 console.log('\n─────── /api/boxes ───────')

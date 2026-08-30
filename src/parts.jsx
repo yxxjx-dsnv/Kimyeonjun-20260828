@@ -12,7 +12,7 @@
  * v1에서 `+{won(v)}`가 React 렌더에서 `+<!-- -->1,300원`으로 쪼개져 문구 매칭이
  * 깨진 적이 있다. 템플릿 리터럴로 합친다.
  */
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 export const won = (n) => `${Math.round(n).toLocaleString('ko-KR')}원`
 
@@ -84,7 +84,7 @@ export function ProductCard({ item, badge }) {
   )
 }
 
-/* ── 통 — 1,000칸. 이 제품의 서명 ───────────────────────────
+/* ── 박스 그리드 — 1,000칸. 이 제품의 서명 ─────────────────────
    오리파가 보여주지 않는 것을 화면이 직접 보여준다.
    세어볼 수 있다는 것이 요점이라 요약하거나 축약하지 않는다. */
 export function BoxGrid({ slotTiers, drawn = [], revealed = null }) {
@@ -256,53 +256,15 @@ export function RevealCard({ r, mine, fee, delay }) {
       <p className="rv__before">
         {`뽑기 직전 ${r.slotsBefore.toLocaleString('ko-KR')}구좌 남음 · S ${r.oddsBefore.S.pct}`}
       </p>
-    </li>
-  )
-}
-
-/* ── 취향 대화 (ChatGPT) ───────────────────────────────────
-   확률형 구매의 가장 큰 약점은 안 쓸 물건이 오는 것이다. 무작위를 쓰되
-   취향 밖으로는 안 나가게 한다. 대화가 정하는 것은 '무엇을 더 원하는가'
-   까지이고, '무엇이 뽑히는가'는 서버가 정한다.
-
-   그리고 이 기능은 편의가 아니다 — 선호가 전원 같으면 교환이 수학적으로
-   성립하지 않는다(개선율 68.4% vs 10.5%). 선호를 이질적으로 만드는 것이
-   이 대화의 실제 일이다. */
-const CHIPS = ['아이가 피카츄를 좋아해요', '리자몽 위주로', '이브이 계열이면 좋겠어요', '비싼 것보다 예쁜 걸로']
-
-export function TasteChat({ onSubmit, result, busy, disabled }) {
-  const [text, setText] = useState('')
-  return (
-    <div className="taste">
-      <div className="taste__chips">
-        {CHIPS.map((c) => (
-          <button key={c} type="button" className="taste__chip" disabled={disabled}
-            onClick={() => setText((t) => (t ? `${t} ${c}` : c))}>{c}</button>
-        ))}
-      </div>
-      <div className="taste__row">
-        <input value={text} onChange={(e) => setText(e.target.value)} disabled={disabled}
-          placeholder="어떤 카드를 모으고 싶으신가요" aria-label="카드 취향"
-          onKeyDown={(e) => { if (e.key === 'Enter' && text.trim()) onSubmit(text) }} />
-        <button type="button" className="btn btn--sm" disabled={disabled || busy || !text.trim()}
-          onClick={() => onSubmit(text)}>{busy ? '만드는 중' : '순위 만들기'}</button>
-      </div>
-      {result && (
-        <div className="taste__out">
-          <span className={`badge ${result.source === 'openai' ? 'ai' : 'rule'}`}>
-            {result.source === 'openai' ? 'ChatGPT gpt-4o-mini' : '규칙 기반 (AI 아님)'}
-          </span>
-          <p className="taste__why">{result.why}</p>
-          <ol className="taste__list">
-            {result.prefs.slice(0, 5).map((id) => {
-              const n = result.names[id]
-              return <li key={id}>{n ? `${n.tier} · ${won(n.price)} · ${n.name.slice(0, 26)}` : id}</li>
-            })}
-          </ol>
-          <p className="taste__note">{result.note}</p>
-        </div>
+      {/* 이 카드가 실재하고 지금 이 가격에 팔린다는 증명 — 크롤 url을 그대로 쓴다.
+          배송 리드타임은 가진 데이터가 없으므로 지어내지 않고 한계를 그 자리에 적는다. */}
+      {mine && r.url && (
+        <p className="rv__src">
+          <a href={r.url} target="_blank" rel="noreferrer">판매처에서 보기 ›</a>
+          <span>실물 배송·수령은 이 MVP에서 구현하지 않았습니다</span>
+        </p>
       )}
-    </div>
+    </li>
   )
 }
 
@@ -360,7 +322,7 @@ export function UpdateTable({ updates, tiers }) {
   )
 }
 
-/** 통 안의 카드 하나. 지목 버튼이기도 하다. */
+/** 박스 안의 카드 하나. 지목 버튼이기도 하다. */
 export const CardPick = ({ card, picked, onPick, count = 0 }) => (
   <button type="button" className="cardpick" aria-pressed={picked} onClick={() => onPick(card.id)}>
     {card.image ? <img src={card.image} alt="" loading="lazy" /> : <span className="cardpick__ph" aria-hidden="true" />}
@@ -426,5 +388,148 @@ export function TradeTable({ results, me }) {
         </li>
       ))}
     </ul>
+  )
+}
+
+/* ── 마감 시계 — 마감이 실재하는 형식(②③)에만 그려진다 ─────────
+   ①(팀 뽑기)은 전원 준비 시 즉시 열리므로 마감이 실재하지 않고, 서버가
+   deadlineAt을 null로 내려 이 컴포넌트 자체가 그려지지 않는다(I10').
+   "얼마 안 남았어요" 같은 감정 문구는 쓰지 않는다 — 시각은 사실이고 재촉은 연출이다. */
+export function DeadlineTicker({ deadlineAt, label = '마감까지' }) {
+  const [now, setNow] = useState(() => Date.now())
+  useEffect(() => {
+    if (!deadlineAt) return undefined
+    const t = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(t)
+  }, [deadlineAt])
+  if (!deadlineAt) return null
+  const left = deadlineAt - now
+  if (left <= 0) return <span className="ticker ticker--over">마감됨</span>
+  const s = Math.floor(left / 1000)
+  const d = Math.floor(s / 86400)
+  const pad = (x) => String(x).padStart(2, '0')
+  const hms = `${pad(Math.floor(s / 3600) % 24)}:${pad(Math.floor(s / 60) % 60)}:${pad(s % 60)}`
+  return (
+    <span className="ticker" role="timer">
+      <em>{label}</em>
+      <b>{d > 0 ? `${d}일 ${hms}` : hms}</b>
+    </span>
+  )
+}
+
+/* ── 판매 게이지 — 이 제품에서 분모는 장식이 아니라 확률이다 ─────
+   누적 판매량은 서버가 세지 않으므로 표시하지 않는다(가짜 판매량 금지).
+   그리는 것은 "이 방의 통에서 빠진 구좌"뿐 — 서버 값이고 세면 맞는다. */
+export function Gauge({ num, den, label }) {
+  const ratio = den > 0 ? Math.min(1, num / den) : 0
+  return (
+    <div className="gauge" role="img" aria-label={label}>
+      {/* 폭은 정수 %면 충분하다 — toFixed는 확률 경로에서 금지라 여기서도 안 쓴다 */}
+      <div className="gauge__bar"><span style={{ width: `${Math.round(ratio * 100)}%` }} /></div>
+      <span className="gauge__t">{label}</span>
+    </div>
+  )
+}
+
+/* ── 딜 카드 — 목록 화면의 단위. 모든 문자열은 서버(deals[])가 만든다 ──
+   커머스 카드의 표준 위계: 가장 큰 활자는 언제나 "내가 내는 돈".
+   취소선·할인율은 서버가 내려준 것만 그린다 — ①은 정가가 없어 null이고,
+   여기서 %를 만들어 그리는 순간 지어낸 수가 된다(I4). */
+export function DealCard({ deal, onOpen }) {
+  const KIND = { team: '팀 뽑기', group: '공동구매', daily: '0원 응모' }
+  return (
+    <button type="button" className={`deal deal--${deal.kind}`} onClick={() => onOpen(deal)}>
+      <span className="deal__media">
+        {deal.image ? <img src={deal.image} alt="" loading="lazy" /> : <span className="deal__ph" />}
+        <span className="deal__kind">{KIND[deal.kind]}</span>
+        {deal.deadlineAt && <span className="deal__due"><DeadlineTicker deadlineAt={deal.deadlineAt} label="" /></span>}
+      </span>
+      <span className="deal__body">
+        <span className="deal__title">{deal.title}</span>
+        <span className="deal__sub">{deal.subtitle}</span>
+        <span className="deal__price">
+          {deal.price.discount && <b className="deal__disc">{deal.price.discount}</b>}
+          {deal.price.strike && <s>{deal.price.strike}</s>}
+          <b className="deal__big">{deal.price.big}</b>
+        </span>
+        <span className="deal__note">{deal.price.sub}</span>
+        <span className="deal__odds">{deal.oddsLine}</span>
+        <span className={`deal__dir deal__dir--${deal.dir}`}>
+          {deal.dir === 'up' ? '↑ ' : '↓ '}{deal.dirLine}
+        </span>
+      </span>
+      <span className="deal__go" aria-hidden="true">›</span>
+    </button>
+  )
+}
+
+/* ── 프로젝트 Q&A 독 — VS Code 터미널 문법 ────────────────────
+   채용 담당자용. 화면 하단에 접혀 있다가 열면 패널이 올라온다.
+   답변은 /api/ask가 저장소 문서 발췌 안에서만 생성한다. 키가 없으면
+   문서 발췌를 그대로 보여주는 폴백으로 내려앉고 배지로 표기한다(I13). */
+export function ChatDock({ open, onToggle, messages, onSend, busy }) {
+  const [q, setQ] = useState('')
+  const listRef = useRef(null)
+  useEffect(() => {
+    if (listRef.current) listRef.current.scrollTop = listRef.current.scrollHeight
+  }, [messages, busy])
+  const submit = (text) => {
+    const t = (text ?? q).trim()
+    if (!t || busy) return
+    setQ('')
+    onSend(t)
+  }
+  const PRESETS = ['왜 이 문제를 골랐나요?', '확률은 어떻게 정해지나요?', '왜 올웨이즈인가요?', '크롤 데이터는 어디에 쓰이나요?']
+  if (!open) {
+    return (
+      <button type="button" className="dock dock--closed" onClick={onToggle} aria-expanded="false">
+        <span className="dock__dot" aria-hidden="true">●</span>
+        프로젝트 Q&A — 이 과제에 대해 물어보세요
+        <span className="dock__caret" aria-hidden="true">▲</span>
+      </button>
+    )
+  }
+  return (
+    <section className="dock dock--open" aria-label="프로젝트 Q&A">
+      <header className="dock__head">
+        <span className="dock__dot" aria-hidden="true">●</span>
+        <b>프로젝트 Q&A</b>
+        <span className="dock__hint">저장소 문서(README · SPEC · 근거 대장)에서만 답합니다</span>
+        <button type="button" className="dock__x" onClick={onToggle} aria-label="접기">▼</button>
+      </header>
+      <div className="dock__list" ref={listRef}>
+        {messages.length === 0 && (
+          <div className="dock__empty">
+            <p>지원자의 의도·설계 근거를 물어보세요. 답은 저장소 문서 발췌에 근거합니다.</p>
+            <div className="dock__chips">
+              {PRESETS.map((t) => (
+                <button key={t} type="button" onClick={() => submit(t)}>{t}</button>
+              ))}
+            </div>
+          </div>
+        )}
+        {messages.map((m, i) => (
+          <div key={i} className={`dockmsg dockmsg--${m.role}`}>
+            <p>{m.content}</p>
+            {m.role === 'assistant' && (
+              <footer>
+                {m.source === 'fallback' && <span className="simtag">문서 발췌 · AI 미사용</span>}
+                {m.source === 'openai' && m.refs?.length > 0 && (
+                  <details><summary>근거 {m.refs.length}건</summary>
+                    <ul>{m.refs.map((r) => <li key={r}>{r}</li>)}</ul>
+                  </details>
+                )}
+              </footer>
+            )}
+          </div>
+        ))}
+        {busy && <div className="dockmsg dockmsg--assistant dockmsg--wait"><p className="dock__wait">문서를 찾는 중…</p></div>}
+      </div>
+      <form className="dock__input" onSubmit={(e) => { e.preventDefault(); submit() }}>
+        <input value={q} onChange={(e) => setQ(e.target.value)}
+          placeholder="예: 천장이 왜 없나요?" aria-label="질문" maxLength={300} />
+        <button type="submit" disabled={busy || !q.trim()}>질문</button>
+      </form>
+    </section>
   )
 }

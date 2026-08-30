@@ -13,6 +13,7 @@ import { createElement as h } from 'react'
 import { render, OddsTable, UpdateTable, TradeTable, CycleView, BoxGrid, GridLegend, SimBadge, TierShowcase } from '../dist-ssr/ssr.js'
 import { BOX, TIERS, slotsOf } from '../api/_box.js'
 import { allOdds, updateTable } from '../api/_draw.js'
+import { buildDeals } from '../api/boxes.js'
 import { ttc, completePrefs } from '../api/_trade.js'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -194,18 +195,65 @@ t('희소성 압박 문구가 없다', () => {
   }
 })
 
-t('카운트다운 타이머가 없다', () => {
-  assert.ok(!/setInterval[\s\S]{0,200}(남은|초|분|시간)/.test(APP_CODE), '카운트다운으로 보이는 타이머')
-  assert.ok(!APP_CODE.includes('Date.now() +'), '만료 시각 계산이 없어야 한다')
+/**
+ * I10′ 마감 시계 — 형식별 가드.
+ * 1차 버전의 가드는 'sec-team'/'sec-pick' 앵커가 JSX에서 사라져 12자짜리 빈 조각을
+ * 검사하고 있었다(죽은 가드). 앵커 문자열 대신 **서버 데이터와 컴포넌트 경계**로 다시 짠다.
+ *   · 마감이 실재하지 않는 ①(팀)은 서버가 deadlineAt=null을 내린다 → 시계가 그려질 수 없다
+ *   · 마감이 실재하는 ②③은 deadlineAt이 미래 시각이다 (숨기면 조건 은닉 — C2)
+ *   · 시계 컴포넌트는 deadlineAt 없이는 null을 반환한다
+ *   · 화면은 마감 시각을 계산하지 않는다 — 서버 필드를 그대로 넘길 뿐이다
+ */
+t('①팀 뽑기 딜에는 마감이 없다 — 서버가 null을 내린다 (I10′)', () => {
+  const deals = buildDeals(Date.now())
+  for (const d of deals.filter((x) => x.kind === 'team'))
+    assert.equal(d.deadlineAt, null, `${d.id}에 마감이 있으면 안 된다`)
+})
+
+t('②③ 딜의 마감은 실재하고 미래다', () => {
+  const now = Date.now()
+  const deals = buildDeals(now)
+  for (const d of deals.filter((x) => x.kind !== 'team')) {
+    assert.equal(typeof d.deadlineAt, 'number', `${d.id} 마감이 시각이어야 한다`)
+    assert.ok(d.deadlineAt > now, `${d.id} 마감이 과거다 — 회차가 안 굴렀다`)
+  }
+})
+
+t('시계 컴포넌트는 마감 없이는 그려지지 않는다', () => {
+  assert.ok(/if \(!deadlineAt\) return null/.test(PARTS_CODE), 'DeadlineTicker의 null 가드')
+})
+
+t('화면은 마감을 계산하지 않는다 — 서버 필드만 넘긴다', () => {
+  assert.ok(!APP_CODE.includes('Date.now() +'), '만료 시각 계산이 화면에 있으면 안 된다')
+  for (const m of APP_CODE.match(/<DeadlineTicker[^/>]*/g) ?? [])
+    assert.ok(/deadlineAt=\{(deal|daily)\.deadlineAt\}/.test(m), `서버 필드가 아닌 값: ${m.slice(0, 60)}`)
+})
+
+t('①의 화면 조각에 시계가 없다', () => {
+  // 팀 상세·팀 흐름 컴포넌트 본문 = function 선언 사이의 조각. 앵커가 실재하는지 먼저 확인한다.
+  for (const [from, to] of [['function TeamDetail', 'function CheckoutScreen'], ['function TeamFlow', 'function OlboxTab']]) {
+    const a = APP_CODE.indexOf(from), b = APP_CODE.indexOf(to)
+    assert.ok(a > -1 && b > a, `앵커 소실: ${from} → ${to} — 이 가드가 죽었다`)
+    assert.ok(!APP_CODE.slice(a, b).includes('DeadlineTicker'), `${from}에 시계가 있다`)
+  }
 })
 
 t('재고 표시는 사실 표시로만 쓴다', () => {
   assert.ok(APP.includes('남은 구좌'), '재고 개수의 사실 표시는 허용된다')
-  // 마감이 없는 형식(① 팀 뽑기)에 타이머를 붙이지 않았는가.
-  // ①은 전원이 준비하면 즉시 열리므로 가리킬 마감이 없다.
-  const teamSec = APP_CODE.slice(APP_CODE.indexOf('sec-team'), APP_CODE.indexOf('sec-pick'))
-  assert.ok(!/남음|카운트|타이머/.test(teamSec), '팀 뽑기에는 마감이 없으므로 카운트다운도 없다')
   assert.ok(!/남은 구좌[^`'"]{0,20}!/.test(APP_CODE), '재고 표시에 감정 유도 부호가 붙으면 안 된다')
+})
+
+t('가격 블록 — 취소선·할인율은 서버가 내려준 것만 그린다 (I4)', () => {
+  const deals = buildDeals(Date.now())
+  for (const d of deals.filter((x) => x.kind === 'team')) {
+    assert.equal(d.price.strike, null, '뽑기에는 정가가 없다 — 취소선 금지')
+    assert.equal(d.price.discount, null, '뽑기에 할인율을 만들면 지어낸 수다')
+  }
+  const g = deals.find((x) => x.kind === 'group')
+  assert.equal(g.price.strike, null, '공동구매가 = 정가(웃돈 0) — 할인율 0%에 취소선을 그리면 거짓이다')
+  const dd = deals.find((x) => x.kind === 'daily')
+  assert.ok(/^-\d+%$/.test(dd.price.discount), '0원 응모의 할인율은 서버가 계산한 문자열')
+  // 화면 소스에 % 리터럴로 할인율을 박아넣지 않았는지는 아래 하드코딩 탐지가 같이 잡는다
 })
 
 console.log('\n─────── I11 · I12 고지 ───────')
@@ -224,7 +272,7 @@ t('초대자 추가 보상이 없다는 것을 명시한다 (I12)', () => {
 t('문제 제시와 타깃이 브리프 레일에 있다', () => {
   // 앱 셸 복원 후 구조가 바뀌었다 — 폰 안은 유저 화면, 문제 정의는 좌 레일이 맡는다.
   const brief = APP.slice(APP.indexOf('function BriefRail'), APP.indexOf('function OpsRail'))
-  assert.ok(brief.includes('통이 안 보이는 것'), '문제 한 줄')
+  assert.ok(brief.includes('검증 불가능성'), '문제 한 줄')
   assert.ok(brief.includes('30~40대 부모'), '타깃')
   assert.ok(brief.includes('oripa.probNum'), '실측 수치를 서버에서 받아 쓴다')
   assert.ok(brief.includes('왜 올웨이즈인가'), '정착 논거')

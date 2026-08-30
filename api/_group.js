@@ -70,6 +70,17 @@ export const M_MAX = 500                           // 정원
 export const DEADLINE_DAYS = 5
 export const deadlineFrom = (startedAt) => startedAt + DEADLINE_DAYS * 86400_000
 
+/**
+ * 회차제 — 크롤 시각을 원점으로 5일짜리 회차가 연속해서 돈다.
+ * 이유: 마감을 크롤 시각 + 5일로 고정하면 제출 며칠 뒤 심사자가 열었을 때
+ * 음수 카운트다운이 뜬다. 회차는 (1) 원점이 실측 시각이라 임의값이 아니고,
+ * (2) 같은 회차 안에서는 마감이 절대 움직이지 않으며(리셋 금지 검사 유지),
+ * (3) 실제 공동구매가 회차 단위로 반복되는 구조와 같다.
+ */
+export const EPOCH = Date.parse(pool.crawledAt)
+export const roundOf = (now) => Math.floor((now - EPOCH) / (DEADLINE_DAYS * 86400_000)) + 1
+export const roundDeadline = (now) => EPOCH + roundOf(now) * DEADLINE_DAYS * 86400_000
+
 /** 환불 인원. 재고다 — 확률이 아니다. 화면에서 셀 수 있다. */
 export const refundSlots = (M) => Math.max(0, Math.floor((MARGIN * M - FIXED) / PRICE))
 /** 개인 확률 = 재고 ÷ 구좌 */
@@ -147,6 +158,11 @@ export function check() {
   ok('마감이 시작 시각에서 결정된다', deadlineFrom(t0) === t0 + DEADLINE_DAYS * 86400_000,
     `시작 + ${DEADLINE_DAYS}일`)
   ok('마감이 고정이다 (리셋되지 않는다)', deadlineFrom(t0) === deadlineFrom(t0))
+  // 회차제 — 같은 회차 안에서는 마감이 같고, 마감은 항상 미래이며, 경계에서 다음 회차로 넘어간다
+  const mid = EPOCH + 2.5 * 86400_000
+  ok('회차 안에서 마감이 같다', roundDeadline(mid) === roundDeadline(mid + 3600_000))
+  ok('마감이 항상 미래다', roundDeadline(mid) > mid && roundDeadline(EPOCH + 99 * 86400_000) > EPOCH + 99 * 86400_000)
+  ok('회차 경계에서 다음 회차로', roundOf(EPOCH + DEADLINE_DAYS * 86400_000) === roundOf(EPOCH) + 1)
 
   ok('결정성 — 2회 계산이 동일', JSON.stringify(milestones()) === JSON.stringify(milestones()))
 

@@ -1,5 +1,5 @@
 /**
- * 배포본 E2E — 실제 브라우저로 클릭해서 확인한다.
+ * 배포본 E2E — 실제 브라우저로 소비자 여정을 처음부터 끝까지 밟는다.
  *   node tests/browser.e2e.mjs [URL]        기본 http://localhost:3111
  *
  * Playwright는 애드혹 설치다(`npm i -D playwright --no-save`). package.json에
@@ -8,6 +8,9 @@
  * 여기서 검사하는 것은 "코드가 그렇게 쓰여 있는가"가 아니라
  * **"사용자가 여는 URL에서 실제로 그렇게 동작하는가"**다.
  * v1에서 배포 성공 로그를 보고도 사용자는 옛 화면을 보고 있었다.
+ *
+ * 여정: 홈 → 올박스 목록 → 상세 → 결제 → 주문완료 → 모집(시간차) → 전원 게이트(409)
+ *      → 자동 개봉 → 교환 → 새로고침 복구 → 주문내역 → 공동구매 → 0원 응모 → Q&A
  */
 import { chromium } from 'playwright'
 
@@ -25,157 +28,199 @@ const ok = (name, cond, detail) => {
 const browser = await chromium.launch()
 const page = await browser.newPage({ viewport: { width: 1280, height: 900 } })
 const consoleErrors = []
-page.on('console', (m) => m.type() === 'error' && consoleErrors.push(m.text()))
+// 전원 게이트의 409는 설계된 증거다(I8) — 브라우저가 실패 리소스로 찍는 로그는 제외한다
+page.on('console', (m) => m.type() === 'error' && !/409/.test(m.text()) && consoleErrors.push(m.text()))
 page.on('pageerror', (e) => consoleErrors.push(`pageerror: ${e.message}`))
 
 console.log(`═══ 올박스 E2E — ${BASE} ═══\n`)
-console.log('─── 로딩과 첫 화면 ───')
 
+// ── 서버 계약 먼저 — 화면 검사가 서버 값과 대조할 기준을 뜬다 ──
+console.log('─── API 계약 ───')
+const apiRes = await fetch(`${BASE}/api/boxes`)
+ok('/api/boxes가 200', apiRes.ok, `HTTP ${apiRes.status}`)
+const API = await apiRes.json()
+ok('딜이 5개다 (팀 3통 + 공동구매 + 0원 응모)', API.deals?.length === 5,
+  API.deals?.map((d) => d.id).join(','))
+ok('팀 딜에는 마감이 없다 (I10′)', API.deals.filter((d) => d.kind === 'team').every((d) => d.deadlineAt === null))
+ok('공동구매·응모 마감은 미래다', API.deals.filter((d) => d.kind !== 'team').every((d) => d.deadlineAt > Date.now()))
+ok('통이 3개 내려온다', API.boxes?.length === 3, API.boxes?.map((b) => b.box.id).join(','))
+const askRes = await fetch(`${BASE}/api/ask`, {
+  method: 'POST', headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ question: '확률은 어떻게 정해지나요?' }),
+})
+const askJ = await askRes.json().catch(() => ({}))
+ok('Q&A가 답한다 (openai 또는 문서 폴백)', askRes.ok && !!askJ.answer && ['openai', 'fallback'].includes(askJ.source),
+  `source=${askJ.source}`)
+
+console.log('\n─── 로딩과 앱 셸 ───')
 const res = await page.goto(BASE + '/' + CACHE_BUST, { waitUntil: 'networkidle', timeout: 45000 })
 ok('페이지가 200으로 열린다', res.status() === 200, `HTTP ${res.status()}`)
-ok('통이 렌더될 때까지 도달한다', await page.waitForSelector('.boxgrid', { timeout: 20000 }).then(() => true).catch(() => false))
+ok('폰 셸이 뜬다', await page.waitForSelector('.phone', { timeout: 20000 }).then(() => true).catch(() => false))
+ok('하단 탭이 5개다', (await page.locator('.tabbar__b').count()) === 5)
 
-const h1 = await page.locator('h1').first().textContent()
-ok('첫 화면이 문제를 제시한다', /통이 안 보입니다/.test(h1), h1?.slice(0, 30))
-ok('타깃이 첫 화면에 명시된다', await page.getByText('30~40대 부모').first().isVisible())
+// 탭을 바꿔도 폰 크기가 같아야 한다 — 실기기 비율 고정 (실제로 깨졌던 결함)
+const size1 = await page.locator('.phone').boundingBox()
+await page.locator('.tabbar__b').nth(4).click()
+const size2 = await page.locator('.phone').boundingBox()
+ok('어느 탭에서도 폰 크기가 동일하다', size1.width === size2.width && size1.height === size2.height,
+  `${Math.round(size1.width)}×${Math.round(size1.height)}`)
 
-const measure = await page.locator('.measure').textContent()
-ok('오리파 실측이 첫 화면에 있다', /확률을 적어 둔 상품/.test(measure) && /\d+ \/ \d+건/.test(measure),
-  measure.match(/\d+ \/ \d+건/)?.[0])
-ok('실측의 한계를 함께 적는다', /중개 링크라 판매자 상세 페이지에 도달할 수 없었습니다/.test(measure))
+console.log('\n─── 홈 — 카테고리 필터가 실제로 동작한다 ───')
+await page.locator('.tabbar__b').first().click()
+ok('골드박스 히어로가 올박스를 소개한다', await page.getByText('구성품·확률 전체 공개').isVisible())
+const allCount = await page.locator('.grid .pcard').count()
+const allText = await page.locator('.grid').textContent()
+await page.getByRole('button', { name: '벌크·입문' }).click()
+const bulkCount = await page.locator('.grid .pcard').count()
+const bulkText = await page.locator('.grid').textContent()
+ok('카테고리 필터가 실데이터로 동작한다', allCount > 0 && bulkCount > 0 && bulkText !== allText,
+  `전체 ${allCount}장 → 벌크·입문 ${bulkCount}장`)
 
-console.log('\n─── 통 공개 ───')
+console.log('\n─── 올박스 목록 — 고를 것이 있다 ───')
+await page.locator('.tabbar__b.is-center').click()
+await page.waitForSelector('.deallist')
+ok('딜 카드가 5개다', (await page.locator('.deal').count()) === 5)
+ok('0원 응모 배너가 있고 마감 시계가 돈다', await page.locator('.dbanner .ticker').isVisible())
+const t1 = await page.locator('.dbanner .ticker b').textContent()
+await page.waitForTimeout(1600)
+const t2 = await page.locator('.dbanner .ticker b').textContent()
+ok('시계가 실제로 흐른다', t1 !== t2, `${t1} → ${t2}`)
+ok('팀 딜 카드에는 시계가 없다 (I10′)', (await page.locator('.deal--team .ticker').count()) === 0)
+ok('공동구매·응모 카드에는 시계가 있다', (await page.locator('.deal--group .ticker').count()) === 1
+  && (await page.locator('.deal--daily .ticker').count()) === 1)
+
+// 가격 위계 — 화면의 큰 활자가 서버 문자열 그대로인가
+const stdDeal = API.deals.find((d) => d.id === 'standard')
+ok('큰 활자 = 내가 내는 돈 (서버 문자열 그대로)',
+  (await page.locator('.deal--team .deal__big').first().textContent()) === stdDeal.price.big, stdDeal.price.big)
+ok('팀 딜에 취소선·할인율이 없다 (정가가 없으므로)',
+  (await page.locator('.deal--team s').count()) === 0 && (await page.locator('.deal--team .deal__disc').count()) === 0)
+const dailyDeal = API.deals.find((d) => d.kind === 'daily')
+ok('0원 응모의 할인율은 서버가 계산한 문자열', (await page.locator('.deal--daily .deal__disc').textContent()) === dailyDeal.price.discount,
+  dailyDeal.price.discount)
+
+// 형식 필터
+await page.getByRole('button', { name: '팀 뽑기', exact: true }).click()
+ok('형식 필터가 동작한다', (await page.locator('.deal').count()) === 3)
+await page.getByRole('button', { name: '전체', exact: true }).click()
+
+console.log('\n─── 상세 — 구성 전체 공개 ───')
+await page.getByText('스탠다드 올박스').first().click()
+await page.waitForSelector('.pricebox')
+ok('가격 블록의 큰 활자가 참여비다', (await page.locator('.pricebox__big').textContent()) === stdDeal.price.big)
+ok('받는 것의 최소·최대가 함께 있다', /최소.*최대/.test(await page.locator('.pricebox__sub').textContent()))
+ok('등급 구성이 전부 보인다', (await page.locator('.tshow').count()) === 4)
+ok('팀 고지가 본문에 있다 (I11)', await page.getByText('친구를 부르면 뭐가 달라지나요').isVisible())
+ok('초대 보상 없음 고지 (I12)', await page.getByText('초대한 사람이 더 받는 건 없어요').isVisible())
+
+// 1,000칸 검증 시트
+await page.locator('.verify').click()
+await page.waitForSelector('.sheet')
 const cells = await page.locator('.cell').count()
 ok('구좌를 전부 그린다 (요약하지 않는다)', cells === 1000, `${cells}칸`)
-const [s, a, b, c] = await Promise.all(['S', 'A', 'B', 'C'].map((t) => page.locator(`.cell.t-${t}`).count()))
-ok('등급별 칸 수가 재고와 같다', s === 1 && a === 4 && b === 25 && c === 970, `S${s} A${a} B${b} C${c}`)
-ok('통 안 카드가 실제 상품 이미지와 함께 보인다', (await page.locator('.cardpick img').count()) > 0,
-  `${await page.locator('.cardpick img').count()}장`)
+await page.locator('.sheet__x').click()
 
-console.log('\n─── 팀 확률과 고지 (I11 · I12) ───')
-const teamNotice = await page.getByText('팀 인원이 늘면 무엇이 어떻게 달라지는지').isVisible()
-ok('팀 효과 고지가 화면 본문에 있다 (툴팁·더보기 아님)', teamNotice)
-ok('초대자 추가 보상 없음을 명시한다', await page.getByText('초대한 사람에게 추가 보상은 없습니다').isVisible())
-const oddsText = await page.locator('table').first().textContent()
-ok('확률 옆에 자연빈도가 병기된다 (D10)', /\d{1,3}(,\d{3})*명 중/.test(oddsText), oddsText.match(/[\d,]+명 중 [^\s]+/)?.[0])
-ok('초기하분포 식이 화면에 노출된다', await page.locator('.formula').first().isVisible())
-const mulCells = await page.locator('table').first().textContent()
-ok('K=1은 정확히 n배, K>1은 아니라고 적는다',
-  /재고가 1장이라 정확히 n배/.test(mulCells) && /재고가 여러 장이라 n배보다 작다/.test(mulCells))
+console.log('\n─── 결제 — 커머스 규격, 서버 값, 시뮬 표기 ───')
+await page.locator('.cta .btn--go').click()
+await page.waitForSelector('.agree')
+ok('배송비 자리에 한계를 적는다 (지어내지 않는다)', await page.getByText('배송을 모델링하지 않았습니다').isVisible())
+ok('결제수단이 시뮬로 표기된다 (I13)', (await page.locator('.order .simtag').count()) >= 1)
+ok('동의 전에는 결제할 수 없다', await page.locator('.cta .btn--go').isDisabled())
+await page.locator('.agree input').check()
+await page.locator('.cta .btn--go').click()
+await page.waitForSelector('.done')
+const orderNo = (await page.locator('.done .order__row b').first().textContent()).trim()
+ok('주문번호는 서버가 발급한다', /^[a-z0-9]{4,8}$/.test(orderNo), orderNo)
+ok('산 시점의 남은 구좌가 주문서에 박힌다', await page.getByText('내가 산 시점').isVisible())
 
-console.log('\n─── 팀 만들기 · 지목 · ChatGPT ───')
-await page.getByRole('button', { name: /명으로 팀 만들기/ }).click()
-await page.waitForSelector('text=내 지목', { timeout: 30000 })
-ok('방이 만들어지고 참여 화면이 열린다', await page.getByText('내 지목').isVisible())
+console.log('\n─── 모집 — 시간차 입장, 전원 게이트는 서버가 판정 ───')
+await page.getByText('팀 모으러 가기').click()
+await page.waitForFunction(() => document.querySelectorAll('.av.is-in').length >= 2, null, { timeout: 8000 }).catch(() => {})
+const joined1 = await page.locator('.av.is-in').count()
+ok('시뮬 팀원이 시간차로 들어온다', joined1 >= 2 && joined1 < 10, `${joined1}명 (진행 중)`)
+ok('시뮬 표기가 있다', (await page.locator('.simtag').count()) >= 1)
 
-await page.locator('.cardpick').first().click()
+// 전원 준비 전에 준비 완료 → 서버 409 경로가 실재함을 사람 말로 확인
+await page.getByRole('button', { name: '준비 완료', exact: true }).click()
+await page.waitForTimeout(1200)
+const gateVisible = await page.locator('.notice--warn').isVisible().catch(() => false)
+ok('전원 게이트가 서버에서 판정된다 (I8)', gateVisible,
+  gateVisible ? (await page.locator('.notice--warn h3').textContent()).slice(0, 24) : '이미 전원 준비였을 수 있음')
+
+console.log('\n─── 개봉 — 자동, 비복원, 실재 증명 ───')
+ok('전원 준비되면 자동으로 열린다', await page.waitForSelector('.rv__list', { timeout: 60000 }).then(() => true).catch(() => false))
+const scene = page.locator('.scene button').first()
+if (await scene.isVisible().catch(() => false)) await scene.click()
+ok('결과 카드가 10장이다', (await page.locator('.rv').count()) === 10)
+const myPrice = await page.locator('.rv.is-mine .rv__pr').first().textContent()
+ok('내 카드가 참여비 이상이다 (꽝 없음 1층)', parseInt(myPrice.replace(/[^\d]/g, ''), 10) >= API.boxes[0].box.fee, myPrice)
+ok('뽑기 직전 남은 구좌·확률이 카드에 박힌다', await page.locator('.rv.is-mine .rv__before').isVisible())
+ok('내 카드에 판매처 링크가 있다 (실재 증명)', (await page.locator('.rv__src a').count()) === 1)
+ok('배송 미구현을 그 자리에 적는다', await page.getByText('실물 배송·수령은 이 MVP에서 구현하지 않았습니다').isVisible())
+ok('빠진 구좌 게이지가 서버 값으로 찬다', /빠진 구좌 10/.test(await page.locator('.gauge__t').textContent()))
+
+console.log('\n─── 교환 — 정리가 보증하고 화면이 확인한다 ───')
+await page.getByText('교환 실행').click()
+await page.waitForSelector('.cycle, .tradetable, #sec-trade table', { timeout: 15000 }).catch(() => {})
 await page.waitForTimeout(800)
-ok('통 안 카드를 지목할 수 있다', (await page.locator('.cardpick[aria-pressed="true"]').count()) > 0)
-
-await page.getByRole('button', { name: '팀원들 취향 정하기' }).click()
-await page.waitForTimeout(3000)
-ok('팀원 지목이 집계된다', /명 지목/.test(await page.locator('.cardlist').first().textContent()))
-
-await page.getByRole('button', { name: '2순위 이하 순위 만들기' }).click()
-await page.waitForSelector('.badge.ai, .badge.rule', { timeout: 40000 })
-const aiBadge = await page.locator('.panel').filter({ hasText: 'AI에게 순위 맡기기' }).locator('.badge').first().textContent()
-ok('AI 순위 생성이 응답하고 출처를 배지로 밝힌다', /ChatGPT|규칙 기반/.test(aiBadge), aiBadge)
-
-console.log('\n─── 전원 게이트 (I8) — 서버가 판정한다 ───')
-await page.getByRole('button', { name: '통 열기' }).click()
-const gate = await page.waitForSelector('text=/서버 응답 409/', { timeout: 15000 }).then(() => true).catch(() => false)
-ok('준비 전 개봉이 서버 409로 막힌다 (프론트 방어가 아니다)', gate)
-const gateText = gate ? await page.locator('.notice').filter({ hasText: '서버 응답' }).textContent() : ''
-ok('누가 안 눌렀는지 서버가 알려준다', /아직 안 누른 사람/.test(gateText))
-
-await page.getByRole('button', { name: '전원 준비시키기' }).click()
-await page.waitForTimeout(4000)
-await page.getByRole('button', { name: '통 열기' }).click()
-await page.waitForSelector('text=뽑힌 카드는 통에서 빠집니다', { timeout: 20000 })
-ok('전원 준비 후에는 열린다', await page.getByText('뽑힌 카드는 통에서 빠집니다').isVisible())
-
-console.log('\n─── 비복원 (I3) ───')
-await page.waitForTimeout(3500)
-const gone = await page.locator('.cell.gone').count()
-ok('뽑힌 구좌가 통에서 꺼진다', gone === 10, `${gone}칸`)
-const topbar = await page.locator('.topbar-count').textContent()
-ok('남은 구좌가 줄어든 것이 상단에 보인다', /990/.test(topbar), topbar?.trim())
-const openTable = await page.locator('table').filter({ hasText: '뽑기 직전 남은 구좌' }).textContent()
-ok('뽑을 때마다 확률이 갱신된 것이 기록된다', /1,000구좌/.test(openTable) && /991구좌/.test(openTable))
-const first = openTable.match(/0\.100%/), later = openTable.match(/0\.101%/)
-ok('갱신된 확률이 실제로 다르다', !!first && !!later, '0.100% → 0.101%')
-const upd = await page.locator('table').filter({ hasText: '구좌 소진' }).textContent()
-ok('성립 불가능한 갱신 상태는 —로 표시된다 (I17)', upd.includes('—'))
-
-console.log('\n─── 교환 (I5) ───')
-await page.getByRole('button', { name: '교환 실행' }).click()
-await page.waitForSelector('text=이 교환에서 아무도 손해 보지 않습니다', { timeout: 20000 })
-const cycles = await page.locator('.cycle').count()
-ok('교환 고리가 화면에 그려진다', cycles > 0, `${cycles}개`)
-const cycleText = cycles ? await page.locator('.cycle').first().textContent() : ''
-ok('고리가 A → B → A 형태로 보인다', (cycleText.match(/→/g) || []).length >= 2, cycleText.replace(/\s+/g, ' ').slice(0, 40))
-const tradeText = await page.locator('table').filter({ hasText: '교환 전' }).textContent()
-ok('교환 전/후와 개선 여부가 참여자별로 보인다', /선호 \d+단계 개선|그대로/.test(tradeText))
-ok('나빠진 사람이 없다', !tradeText.includes('나빠짐'))
-ok('개별 합리성의 출처를 밝힌다', /Gale의 Top Trading Cycles/.test(await page.locator('.notice').filter({ hasText: '손해' }).textContent()))
-const convText = await page.locator('table').filter({ hasText: '같은 걸 원한 사람' }).textContent()
-ok('교환 전환율 표가 있고 100%가 아니다', /%/.test(convText) && !/100\.0%/.test(convText))
-ok('선호가 같을 때와 다를 때를 나란히 보여준다', /선호가 서로 다를 때/.test(convText) && /선호가 모두 같을 때/.test(convText))
-
-console.log('\n─── 대조 뷰 ───')
-const cmp = await page.locator('.compare').textContent()
-ok('오리파 / 혼자 / 팀 세 칸이 있다', /오리파 \(실제 시장\)/.test(cmp) && /혼자 열기/.test(cmp) && /팀으로 열기/.test(cmp))
+const tradeNote = await page.locator('#sec-trade .notice p').textContent()
+ok('개선 인원과 무손해가 함께 표기된다', /\d+명이 원하던 쪽으로/.test(tradeNote) && /손해 본 사람은 없습니다/.test(tradeNote),
+  tradeNote.match(/\d+명/)?.[0])
 const unknowns = await page.locator('.compare .unknown').count()
-ok('오리파 칸이 물음표로 남는다 (추정치로 채우지 않았다)', unknowns >= 4, `${unknowns}칸`)
-ok('혼자·팀 칸은 실제 엔진 결과다', /0\.100%/.test(cmp) && /1\.000%/.test(cmp))
-const seed = await page.locator('.mono').filter({ hasText: '추첨 시드' }).textContent()
-ok('시드가 노출돼 재현 가능하다', /추첨 시드 \S+\|\S+\|\S+\|\d/.test(seed), seed?.trim().slice(0, 46))
+ok('오리파 대조표의 모르는 칸은 물음표로 남는다', unknowns >= 4, `${unknowns}칸`)
+ok('추첨·교환 시드가 공개된다', /추첨 시드/.test(await page.locator('.seed').textContent()))
 
-console.log('\n─── 근거 시트 · 금지 (I10) ───')
-const ev = await page.locator('.section').last().textContent()
-ok('무엇이 정의·정리·실측·가정·미검증인지 구분한다',
-  /정의/.test(ev) && /정리/.test(ev) && /실측/.test(ev) && /가정/.test(ev) && /미검증/.test(ev))
-ok('시뮬레이션 범위를 밝힌다', /팀원 · 교환 상대 · 10만 회 분포는 시뮬레이션/.test(ev))
-const body = await page.locator('body').textContent()
-const FORBIDDEN = ['얼마 안 남', '서두르', '마감 임박', '지금 바로', '놓치지', '마지막 기회']
-const found = FORBIDDEN.filter((w) => body.includes(w))
-ok('희소성 압박 문구가 화면에 없다', found.length === 0, found.join(', ') || '없음')
-ok('시뮬 배지가 화면에 있다 (I13)', (await page.locator('.badge.sim').count()) > 0)
+console.log('\n─── 새로고침 복구 — 주문이 사라지지 않는다 ───')
+await page.reload({ waitUntil: 'networkidle' })
+await page.waitForSelector('.phone')
+await page.locator('.tabbar__b').nth(4).click()
+await page.waitForSelector('.order')
+const meNo = (await page.locator('.order__row b').first().textContent()).trim()
+ok('주문내역이 서버 상태로 복구된다', meNo === orderNo, `${meNo} = ${orderNo}`)
+ok('받은 카드가 주문내역에 있다', await page.locator('.order__card').isVisible())
 
-console.log('\n─── 응답 헤더 · 콘솔 ───')
-const boxesRes = await page.request.get(`${BASE}/api/boxes${CACHE_BUST}`)
-const cc = boxesRes.headers()['cache-control'] || ''
+console.log('\n─── 공동구매(②) — 마감 실재, 웃돈 0 ───')
+await page.locator('.tabbar__b.is-center').click()
+// 진행 중 주문이 있으면 흐름 화면이 뜬다 — 목록으로 돌아가는 길이 있어야 한다
+await page.getByText('올박스 목록').first().click().catch(() => {})
+await page.getByText('브랜드 공동구매').first().click()
+await page.waitForSelector('.pricebox')
+ok('회차 마감 시계가 있다', await page.locator('.ticker').first().isVisible())
+ok('웃돈 0원이 명시된다', await page.getByText('웃돈 0원').first().isVisible())
+const gDeal = API.deals.find((d) => d.kind === 'group')
+ok('환불 구간표가 서버 값 그대로다', (await page.locator('.body tbody tr').count()) === gDeal.milestones.length,
+  `${await page.locator('.body tbody tr').count()}행 = ${gDeal.milestones.length}구간`)
+await page.getByText('공동구매 참여하기').click()
+ok('접수가 시뮬로 표기된다 (집계 저장 없음)', await page.getByText('집계는 저장되지 않습니다').isVisible())
 
-/**
- * 캐시를 헤더 문자열로 확인하면 배포본에서 실패한다.
- * **Vercel은 s-maxage와 stale-while-revalidate를 엣지에서 소비하고 클라이언트
- * 응답에서 제거한다.** 로컬 서버에서는 그대로 남는다. 헤더만 보면 검사가
- * 로컬에서는 통과하고 정작 중요한 배포본에서는 실패한다.
- * 재려던 것은 "헤더에 그렇게 적혀 있는가"가 아니라 "실제로 캐시되는가"다.
- */
-if (/s-maxage/.test(cc)) {
-  ok('/api/boxes 캐시가 s-maxage=60 (원본 헤더)', /s-maxage=60/.test(cc), cc)
-  ok('/api/boxes에 stale-while-revalidate=600', /stale-while-revalidate=600/.test(cc))
-} else {
-  // 엣지가 헤더를 걷어낸 경우 — 동작으로 확인한다. 같은 URL 2회 → 두 번째가 HIT.
-  const probe = `${BASE}/api/boxes?cacheprobe=e2e`
-  await page.request.get(probe)
-  await new Promise((r) => setTimeout(r, 1200))
-  const second = await page.request.get(probe)
-  const hdr = second.headers()
-  const hit = /HIT/i.test(hdr['x-vercel-cache'] || '') || Number(hdr['age'] || 0) > 0
-  ok('엣지가 /api/boxes를 실제로 캐시한다 (s-maxage는 엣지가 소비)', hit,
-    `x-vercel-cache=${hdr['x-vercel-cache']} age=${hdr['age']}`)
-  ok('캐시 헤더가 public이다', /public/.test(cc), cc)
+console.log('\n─── 0원 응모(③) — 반대 방향의 대비군 ───')
+await page.getByText('올박스 목록').click()
+await page.locator('.dbanner').click()
+await page.waitForSelector('.pricebox')
+ok('취소선·할인율·특가가 서버 문자열이다',
+  (await page.locator('.pricebox__strike em').textContent()) === dailyDeal.price.discount)
+ok('하락 방향이 명시된다 (반대 방향 고지)', await page.getByText('반대 방향').isVisible())
+await page.getByText('0원으로 응모하기').click()
+ok('응모 접수가 시뮬로 표기된다', await page.getByText('집계는 저장되지 않습니다').isVisible())
+
+console.log('\n─── 프로젝트 Q&A — 문서에 근거해 답한다 ───')
+await page.locator('.dock--closed').click()
+await page.waitForSelector('.dock--open')
+await page.getByText('왜 올웨이즈인가요?').click()
+const answered = await page.waitForSelector('.dockmsg--assistant:not(.dockmsg--wait) p', { timeout: 30000 })
+  .then(() => true).catch(() => false)
+ok('질문에 답이 돌아온다', answered)
+if (answered) {
+  const ans = await page.locator('.dockmsg--assistant:not(.dockmsg--wait) p').first().textContent()
+  ok('답이 비어 있지 않다', ans.length > 30 && !/응답을 받지 못했습니다/.test(ans), `${ans.slice(0, 32)}…`)
+  const grounded = (await page.locator('.dockmsg footer details').count()) > 0
+    || (await page.locator('.dockmsg footer .simtag').count()) > 0
+  ok('근거(발췌 목록) 또는 폴백 표기가 붙는다', grounded)
 }
-const bj = await boxesRes.json()
-ok('배포본이 이번 크롤 데이터를 쓴다', bj.box?.crawledAt?.startsWith('2026-08-29'), bj.box?.crawledAt)
-ok('통 구성이 코드와 일치한다', bj.box?.N === 1000 && bj.box?.tiers?.length === 4)
 
-const realErrors = consoleErrors.filter((e) => !/409/.test(e))
-ok('예상치 못한 콘솔 에러가 없다 (409는 게이트 시연이므로 제외)',
-  realErrors.length === 0, realErrors.slice(0, 2).join(' / ') || '없음')
+console.log('\n─── 콘솔 무결성 ───')
+ok('콘솔 에러가 없다', consoleErrors.length === 0, consoleErrors.slice(0, 2).join(' | ') || '0건')
 
-console.log(`\n  ${step - fails.length}/${step}단계 통과${fails.length ? ` · 실패: ${fails.join(', ')}` : ''}`)
 await browser.close()
-if (fails.length) process.exitCode = 1
+console.log(`\n═══ ${step}단계 중 ${step - fails.length}단계 통과${fails.length ? ` · 실패: ${fails.join(' / ')}` : ' — 전부 통과'} ═══`)
+process.exit(fails.length ? 1 : 0)

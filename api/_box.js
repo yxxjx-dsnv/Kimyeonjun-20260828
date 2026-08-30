@@ -66,10 +66,10 @@ export const candidates = pool.items.filter(
     !isOripa(x.name) && !isNotCard(x.name) && isPokemonCard(x.name)
 )
 
-const bandOf = (price) => {
+const bandOf = (price, fee) => {
   for (const g of TIERS) {
     const [lo, hi] = BANDS[g]
-    if (price >= FEE * lo && price < (hi === Infinity ? Infinity : FEE * hi)) return g
+    if (price >= fee * lo && price < (hi === Infinity ? Infinity : fee * hi)) return g
   }
   return null
 }
@@ -94,10 +94,28 @@ function spread(cards, slots) {
   return cards.map((c, i) => ({ ...c, slots: base + (i < extra ? 1 : 0) }))
 }
 
-export function buildBox() {
+/**
+ * 통 정의 — fee(참여비)와 groups(포함할 크롤 그룹)만 다르고 규칙은 전부 같다.
+ * 등급 밴드가 참여비 **배수**로 정의돼 있어(BANDS) fee가 바뀌면 밴드가 따라 움직인다.
+ * K(재고 분포)는 모든 통에서 같다 — 통마다 확률이 달라지는 유일한 이유가
+ * "어떤 카드가 그 가격대에 실재하는가"가 되도록. 손잡이를 늘리지 않는다.
+ *
+ * C등급 종 수 기준을 30(전체 풀)에서 낮춘 이유: 테마 통은 풀이 좁아 종이 적은 것이
+ * 당연하고, 실제 지켜야 할 것은 꽝 없음 1층(최저가 ≥ 참여비)이다. 종 수는 화면에
+ * 그대로 표시되어 소비자가 직접 본다 — 숨기는 값이 아니므로 기준이 아니라 표시다.
+ */
+export const BOX_DEFS = [
+  { id: 'standard', name: '스탠다드', desc: '카드 생태계 전체', fee: 10000, groups: null },
+  { id: 'starter', name: '입문', desc: '덱·단품·벌크', fee: 5000, groups: ['deck', 'bulk'] },
+  { id: 'premium', name: '프리미엄', desc: '그레이딩·봉인 박스', fee: 30000, groups: ['grade', 'sealed'] },
+]
+
+export function buildBox(def = BOX_DEFS[0]) {
+  const fee = def.fee
+  const cand = def.groups ? candidates.filter((c) => def.groups.includes(c.group)) : candidates
   const byTier = Object.fromEntries(TIERS.map((g) => [g, []]))
-  for (const c of candidates) {
-    const g = bandOf(c.price)
+  for (const c of cand) {
+    const g = bandOf(c.price, fee)
     if (g) byTier[g].push(c)
   }
   const tiers = TIERS.map((g) => {
@@ -108,16 +126,19 @@ export function buildBox() {
       tier: g,
       K: K[g],
       available: sorted.length,
-      cards: cards.map((c) => ({ id: c.id, name: c.name, price: c.price, image: c.image, url: c.url, slots: c.slots })),
+      cards: cards.map((c) => ({ id: c.id, name: c.name, price: c.price, image: c.image, url: c.url, group: c.group, seller: c.seller ?? null, slots: c.slots })),
       minPrice: Math.min(...cards.map((c) => c.price)),
       maxPrice: Math.max(...cards.map((c) => c.price)),
-      band: [FEE * BANDS[g][0], BANDS[g][1] === Infinity ? Infinity : FEE * BANDS[g][1]],
+      band: [fee * BANDS[g][0], BANDS[g][1] === Infinity ? Infinity : fee * BANDS[g][1]],
     }
   })
-  return { fee: FEE, N, teamMax: TEAM_MAX, crawledAt: pool.crawledAt, tiers }
+  return { id: def.id, name: def.name, desc: def.desc, fee, N, teamMax: TEAM_MAX, crawledAt: pool.crawledAt, tiers }
 }
 
-export const BOX = buildBox()
+export const BOXES = BOX_DEFS.map((d) => buildBox(d))
+/** 기본 통 — 기존 소비자(문서·검사·라우트)와의 호환 지점. BOXES[0]과 동일 객체다. */
+export const BOX = BOXES[0]
+export const boxById = (id) => BOXES.find((b) => b.id === id) || null
 
 /**
  * 구좌 하나하나를 펼친 배열. 추첨은 이 위에서 비복원으로 일어난다.
@@ -131,7 +152,7 @@ export function slotsOf(box = BOX) {
   const out = []
   let i = 0
   for (const t of box.tiers) for (const c of t.cards) for (let k = 0; k < c.slots; k++) {
-    out.push({ i: i++, tier: t.tier, id: c.id, name: c.name, price: c.price, image: c.image })
+    out.push({ i: i++, tier: t.tier, id: c.id, name: c.name, price: c.price, image: c.image, url: c.url, seller: c.seller })
   }
   return out
 }
@@ -149,7 +170,9 @@ export const tierCountsOf = (remaining) =>
 // ─────────────────────────── self-check ───────────────────────────
 export function check(box = BOX) {
   const fails = []
-  const ok = (name, cond, detail) => { if (!cond) fails.push(name); console.log(`  ${cond ? '✓' : '✗'} ${name}${detail ? ` — ${detail}` : ''}`) }
+  // 검사 총 건수를 세어 둔다 — 문서가 건수를 손으로 적지 않고 실행에서 가져가게 한다
+  check.total = 0
+  const ok = (name, cond, detail) => { check.total++; if (!cond) fails.push(name); console.log(`  ${cond ? '✓' : '✗'} ${name}${detail ? ` — ${detail}` : ''}`) }
   const won = (n) => n.toLocaleString('ko-KR') + '원'
 
   const sumK = box.tiers.reduce((s, t) => s + t.K, 0)
@@ -182,31 +205,39 @@ export function check(box = BOX) {
   }
 
   ok('전 카드가 크롤 실측 상품', slots.every((s) => candidates.some((c) => c.id === s.id)))
-  ok('결정성 — 2회 구성이 동일', JSON.stringify(buildBox()) === JSON.stringify(buildBox()))
+  const def = BOX_DEFS.find((d) => d.id === box.id) || BOX_DEFS[0]
+  ok('결정성 — 2회 구성이 동일', JSON.stringify(buildBox(def)) === JSON.stringify(buildBox(def)))
+  // 전 카드가 실측 후보인가 — 테마 통은 후보가 부분집합이므로 전체 candidates로 검사
+  ok('통 id·이름이 정의와 일치', box.id === def.id && box.name === def.name)
 
   return fails
 }
 
 if (isMain()) {
   const won = (n) => n.toLocaleString('ko-KR') + '원'
-  console.log('═'.repeat(70))
-  console.log(`통 구성 — 참여비 ${won(FEE)} · ${N}구좌 · 정원 ${TEAM_MAX}명`)
-  console.log(`크롤 ${BOX.crawledAt} · 후보 카드 ${candidates.length}건`)
-  console.log('═'.repeat(70))
-  for (const t of BOX.tiers) {
-    console.log(`\n■ ${t.tier}등급  재고 ${t.K}구좌  ·  카드 ${t.cards.length}종  ·  후보 ${t.available}건`)
-    console.log(`  밴드 ${won(t.band[0])} ~ ${t.band[1] === Infinity ? '∞' : won(t.band[1])}   실제 ${won(t.minPrice)} ~ ${won(t.maxPrice)}`)
-    for (const c of t.cards.slice(0, 3)) console.log(`    ${won(c.price).padStart(12)} × ${String(c.slots).padStart(3)}구좌  ${c.name.slice(0, 46)}`)
-    if (t.cards.length > 3) console.log(`    … 외 ${t.cards.length - 3}종`)
+  let total = 0
+  const allFails = []
+  for (const box of BOXES) {
+    console.log('═'.repeat(70))
+    console.log(`통 「${box.name}」 (${box.desc}) — 참여비 ${won(box.fee)} · ${box.N}구좌 · 정원 ${box.teamMax}명`)
+    console.log('═'.repeat(70))
+    for (const t of box.tiers) {
+      console.log(`\n■ ${t.tier}등급  재고 ${t.K}구좌  ·  카드 ${t.cards.length}종  ·  후보 ${t.available}건`)
+      console.log(`  밴드 ${won(t.band[0])} ~ ${t.band[1] === Infinity ? '∞' : won(t.band[1])}   실제 ${won(t.minPrice)} ~ ${won(t.maxPrice)}`)
+      for (const c of t.cards.slice(0, 2)) console.log(`    ${won(c.price).padStart(12)} × ${String(c.slots).padStart(3)}구좌  ${c.name.slice(0, 46)}`)
+      if (t.cards.length > 2) console.log(`    … 외 ${t.cards.length - 2}종`)
+    }
+    const slots = slotsOf(box)
+    const value = slots.reduce((s, x) => s + x.price, 0)
+    console.log(`\n■ 통 시가 합계 ${won(value)}  ·  참여비 총액 ${won(box.fee * box.N)}  ·  비율 ${(value / (box.fee * box.N) * 100).toFixed(1)}%`)
+    console.log('\n─────────── self-check ───────────')
+    const fails = check(box)
+    total += check.total
+    allFails.push(...fails.map((f) => `${box.id}:${f}`))
   }
-  const slots = slotsOf()
-  const value = slots.reduce((s, x) => s + x.price, 0)
-  console.log(`\n■ 통 시가 합계 ${won(value)}  ·  참여비 총액 ${won(FEE * N)}  ·  비율 ${(value / (FEE * N) * 100).toFixed(1)}%`)
-  console.log('  ※ 100%를 넘는 것은 꽝 없음 1층(모든 등급 최저가 ≥ 참여비)의 구조적 귀결이다.')
+  console.log('  ※ 시가 합계가 참여비 총액을 넘는 것은 꽝 없음 1층의 구조적 귀결이다.')
   console.log('    다나와 최저가는 소매가이고 실제 매입가는 다르다. MVP는 매입가를 모델링하지')
   console.log('    않았다 — SPEC §12에 가정으로 적혀 있다. 이 숫자를 사업성 근거로 읽지 말 것.')
-  console.log('\n─────────── self-check ───────────')
-  const fails = check()
-  console.log(`\n  ${fails.length === 0 ? '전부 통과' : `${fails.length}건 실패: ${fails.join(', ')}`}`)
-  if (fails.length) process.exitCode = 1
+  console.log(`\n  ${total}개 항목 · ${allFails.length === 0 ? '전부 통과' : `${allFails.length}건 실패: ${allFails.join(', ')}`}`)
+  if (allFails.length) process.exitCode = 1
 }

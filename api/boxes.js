@@ -7,11 +7,92 @@
  *
  * roomId를 주면 그 방의 **현재** 통 상태로 갱신된 확률을 함께 내려준다(I3).
  */
-import { BOX, TIERS, slotsOf, remainingFrom, tierCountsOf } from './_box.js'
+import { BOX, BOXES, TIERS, slotsOf, remainingFrom, tierCountsOf } from './_box.js'
 import { allOdds, updateTable, pSolo, fmtPct, naturalFreq } from './_draw.js'
+import * as G from './_group.js'
+import * as D from './_daily.js'
 import { readRoom, kvEnabled } from './_room.js'
 import conversion from '../data/conversion.json' with { type: 'json' }
 import oripaAudit from '../data/oripa-audit.json' with { type: 'json' }
+
+
+const won = (n) => n.toLocaleString('ko-KR') + '원'
+
+/**
+ * 딜 목록 — 화면 카드에 찍히는 **모든 문자열**을 여기서 만든다.
+ * 화면이 숫자를 조립하기 시작하면(I4 위반) 서버와 두 벌이 되고 반드시 어긋난다.
+ * 시간 의존 값(마감)은 요청 시각으로 계산하되, 규칙은 각 모듈이 소유한다.
+ */
+export function buildDeals(now) {
+  const teamDeals = BOXES.map((box) => {
+    const odds = allOdds(box)
+    const S = odds[0]
+    const nMax = S.team[box.teamMax - 1]
+    const cTier = box.tiers.find((t) => t.tier === 'C')
+    const sTier = box.tiers[0]
+    return {
+      kind: 'team', id: box.id,
+      title: `${box.name} 올박스`, subtitle: box.desc,
+      image: sTier.cards[0].image,
+      topCard: { name: sTier.cards[0].name, priceLine: `시가 ${won(sTier.maxPrice)}` },
+      // 가격 블록 — 가장 큰 활자는 언제나 "내가 내는 돈". 뽑기에는 정가가 없으므로
+      // 취소선·할인율을 만들지 않는다(만드는 순간 지어낸 수다).
+      price: {
+        big: won(box.fee), strike: null, discount: null,
+        sub: `받는 것 최소 ${won(cTier.minPrice)} ~ 최대 ${won(sTier.maxPrice)}`,
+        bands: box.tiers.slice().reverse().map((t) =>
+          `${t.tier} ${won(t.minPrice)}${t.minPrice !== t.maxPrice ? `~${won(t.maxPrice)}` : ''}`).join(' · '),
+      },
+      oddsLine: `팀 ${box.teamMax}명이면 S등급 ${nMax.pct} · 혼자 대비 ${nMax.mul}`,
+      varietyLine: box.tiers.map((t) => `${t.tier} ${t.cards.length}종`).join(' · '),
+      dir: 'up', dirLine: '사람이 모일수록 확률이 오릅니다',
+      floorLine: `꽝 없음 — 최저 ${won(cTier.minPrice)}, 참여비 ${won(box.fee)} 이상`,
+      deadlineAt: null,   // 전원 준비 시 즉시 열린다. 마감이 실재하지 않으므로 적지 않는다(I10')
+      cta: `${won(box.fee)} 참여하기`,
+    }
+  })
+
+  const gRound = G.roundOf(now)
+  const gDeal = {
+    kind: 'group', id: 'group',
+    title: '브랜드 공동구매', subtitle: `${gRound}회차 · 인원이 모이면 일부가 전액 환불`,
+    image: G.ITEM?.image ?? null,
+    topCard: { name: G.ITEM?.name ?? '', priceLine: `정가 ${won(G.LIST)}` },
+    // 공동구매가 = 정가. 할인율 0%이므로 취소선을 만들지 않는다 — 여기서 -x%를
+    // 지어내면 "확률로 포장한 가격 인상을 피했다"는 논증 전체가 무너진다.
+    price: {
+      big: won(G.PRICE), strike: null, discount: null,
+      sub: `정가 ${won(G.LIST)} · 웃돈 0원 — 공동구매가가 정가를 넘지 않습니다`,
+      bands: null,
+    },
+    oddsLine: `${G.M_MAX}명이 모이면 ${G.milestones([G.M_MAX])[0].freq} 전액 환불`,
+    milestones: G.milestones(),
+    ceilLine: `환불 비율 상한 ${G.fmtPct(G.CEIL)} — 참여자당 마진이 재원이기 때문입니다`,
+    dir: 'up', dirLine: '사람이 모일수록 환불 인원이 늘어납니다',
+    deadlineAt: G.roundDeadline(now), round: gRound,
+    cta: `${won(G.PRICE)} 공동구매 참여하기`,
+  }
+
+  const dDeal = {
+    kind: 'daily', id: 'daily',
+    title: '0원 응모 특가', subtitle: '오늘 자정 추첨 · 응모는 공짜',
+    image: D.ITEM?.image ?? null,
+    topCard: { name: D.ITEM?.name ?? '', priceLine: `정가 ${won(D.LIST)}` },
+    price: {
+      big: won(D.DEAL), strike: won(D.LIST),
+      discount: `-${Math.round((1 - D.DEAL / D.LIST) * 100)}%`,
+      sub: `응모 ${won(D.ENTRY)} · 안 되면 잃는 것 없음`,
+      bands: null,
+    },
+    oddsLine: `특가 ${D.SLOTS}개 · 응모자 수에 따라 확률이 정해집니다`,
+    table: D.table(),
+    dir: 'down', dirLine: '응모가 많을수록 확률이 내려갑니다',
+    deadlineAt: D.closesAt(now),
+    cta: `0원으로 응모하기`,
+  }
+
+  return [...teamDeals, gDeal, dDeal]
+}
 
 export default async function handler(req, res) {
   // 코드와 크롤 데이터로 정해지므로 배포마다 내용이 바뀐다.
@@ -38,6 +119,15 @@ export default async function handler(req, res) {
   }
 
   res.status(200).json({
+    /** 딜 목록 — 목록 화면의 유일한 출처. */
+    deals: buildDeals(Date.now()),
+    /** 통별 상세 — ① 상세 화면이 통 선택에 따라 읽는다. */
+    boxes: BOXES.map((b) => ({
+      box: b,
+      slotTiers: slotsOf(b).map((s) => s.tier).join(''),
+      odds: allOdds(b),
+      updates: Object.fromEntries(TIERS.map((g) => [g, updateTable(g, [0, 250, 500, 750, 900, 990], b)])),
+    })),
     box: BOX,
     /**
      * 구좌별 등급을 인덱스 순서대로 이어붙인 문자열 (길이 N).

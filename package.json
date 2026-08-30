@@ -13,11 +13,14 @@
     "serve": "node tests/serve.mjs",
     "box": "node api/_box.js",
     "odds": "node api/_draw.js",
-    "test": "node api/_box.js && node api/_draw.js && node api/_trade.js && node api/_group.js && node api/_daily.js && node tests/room.test.mjs && npm run --silent build:ssr && node tests/render.test.mjs",
+    "test": "node api/_box.js && node api/_draw.js && node api/_trade.js && node api/_group.js && node api/_daily.js && node crawler/trend.js check && node tests/room.test.mjs && npm run --silent build:ssr && node tests/render.test.mjs",
     "trade": "node api/_trade.js",
     "build:ssr": "vite build --ssr src/ssr.jsx --outDir dist-ssr",
     "group": "node api/_group.js",
-    "daily": "node api/_daily.js"
+    "daily": "node api/_daily.js",
+    "trend": "node crawler/trend.js",
+    "chart": "node crawler/chart.mjs",
+    "digest": "node crawler/digest.mjs"
   },
   "dependencies": {
     "react": "^18.3.1",

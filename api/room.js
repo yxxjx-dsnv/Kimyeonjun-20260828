@@ -16,18 +16,26 @@
  * "지목하면 잘 나온다"는 어떤 경로도 만들지 않는다 — 만드는 순간 확률이
  * 재고 ÷ 구좌가 아니게 된다(I1).
  */
-import { BOX, TEAM_MAX, slotsOf, remainingFrom, tierCountsOf } from './_box.js'
+import { BOX, BOXES, boxById, TEAM_MAX, slotsOf, remainingFrom, tierCountsOf } from './_box.js'
 import { openRound, fmtPct, naturalFreq, rng } from './_draw.js'
 import { ttc, completePrefs, tradeSeed } from './_trade.js'
 import { readRoom, writeRoom, mutateRoom, newId, newRoom, kvEnabled } from './_room.js'
 
-const ALL_CARD_IDS = [...new Set(slotsOf().map((s) => s.id))]
-const UNIVERSE = [...new Map(slotsOf().map((s) => [s.id, s])).values()]
-const CARD_IDS = new Set(ALL_CARD_IDS)
+/**
+ * 통별 카드 전집 — 방이 어느 통이냐에 따라 유효한 카드가 다르다.
+ * 모듈 로드 시 한 번 계산한다(통 구성이 결정적이므로 안전하다).
+ */
+const PER_BOX = new Map(BOXES.map((b) => {
+  const univ = [...new Map(slotsOf(b).map((s) => [s.id, s])).values()]
+  return [b.id, { box: b, universe: univ, ids: new Set(univ.map((c) => c.id)), allIds: univ.map((c) => c.id) }]
+}))
+/** 방의 통. 과거 방(boxId='olbox')은 기본 통으로 해석한다. */
+const ctxOf = (room) => PER_BOX.get(room.boxId) || PER_BOX.get(BOX.id)
 
 /** 클라이언트에 내려보내는 방 상태. 통 상태와 갱신된 확률을 함께 준다(I3). */
 export function view(room) {
-  const remaining = remainingFrom(room.drawn)
+  const { box } = ctxOf(room)
+  const remaining = remainingFrom(room.drawn, box)
   const counts = tierCountsOf(remaining)
   const readyCount = room.members.filter((m) => m.ready).length
   return {
@@ -49,7 +57,7 @@ export function view(room) {
       left: remaining.length,
       tiers: Object.entries(counts).map(([tier, K]) => {
         const p = remaining.length ? K / remaining.length : null
-        return { tier, K, N: remaining.length, p, pct: fmtPct(p), freq: naturalFreq(p, BOX.N) }
+        return { tier, K, N: remaining.length, p, pct: fmtPct(p), freq: naturalFreq(p, box.N) }
       }),
     },
     storage: kvEnabled() ? 'kv' : 'memory',
@@ -84,11 +92,13 @@ async function doOpen(res, roomId) {
 
   const next = await mutateRoom(roomId, (r) => {
     if (r.opened) return null
+    const { box } = ctxOf(r)
     const out = openRound({
       roomId: r.id, boxId: r.boxId,
       participantIds: r.members.map((m) => m.id),
       round: r.round + 1,
-      remaining: remainingFrom(r.drawn),
+      box,
+      remaining: remainingFrom(r.drawn, box),
     })
     r.round += 1
     r.opened = true
@@ -98,9 +108,10 @@ async function doOpen(res, roomId) {
       return {
         memberId: x.participantId, name: m?.name ?? x.participantId,
         i: x.i, tier: x.tier, cardId: x.id, name_: x.name, price: x.price, image: x.image,
+        url: x.url ?? null, seller: x.seller ?? null,
         slotsBefore: x.slotsBefore,
         oddsBefore: Object.fromEntries(Object.entries(x.oddsBefore).map(([g, p]) =>
-          [g, { p, pct: fmtPct(p), freq: naturalFreq(p, BOX.N) }])),
+          [g, { p, pct: fmtPct(p), freq: naturalFreq(p, box.N) }])),
       }
     })
     r.rev++
@@ -125,16 +136,17 @@ async function doTrade(res, roomId) {
 
   const next = await mutateRoom(roomId, (r) => {
     if (r.trade) return null
+    const { universe } = ctxOf(r)
     const participants = r.members.map((m) => {
       const got = r.openResults.find((x) => x.memberId === m.id)
       return {
         id: m.id,
         holding: got.cardId,
-        prefs: completePrefs({ target: m.target, aiRanked: m.aiPrefs || [], universe: UNIVERSE }),
+        prefs: completePrefs({ target: m.target, aiRanked: m.aiPrefs || [], universe }),
       }
     })
     const out = ttc(participants, tradeSeed(r.id, r.round))
-    const byId = new Map(UNIVERSE.map((c) => [c.id, c]))
+    const byId = new Map(universe.map((c) => [c.id, c]))
     r.trade = {
       seed: tradeSeed(r.id, r.round),
       cycles: out.tradeCycles.map((c) => c.map((id) =>
@@ -168,8 +180,11 @@ export default async function handler(req, res) {
   const { action, roomId, memberId, name, cardId, ready } = req.body || {}
 
   if (action === 'create') {
+    // 통 선택 — 서버가 검증한다. 모르는 id는 기본 통이 아니라 400이다(조용히 바꿔치기하지 않는다).
+    const want = req.body?.boxId ?? BOX.id
+    if (!boxById(want)) return res.status(400).json({ error: '없는 통이다', boxes: BOXES.map((b) => b.id) })
     const id = newId()
-    const room = newRoom(id, BOX.crawledAt ? 'olbox' : 'olbox')
+    const room = newRoom(id, want)
     const me = { id: newId(4), name: (name || '방장').slice(0, 12), ready: false, target: null }
     room.members.push(me)
     room.rev = 1
@@ -184,12 +199,14 @@ export default async function handler(req, res) {
    * — 통 안에 없는 id는 버린다(I9). 클라이언트가 보낸 것을 믿지 않는다.
    */
   if (action === 'setPrefs') {
-    let error = null
-    const clean = Array.isArray(req.body?.prefs) ? req.body.prefs.filter((x) => CARD_IDS.has(x)) : []
+    let error = null, kept = 0
     const room = await mutateRoom(roomId, (r) => {
       if (r.opened) { error = { code: 409, msg: '개봉 후에는 바꿀 수 없다' }; return null }
       const m = r.members.find((x) => x.id === memberId)
       if (!m) { error = { code: 404, msg: '참여자가 없다' }; return null }
+      const { ids } = ctxOf(r)
+      const clean = Array.isArray(req.body?.prefs) ? req.body.prefs.filter((x) => ids.has(x)) : []
+      kept = clean.length
       m.aiPrefs = clean
       m.aiSource = req.body?.source ?? 'openai'
       r.rev++
@@ -197,7 +214,7 @@ export default async function handler(req, res) {
     })
     if (!room) return res.status(404).json({ error: '방이 없다' })
     if (error) return res.status(error.code).json({ error: error.msg, ...view(room) })
-    return res.status(200).json({ ...view(room), kept: clean.length })
+    return res.status(200).json({ ...view(room), kept })
   }
 
   if (action === 'open') return doOpen(res, roomId)
@@ -224,10 +241,10 @@ export default async function handler(req, res) {
   }
 
   if (action === 'target') {
-    // 통 안에 없는 카드는 거절한다. 클라이언트가 보낸 id를 믿지 않는다.
-    if (!CARD_IDS.has(cardId)) return res.status(400).json({ error: '통 안에 없는 카드다' })
     let error = null
     const room = await mutateRoom(roomId, (r) => {
+      // 통 안에 없는 카드는 거절한다. 클라이언트가 보낸 id를 믿지 않는다.
+      if (!ctxOf(r).ids.has(cardId)) { error = { code: 400, msg: '통 안에 없는 카드다' }; return null }
       if (r.opened) { error = { code: 409, msg: '개봉 후에는 지목을 바꿀 수 없다' }; return null }
       const m = r.members.find((x) => x.id === memberId)
       if (!m) { error = { code: 404, msg: '참여자가 없다' }; return null }
@@ -250,13 +267,13 @@ export default async function handler(req, res) {
    * 진짜 사용자는 각자 다른 것을 모으므로 선호가 엇갈린다(E4 — 커뮤니티 교환이
    * 실재하는 이유가 그것이다). 시뮬 팀원에게도 각자 다른 순서를 준다.
    * **시뮬레이션이므로 화면에 시뮬 배지를 단다(I13).** 실제 사용자라면 이 자리를
-   * 지목과 ChatGPT가 채운다.
+   * 지목과 본인의 선호 순서가 채운다.
    */
   if (action === 'simPrefs') {
     let error = null
     const room = await mutateRoom(roomId, (r) => {
       if (r.opened) { error = { code: 409, msg: '개봉 후에는 바꿀 수 없다' }; return null }
-      const ids = ALL_CARD_IDS
+      const ids = ctxOf(r).allIds
       for (const m of r.members) {
         if (m.id === memberId) continue   // 나는 내가 정한다. 시뮬로 덮지 않는다.
         const rand = rng(`${r.id}|${m.id}|taste`)

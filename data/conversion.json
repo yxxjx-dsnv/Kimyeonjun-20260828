@@ -49,7 +49,7 @@
       ]
     },
     "heterogeneous": {
-      "label": "이질 — 지목 후 각자 다른 취향 순서 (지목 + ChatGPT)",
+      "label": "이질 — 지목 후 각자 다른 취향 순서",
       "rows": [
         {
           "k": 1,
