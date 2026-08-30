@@ -162,17 +162,18 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
 /* ── 홈 — 실제 올웨이즈 홈 구조 ────────────────────────────── */
 /* 검색바. 실제 앱은 헤더 바로 아래 전폭 회색 pill이다. */
 .hsearch {
-  display: flex; align-items: center; gap: var(--s2);
-  background: var(--band); border-radius: var(--r2);
-  padding: var(--s3) var(--s4); margin-bottom: var(--s4);
+  display: flex; align-items: center; gap: var(--s2); width: 100%;
+  background: var(--band); border: 0; border-radius: var(--r2);
+  padding: 13px var(--s4); margin-bottom: var(--s4);
+  cursor: pointer; text-align: left;
 }
 .hsearch svg { width: 20px; height: 20px; color: var(--muted); flex: none; order: 2; }
-.hsearch input {
-  order: 1; flex: 1; min-width: 0; border: 0; background: none; outline: none;
-  font: inherit; font-size: var(--fs-body); color: var(--ink);
+.hsearch .top__q {
+  order: 1; flex: 1; min-width: 0;
+  border: 0; padding: 0; background: none; border-radius: 0;
+  font-size: var(--fs-body); color: var(--muted); font-weight: 400;
 }
-.hsearch input::placeholder { color: var(--muted); }
-.hsearch input::-webkit-search-cancel-button { appearance: none; }
+.hsearch:hover { background: #e9ebef; }
 
 /* 카테고리 스트립 — 활성 탭은 빨간 글자 + 빨간 밑줄. */
 .cats {
@@ -512,6 +513,11 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
   }
   /* min-height:0 이 없으면 플렉스 아이템이 내용 크기 아래로 못 줄어 스크롤이 안 생긴다. */
   .body { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-bottom: 24px; }
+  /* 실제 앱 화면에는 스크롤바가 보이지 않는다. 데스크톱 브라우저의 막대가
+     프레임 안에 뜨면 그 순간 '웹 페이지'로 읽힌다. */
+  .body, .brief, .ops, .rail2 { scrollbar-width: none; -ms-overflow-style: none; }
+  .body::-webkit-scrollbar, .brief::-webkit-scrollbar,
+  .ops::-webkit-scrollbar, .rail2::-webkit-scrollbar { width: 0; height: 0; display: none; }
   /* 프레임이 고정이라 헤더·탭바를 붙여둘 이유가 없어졌다. */
   .top, .tabbar { position: static; }
   /* 탭바가 스크롤 컨테이너(.body) 밖에 있으므로 CTA는 본문 바닥에 붙는다.
@@ -1384,3 +1390,23 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
 }
 .chip:hover { border-color: var(--ink-2); }
 .chip--sug { background: var(--band); border-color: transparent; }
+
+/* ── 두 버튼 CTA — 올웨이즈 팀구매 문법 ── */
+.cta--two { display: flex; gap: var(--s2); }
+.cta--two .btn { flex: 1; display: flex; flex-direction: column; gap: 1px; padding: 11px var(--s2); }
+.cta--two .btn b { font-size: var(--fs-lead); font-weight: 900; }
+.cta--two .btn span { font-size: var(--fs-micro); font-weight: 700; opacity: 0.92; }
+.btn--alt { background: #FFB800; color: var(--ink); border: 0; }
+.btn--alt:hover { background: #f0ad00; }
+.cta__note--two { margin-top: var(--s2); }
+
+/* ── 팀 모으기 선택 ── */
+.setup { display: flex; flex-direction: column; gap: var(--s2); margin: var(--s3) 0; }
+.setup__opt {
+  display: flex; flex-direction: column; gap: 2px; padding: var(--s3) var(--s4);
+  border: 1.5px solid var(--line); border-radius: 12px; background: var(--paper);
+  cursor: pointer; text-align: left;
+}
+.setup__opt.is-on { border-color: var(--brand); background: var(--brand-weak); }
+.setup__opt b { font-size: var(--fs-label); }
+.setup__opt span { font-size: var(--fs-micro); color: var(--muted); }

@@ -557,9 +557,9 @@ function DealListScreen({ deals, onOpenDeal, sel }) {
           </span>
         </div>
         <ul className="intro__pts">
-          <li><b>전 구성 공개</b><span>확률을 직접 계산해볼 수 있어요</span></li>
-          <li><b>뽑히면 빠져요</b><span>남을수록 확률이 올라갑니다</span></li>
-          <li><b>꽝 없음</b><span>어떤 카드가 나와도 참여비 이상</span></li>
+          <li><b>전체 확률 100% 공개</b><span>박스에 뭐가 몇 장 들었는지 전부 보여드려요</span></li>
+          <li><b>참여할수록 올라가는 확률</b><span>같이 열면 팀 전원의 확률이 올라갑니다</span></li>
+          <li><b>꽝 없음 · 모두가 당첨</b><span>어떤 카드가 나와도 참여비 이상</span></li>
         </ul>
         <p className="intro__scroll" aria-hidden="true">아래로 내리면 열려 있는 올박스 ↓</p>
       </section>
@@ -650,20 +650,6 @@ function TeamDetail({ sel, deal, teamSize, setTeamSize, busy, onBack, onBuy, onS
           <TierShowcase key={t.tier} tier={t} hero={t.tier === 'S'}
             pct={odds[i].soloPct} freq={odds[i].soloFreq} />
         ))}
-        {/* 오리파가 못 하는 일이 이것이다. 버튼 문구가 '무엇을 볼 수 있는지'를 말한다. */}
-        <button type="button" className="verify" onClick={onSheet}>
-          <span className="verify__n" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-              <rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" />
-              <rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" />
-            </svg>
-          </span>
-          <span className="verify__t">
-            {`${box.N.toLocaleString('ko-KR')}장을 직접 세어보기`}
-            <em>어떤 카드가 몇 장인지 하나도 빠짐없이 화면에 있습니다</em>
-          </span>
-          <span className="verify__go" aria-hidden="true">›</span>
-        </button>
       </section>
 
       <section className="hsec">
@@ -688,16 +674,70 @@ function TeamDetail({ sel, deal, teamSize, setTeamSize, busy, onBack, onBuy, onS
         </p>
       </section>
 
-      {/* 고정 CTA — 결제 화면으로 간다. 참여가 곧 구매인데 결제 단계가 없으면
-          커머스에서 가장 규격화된 화면 하나가 통째로 비는 셈이다. */}
-      <div className="cta">
-        <button className="btn btn--go" onClick={onBuy} disabled={busy === 'pay'}>
-          {`${won(box.fee)} · ${teamSize}명으로 참여하기`}
+      {/* 올웨이즈 팀구매 문법 — 혼자 살지 팀으로 열지를 먼저 고른다.
+          팀을 고르면 주문서 앞에 **팀 모으기** 화면이 온다. */}
+      <div className="cta cta--two">
+        <button className="btn btn--alt" onClick={() => onBuy(1)} disabled={busy === 'pay'}>
+          <b>{won(box.fee)}</b><span>혼자 열기</span>
         </button>
-        <p className="cta__note">
-          {`꽝 없음 · 어떤 카드가 나와도 ${won(box.fee)} 이상입니다`}
-          {teamSize > 1 && <> · <SimBadge what={`팀원 ${teamSize - 1}명 자동 참여`} /></>}
+        <button className="btn btn--go" onClick={() => onBuy(box.teamMax)} disabled={busy === 'pay'}>
+          <b>{won(box.fee)}</b><span>{`${box.teamMax}명 팀으로 열기`}</span>
+        </button>
+      </div>
+      <p className="cta__note cta__note--two">
+        {`꽝 없음 · 어떤 카드가 나와도 ${won(box.fee)} 이상입니다`}
+      </p>
+    </>
+  )
+}
+
+/* ── ① 팀 모으기 — 주문서 **앞** 단계 ─────────────────────────
+   올웨이즈 팀구매가 그렇듯, 결제 전에 "누구랑 열지"를 먼저 정한다.
+   결제부터 시키면 팀이 왜 필요한지가 흐려진다. */
+function TeamSetupScreen({ sel, deal, teamSize, busy, onBack, onNext }) {
+  const { box, odds } = sel
+  const [mode, setMode] = useState('open')
+  const t = odds[0].team[teamSize - 1]
+  const solo = odds[0]
+  return (
+    <>
+      <button type="button" className="backrow" onClick={onBack}>‹ 상세로</button>
+      <section className="hsec">
+        <header className="shead"><h2>{`${teamSize}명이 같이 열어요`}</h2></header>
+        <p className="lead">
+          같은 박스를 함께 열면 <b>팀 전원의 확률이 올라갑니다.</b>
+          {` 혼자면 S등급 ${solo.soloPct}, ${teamSize}명이면 `}<b>{t.pct}</b>
+          {` — 혼자 대비 ${t.mul}예요.`}
         </p>
+
+        <div className="setup">
+          <button type="button" className={`setup__opt ${mode === 'open' ? 'is-on' : ''}`}
+            onClick={() => setMode('open')}>
+            <b>공개 팀으로 모으기</b>
+            <span>누구나 참여할 수 있어요. 인원이 차면 바로 열립니다</span>
+          </button>
+          <button type="button" className={`setup__opt ${mode === 'invite' ? 'is-on' : ''}`}
+            onClick={() => setMode('invite')}>
+            <b>친구만 초대하기</b>
+            <span>링크를 받은 사람만 들어올 수 있어요</span>
+          </button>
+        </div>
+
+        <div className="notice">
+          <h3>친구를 부르면 뭐가 달라지나요</h3>
+          <p>
+            같은 박스에서 각자 한 장씩 뽑아요. 사람이 많을수록 <b>팀 안에 좋은 카드가 나올 확률</b>이 올라갑니다.
+            팀에 나온 걸 내가 갖는 건 <b>교환</b>으로 정해요.
+            <b> 초대한 사람이 더 받는 건 없어요. 팀 전원이 똑같은 확률입니다.</b>
+          </p>
+        </div>
+      </section>
+
+      <div className="cta">
+        <button className="btn btn--go" onClick={() => onNext(mode)} disabled={busy === 'pay'}>
+          {`${won(box.fee)} 결제하러 가기`}
+        </button>
+        <p className="cta__note">결제 후 초대 링크를 받을 수 있어요 · 인원이 차면 자동으로 열립니다</p>
       </div>
     </>
   )
@@ -1093,9 +1133,13 @@ function OlboxTab(p) {
     return <TeamDetail sel={sel} deal={deal} teamSize={p.teamSize} setTeamSize={p.setTeamSize}
       busy={p.busy} onBack={p.onBackToList} onBuy={p.onBuy} onSheet={p.onSheet} />
   }
+  if (phase === 'team') {
+    return <TeamSetupScreen sel={sel} deal={deal} teamSize={p.teamSize} busy={p.busy}
+      onBack={() => p.setPhase('detail')} onNext={p.onTeamNext} />
+  }
   if (phase === 'checkout') {
     return <CheckoutScreen sel={sel} teamSize={p.teamSize} busy={p.busy}
-      onBack={() => p.setPhase('detail')} onPay={p.onPay} />
+      onBack={() => p.setPhase(p.teamSize > 1 ? 'team' : 'detail')} onPay={p.onPay} />
   }
   if (phase === 'ordered') {
     return <OrderDoneScreen sel={sel} room={p.room} deal={deal}
@@ -1130,6 +1174,7 @@ export default function App() {
   const [dealId, setDealId] = useState(null)
   const [count, setCount] = useState(null)       // 3 · 2 · 1 · 0
   const [sheet, setSheet] = useState(false)
+  const [teamMode, setTeamMode] = useState('open')
   const [search, setSearch] = useState(false)
   const [q, setQ] = useState('')
   const [searchResult, setSearchResult] = useState(null)
@@ -1354,7 +1399,8 @@ export default function App() {
       else setPhase('detail')
     },
     onBackToList: () => setPhase('list'),
-    onBuy: () => setPhase('checkout'),
+    onBuy: (n) => { setTeamSize(n); setPhase(n > 1 ? 'team' : 'checkout') },
+    onTeamNext: (mode) => { setTeamMode(mode); setPhase('checkout') },
     onPay,
     onRecruit: () => setPhase('flow'),
     onOrders: () => setTab('me'),
