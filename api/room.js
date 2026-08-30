@@ -71,6 +71,7 @@ export function view(room) {
     holdings: room.opened ? holdingsOf(room) : null,
     requests: room.requests ?? [],
     swaps: room.swaps ?? [],
+    cheers: room.cheers ?? [],
     trade: room.trade,
     /** 지목 집계 — 같은 카드를 몇 명이 원하는지. 교환 전환율이 여기 달려 있다. */
     targets: room.members.reduce((m, x) => (x.target ? ((m[x.target] = (m[x.target] || 0) + 1), m) : m), {}),
@@ -264,6 +265,28 @@ export default async function handler(req, res) {
       // 같은 상대에게 두 번 보내지 않는다. 덮어쓰는 것이 아니라 무시한다.
       if (r.requests.some((q) => q.from === memberId && q.to === targetId)) return r
       r.requests.push({ from: memberId, to: targetId, at: Date.now() })
+      r.rev++
+      return r
+    })
+    if (!room) return res.status(error?.code ?? 404).json({ error: error?.msg ?? '방이 없습니다' })
+    if (error) return res.status(error.code).json({ error: error.msg, ...view(room) })
+    return res.status(200).json(view(room))
+  }
+
+  /**
+   * 응원 — "잘 뽑으셨네요"를 상대에게 남긴다.
+   * 화면에서만 반짝이고 끝나면 가짜 상호작용이다. 방에 실제로 기록한다.
+   */
+  if (action === 'cheer') {
+    const targetId = req.body?.targetId
+    let error = null
+    const room = await mutateRoom(roomId, (r) => {
+      if (!r.opened) { error = { code: 409, msg: '개봉 전에는 응원할 수 없습니다' }; return null }
+      if (memberId === targetId) { error = { code: 400, msg: '자기 자신은 응원할 수 없습니다' }; return null }
+      if (!r.members.some((m) => m.id === targetId)) { error = { code: 404, msg: '참여자가 없습니다' }; return null }
+      r.cheers = r.cheers ?? []
+      if (r.cheers.some((c) => c.from === memberId && c.to === targetId)) return r  // 한 번만
+      r.cheers.push({ from: memberId, to: targetId, at: Date.now() })
       r.rev++
       return r
     })

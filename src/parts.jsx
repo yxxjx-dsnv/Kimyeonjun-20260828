@@ -234,30 +234,45 @@ export function RevealScene({ r, fee, onClose }) {
 }
 
 /* ── 개봉 결과 카드 (v1 원문, v2 데이터) ────────────────────── */
-export function RevealCard({ r, mine, fee, delay }) {
+export function RevealCard({ r, mine, fee, delay, onRequest, onCheer, asked, cheered, busy }) {
   return (
+    /* 뽑은 카드가 주인공이다. 손익 계산(낸 돈/받은 시가)은 이 화면에서 읽을 이유가 없어
+       걷어내고, 그 자리를 카드 이미지와 등급에 줬다. 교환·응원은 바로 옆에 둔다 —
+       "누가 뭘 뽑았나"를 보는 순간이 곧 말을 걸고 싶은 순간이다. */
     <li className={`rv ${mine ? 'is-mine' : ''}`} style={{ animationDelay: `${delay}ms` }}>
-      <header className="rv__head">
-        <span className="rv__who">{`${r.name}${mine ? ' (나)' : ''}`}</span>
-        {!mine && <span className="simtag">시뮬</span>}
-        <span className={`tier tier--${r.tier}`}>{r.tier}</span>
-      </header>
-      <ul className="rv__items">
-        <li>
+      <div className="rv__main">
+        <div className="rv__thumb">
           {r.image ? <img src={r.image} alt="" loading="lazy" /> : <span className="tstrip__ph" />}
+          <span className={`tier tier--${r.tier} rv__tier`}>{r.tier}</span>
+        </div>
+        <div className="rv__info">
+          <span className="rv__who">
+            {mine ? '나' : r.name}
+            {!mine && <span className="simtag">시뮬</span>}
+          </span>
           <span className="rv__nm">{r.name_}</span>
           <span className="rv__pr">{won(r.price)}</span>
-        </li>
-      </ul>
-      <p className="rv__settle">
-        {`낸 돈 ${won(fee)} · 받은 카드 시가 `}<b>{won(r.price)}</b>{' '}
-        <Delta v={r.price - fee} />
-      </p>
-      <p className="rv__before">
-        {`뽑기 직전 ${r.slotsBefore.toLocaleString('ko-KR')}장 남음 · S등급 ${r.oddsBefore.S.pct}`}
-      </p>
-      {/* 이 카드가 실재하고 지금 이 가격에 팔린다는 증명 — 크롤 url을 그대로 쓴다.
-          배송 리드타임은 가진 데이터가 없으므로 지어내지 않고 한계를 그 자리에 적는다. */}
+          <span className="rv__before">
+            {`뽑기 직전 ${r.slotsBefore.toLocaleString('ko-KR')}장 남음 · S등급 ${r.oddsBefore.S.pct}`}
+          </span>
+        </div>
+        {!mine && (
+          <div className="rv__acts">
+            <button type="button" className={`rv__heart ${cheered ? 'is-on' : ''}`}
+              onClick={() => onCheer?.(r.memberId)} disabled={cheered || !!busy}
+              aria-label="잘 뽑으셨네요" title="잘 뽑으셨네요!">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 20s-7-4.4-7-9.2A4 4 0 0 1 12 8a4 4 0 0 1 7 2.8C19 15.6 12 20 12 20Z" />
+              </svg>
+            </button>
+            <button type="button" className={`rv__swap ${asked ? 'is-sent' : ''}`}
+              onClick={() => onRequest?.(r.memberId)} disabled={asked || !!busy}>
+              {asked ? '요청함' : '교환 요청'}
+            </button>
+          </div>
+        )}
+      </div>
+      {/* 이 카드가 실재하고 지금 이 가격에 팔린다는 증명 — 크롤 url을 그대로 쓴다. */}
       {mine && r.url && (
         <p className="rv__src">
           <a href={r.url} target="_blank" rel="noreferrer">판매처에서 보기 ›</a>
@@ -268,9 +283,6 @@ export function RevealCard({ r, mine, fee, delay }) {
   )
 }
 
-/* ── 인원별 확률표 ─────────────────────────────────────────
-   pct·freq·mul은 전부 서버가 만든 문자열이다.
-   K=1인 등급만 "정확히 n배"이고 나머지는 아니다 — 그것을 그대로 표시한다. */
 export function OddsTable({ odds, n }) {
   return (
     /* 5열이면 390px에서 가로 스크롤이 생겨 한눈에 안 들어온다.
@@ -475,72 +487,6 @@ export function DealCard({ deal, onOpen }) {
   )
 }
 
-/* ── 팀원별 보유 카드 + 직접 교환 요청 ────────────────────────
-   자동 배정만 있으면 "내 카드가 동의 없이 넘어갔다"로 읽힌다.
-   먼저 사람에게 요청하게 하고, 서로 엇갈려 1:1로 안 풀리는 고리만
-   '한 번에 맞추기'(TTC)가 푼다. 요청은 곧 선호의 표명이다. */
-export function SwapBoard({ members, holdings, byId, me, requests, onRequest, onRespond, busy }) {
-  const mine = holdings?.[me]
-  const sent = new Set(requests.filter((q) => q.from === me).map((q) => q.to))
-  const inbox = requests.filter((q) => q.to === me)
-  return (
-    <div className="swap">
-      {inbox.length > 0 && (
-        <div className="swap__inbox">
-          {inbox.map((q) => {
-            const who = members.find((m) => m.id === q.from)
-            const theirs = byId.get(holdings?.[q.from])
-            const ours = byId.get(mine)
-            return (
-              <div key={q.from} className="swapreq">
-                <p className="swapreq__t">
-                  <b>{who?.name ?? q.from}</b>님이 교환을 요청했어요
-                </p>
-                <p className="swapreq__d">
-                  {`${theirs?.name?.slice(0, 22) ?? '카드'} (${won(theirs?.price ?? 0)})`}
-                  {' ↔ '}
-                  {`내 ${ours?.name?.slice(0, 22) ?? '카드'} (${won(ours?.price ?? 0)})`}
-                </p>
-                <div className="swapreq__b">
-                  <button type="button" className="btn btn--go btn--sm"
-                    onClick={() => onRespond(q.from, true)} disabled={!!busy}>수락</button>
-                  <button type="button" className="btn btn--ghost btn--sm"
-                    onClick={() => onRespond(q.from, false)} disabled={!!busy}>거절</button>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      )}
-      <ul className="swap__list">
-        {members.filter((m) => m.id !== me).map((m) => {
-          const c = byId.get(holdings?.[m.id])
-          const asked = sent.has(m.id)
-          return (
-            <li key={m.id} className="swapcard">
-              {c?.image ? <img src={c.image} alt="" loading="lazy" /> : <span className="tstrip__ph" />}
-              <div className="swapcard__b">
-                <span className="swapcard__who">
-                  {m.name}{m.sim && <span className="simtag">시뮬</span>}
-                </span>
-                <span className="swapcard__nm">{c?.name?.slice(0, 30) ?? '—'}</span>
-                <span className="swapcard__pr">
-                  {c && <span className={`tier tier--${c.tier}`}>{c.tier}</span>}
-                  {c ? won(c.price) : ''}
-                </span>
-              </div>
-              <button type="button" className={`swapcard__go ${asked ? 'is-sent' : ''}`}
-                onClick={() => onRequest(m.id)} disabled={asked || !!busy}>
-                {asked ? '요청함' : '교환 요청'}
-              </button>
-            </li>
-          )
-        })}
-      </ul>
-    </div>
-  )
-}
-
 /* ── 친구 초대 (목업) ──────────────────────────────────────────
    링크 복사는 **진짜로 동작한다**. 다만 링크를 받은 사람이 실제로 입장하는 것은
    구현하지 않았다(방 저장소가 인스턴스별 메모리라 다른 기기에서 못 찾는다).
@@ -658,7 +604,7 @@ export function Marquee({ items, pxPerSec = 26 }) {
 /* ── 검색 화면 — 올웨이즈 검색 문법 ─────────────────────────
    최근 검색어(이 기기에만 저장) · 추천 검색어(크롤 데이터에서 유도) · 결과.
    눌리는데 아무 일도 안 일어나는 검색창이 가장 나쁜 상태다. */
-export function SearchScreen({ onClose, onSearch, suggest, recent, onClearRecent, result, busy, q, setQ }) {
+export function SearchScreen({ onClose, onSearch, suggest, recent, onClearRecent, result, busy, q, setQ, picks = [] }) {
   const inputRef = useRef(null)
   useEffect(() => { inputRef.current?.focus() }, [])
   const submit = (text) => {
@@ -719,6 +665,19 @@ export function SearchScreen({ onClose, onSearch, suggest, recent, onClearRecent
               ))}
             </div>
           </section>
+          {/* 검색 첫 화면의 아래를 비워 두면 앱이 아니라 폼처럼 보인다.
+              올웨이즈의 '최근 본 상품' 자리를 실제 수집 상품으로 채운다. */}
+          {picks.length > 0 && (
+            <section className="srch__sec">
+              <header className="srch__h">
+                <b>이런 상품은 어때요</b>
+                <span>다나와에서 수집한 상품</span>
+              </header>
+              <div className="grid">
+                {picks.map((it) => <ProductCard key={it.id} item={it} />)}
+              </div>
+            </section>
+          )}
         </>
       )}
       {busy && <p className="srch__empty">찾는 중…</p>}

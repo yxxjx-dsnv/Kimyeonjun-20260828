@@ -100,5 +100,6 @@ export const newRoom = (id, boxId = 'olbox') => ({
   openResults: null,    // 개봉 결과 (멱등 재조회용) — **불변 기록**. 스왑이 생겨도 건드리지 않는다
   requests: [],         // 직접 교환 요청 { from, to, at }
   swaps: [],            // 성사된 1:1 교환 { from, to, at }
+  cheers: [],           // 응원 { from, to, at } — 하트가 아무 데도 안 남으면 가짜 상호작용이다
   trade: null,          // TTC 최종 배정 (멱등 재조회용). 실행되면 직접 교환은 잠긴다
 })

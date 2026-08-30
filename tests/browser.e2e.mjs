@@ -159,16 +159,20 @@ ok('빠진 카드 게이지가 서버 값으로 찬다',
   await page.locator('.gauge__t').textContent())
 
 console.log('\n─── 교환 — 사람에게 요청하고, 못 푸는 고리는 정리가 푼다 ───')
-// 직접 요청 — 소비자가 먼저 사람에게 말을 건다
-await page.waitForSelector('.swap__list', { timeout: 15000 })
-ok('팀원별 보유 카드가 보인다', (await page.locator('.swapcard').count()) === TEAM - 1,
-  `${await page.locator('.swapcard').count()}명 (나 제외)`)
-await page.locator('.swapcard__go').first().click()
-await page.waitForTimeout(700)
+// 교환 요청은 개봉 결과 카드에서 바로 한다 — 누가 뭘 뽑았나를 보는 순간이 말을 걸 순간이다
+ok('남의 결과 카드에 교환 요청 버튼이 있다', (await page.locator('.rv__swap').count()) === TEAM - 1,
+  `${await page.locator('.rv__swap').count()}명 (나 제외)`)
+ok('응원(하트)도 같은 자리에 있다', (await page.locator('.rv__heart').count()) === TEAM - 1)
+await page.locator('.rv__heart').first().click()
+await page.waitForTimeout(800)
+ok('응원이 서버에 남는다 (화면에서만 반짝이지 않는다)',
+  (await page.locator('.rv__heart.is-on').count()) >= 1)
+await page.locator('.rv__swap').first().click()
+await page.waitForTimeout(800)
 ok('요청을 보내면 버튼이 요청함으로 바뀐다',
-  (await page.locator('.swapcard__go.is-sent').count()) >= 1)
+  (await page.locator('.rv__swap.is-sent').count()) >= 1)
 await page.waitForTimeout(3200)
-const swapLine = await page.locator('.dim').filter({ hasText: '성사된 직접 교환' }).textContent()
+const swapLine = await page.locator('.cta__note').filter({ hasText: '성사된 직접 교환' }).textContent()
 ok('시뮬 팀원이 요청에 응답한다 (수락 또는 거절)', /성사된 직접 교환 \d+건/.test(swapLine),
   swapLine.split('·')[0].trim())
 // 한 번에 맞추기 — 1:1로 안 풀리는 고리를 TTC가 푼다

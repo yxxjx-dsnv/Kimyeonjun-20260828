@@ -21,7 +21,7 @@ import {
   won, Delta, TIERS, TIER_LABEL, Rarity, Badge, SimBadge,
   ProductCard, BoxGrid, GridLegend, TierShowcase, MemberRail,
   RevealScene, RevealCard, OddsTable, UpdateTable,
-  CardPick, CycleView, TradeTable, SwapBoard, InviteBox,
+  CardPick, CycleView, TradeTable, InviteBox,
   DealCard, DeadlineTicker, Gauge, Marquee, SearchScreen,
   IconHome, IconContent, IconHeart, IconUser, IconBox, IconCart, IconSearch,
 } from './parts.jsx'
@@ -34,10 +34,8 @@ const TABS = [
   { id: 'me', label: '내 정보', Icon: IconUser },
 ]
 
-const SIM_NAMES = ['민서', '지호', '서연', '도윤', '하은', '준우', '수아', '시우', '나윤']
-
 /**
- * 문자열 → 32bit 해시. 시뮬 팀원의 준비 순서를 섞는 데만 쓴다.
+ * 문자열 → 32bit 해시. 시뮬 팀원의 준비 순서와 닉네임을 정하는 데 쓴다.
  * 순서가 2·3·4…10이면 사람이 준비하는 모습이 아니라 루프가 도는 모습이다.
  * 방 id를 섞어 넣어 **방마다 다르되 같은 방에서는 같은 순서**가 나오게 한다.
  */
@@ -46,6 +44,23 @@ const hash = (str) => {
   for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619) }
   return (h >>> 0)
 }
+
+/**
+ * 시뮬 팀원 닉네임 — 실명처럼 보이면 "누구 이름인가" 하는 오해가 생긴다.
+ * 커머스 앱에서 팀원은 보통 닉네임으로 보이므로 그 감각을 맞춘다.
+ * 방 id로 시드를 만들어 같은 방에서는 같은 닉네임이 나온다.
+ */
+const NICK_A = ['활발한', '느긋한', '용감한', '신나는', '든든한', '수줍은', '부지런한', '엉뚱한', '다정한', '씩씩한']
+const NICK_B = ['연어', '너구리', '수달', '고래', '다람쥐', '펭귄', '치타', '올빼미', '두더지', '햄스터']
+const NICK_FIXED = ['리자몽최고', '올웨이즈화이팅', '피카츄사랑', '카드모으는사람', '홀로그램덕후', '오늘은SAR', '박스깡장인']
+
+const nickOf = (seed, i) => {
+  const h = hash(`${seed}|nick|${i}`)
+  if (h % 5 === 0) return NICK_FIXED[h % NICK_FIXED.length]
+  // >>는 부호 있는 시프트라 h가 2^31을 넘으면 음수가 되고 인덱스가 undefined가 된다
+  return NICK_A[h % NICK_A.length] + NICK_B[(h >>> 8) % NICK_B.length]
+}
+
 
 const api = async (path, body) => {
   const res = await fetch(path, body
@@ -538,24 +553,38 @@ function DealListScreen({ deals, onOpenDeal, sel }) {
   const shown = kind === 'all' ? deals : deals.filter((d) => d.kind === kind)
   const daily = deals.find((d) => d.kind === 'daily')
   const top = sel?.box?.tiers?.[0]
+  // 무대에 띄울 카드 — 등급을 섞어 6장. 전부 크롤 실측 상품이다.
+  const floaters = (sel?.box?.tiers ?? [])
+    .flatMap((t) => t.cards.slice(0, 2))
+    .filter((c) => c.image)
+    .slice(0, 6)
   return (
     <>
-      {/* 올또처럼 — 탭을 처음 열면 이 기능이 무엇인지부터 말한다.
-          스크롤을 내리면 그때 "지금 열려 있는 올박스" 목록이 나온다. */}
-      <section className="intro">
-        <p className="intro__k">구성을 전부 공개하는 뽑기</p>
-        <h2 className="intro__h">
-          {top ? <>최대 <b>{won(top.maxPrice)}</b></> : '올박스'}
-        </h2>
-        <p className="intro__s">
-          박스에 뭐가 들었는지 <b>{`${(sel?.box?.N ?? 1000).toLocaleString('ko-KR')}장 전부`}</b> 보여드려요
-        </p>
-        <div className="intro__art" aria-hidden="true">
-          {top?.cards?.[0]?.image && <img src={top.cards[0].image} alt="" />}
-          <span className="intro__bubble">
-            어떤 카드가 몇 장인지<br />세어볼 수 있어요
-          </span>
+      {/* 포켓몬 카드 게임 Pocket의 첫 화면 문법 —
+          어두운 무대에 빛이 퍼지고 실제 카드가 흩어져 떠 있다.
+          카드 이미지는 **크롤 실측 상품**이라 장식이 아니라 이 박스의 내용물이다. */}
+      <section className="hero3">
+        <span className="hero3__rays" aria-hidden="true" />
+        <span className="hero3__glow" aria-hidden="true" />
+        <div className="hero3__cards" aria-hidden="true">
+          {floaters.map((c, i) => (
+            <img key={c.id} src={c.image} alt="" loading="lazy"
+              className={`hero3__c hero3__c--${i + 1}`} />
+          ))}
         </div>
+        <div className="hero3__brand">
+          <span className="hero3__k">구성을 전부 공개하는 뽑기</span>
+          <h2 className="hero3__logo">올박스</h2>
+          <span className="hero3__tag">팀 구매 + 확률형 뽑기</span>
+        </div>
+        <p className="hero3__max">
+          {top ? <>최고 <b>{won(top.maxPrice)}</b></> : ''}
+          <em>{`${(sel?.box?.N ?? 1000).toLocaleString('ko-KR')}장 전부 공개`}</em>
+        </p>
+        <p className="hero3__scroll">아래로 내려서 시작 ↓</p>
+      </section>
+
+      <section className="intro">
         <ul className="intro__pts">
           {[
             ['전체 확률 100% 공개', '박스에 뭐가 몇 장 들었는지 전부 보여드려요'],
@@ -567,7 +596,6 @@ function DealListScreen({ deals, onOpenDeal, sel }) {
             </li>
           ))}
         </ul>
-        <p className="intro__scroll" aria-hidden="true">아래로 내리면 열려 있는 올박스 ↓</p>
       </section>
 
       {/* 풀블리드 배너 — ③ 0원 응모. 문구가 전부 참이라 과장 카피가 필요 없는
@@ -647,6 +675,24 @@ function TeamDetail({ sel, deal, teamSize, setTeamSize, busy, onBack, onBuy, onS
         <span className="pricebox__sub">{deal.price.sub}</span>
         {deal.price.bands && <span className="pricebox__bands">{deal.price.bands}</span>}
         <span className="pricebox__floor">{deal.floorLine}</span>
+      </section>
+
+      {/* 미공시만 문제가 아니다 — 서치팩과 정품도 소비자가 못 막는 위험이다.
+          구조적으로 어떻게 막는지를 상세에서 말한다. */}
+      <section className="hsec">
+        <header className="shead"><h2>왜 여기서 사면 안심인가요</h2></header>
+        <ul className="trust">
+          <li>
+            <b>서치팩이 없습니다</b>
+            <span>박스를 미리 뜯어 좋은 팩만 골라가는 사람이 중간에 없어요.
+              구성이 화면에 전부 있고 뽑기는 서버가 합니다</span>
+          </li>
+          <li>
+            <b>정품·등급이 확인된 카드</b>
+            <span>상위 등급은 PSA·BGS 등급이 매겨진 실물로 채웁니다.
+              재포장이나 정품 여부를 걱정하지 않아도 돼요</span>
+          </li>
+        </ul>
       </section>
 
       <section className="hsec">
@@ -981,6 +1027,7 @@ function TeamFlow(p) {
   const myTrade = room?.trade?.results.find((x) => x.memberId === me)
   const members = room ? room.members.map((m) => ({ ...m, sim: m.id !== me })) : []
   const iAmReady = !!room?.members.find((m) => m.id === me)?.ready
+  const inbox = (room?.requests ?? []).filter((q) => q.to === me)
   const joining = (room?.members.length ?? 0) < teamSize
 
   return (
@@ -1045,7 +1092,10 @@ function TeamFlow(p) {
           <section className="hsec" id="sec-open">
             <ul className="rv__list">
               {room.openResults.map((r, i) => (
-                <RevealCard key={r.memberId} r={r} mine={r.memberId === me} fee={box.fee} delay={i * 60} />
+                <RevealCard key={r.memberId} r={r} mine={r.memberId === me} fee={box.fee} delay={i * 60}
+                  onRequest={p.onSwapRequest} onCheer={p.onCheer} busy={busy}
+                  asked={(room.requests ?? []).some((q) => q.from === me && q.to === r.memberId)}
+                  cheered={(room.cheers ?? []).some((c) => c.from === me && c.to === r.memberId)} />
               ))}
             </ul>
             <div className="notice">
@@ -1058,28 +1108,51 @@ function TeamFlow(p) {
           </section>
 
           <section className="hsec" id="sec-trade">
-            <header className="shead"><h2>안 나온 것은 팀 안에서 바꿉니다</h2></header>
-            <p className="lead">
-              원하는 카드를 가진 사람에게 <b>직접 요청</b>하세요.
-              서로 엇갈려 1:1로 안 풀리는 것은 <b>한 번에 맞추기</b>가 고리로 풀어줍니다.
-            </p>
+            {/* 교환 요청은 위 결과 카드에서 바로 한다. 여기는 **받은 요청**과
+                1:1로 못 푸는 고리를 정리하는 '한 번에 맞추기'만 남긴다. */}
             {!room.trade ? (
               <>
-                <SwapBoard members={members} holdings={room.holdings} byId={p.cardById} me={me}
-                  requests={room.requests ?? []} onRequest={p.onSwapRequest}
-                  onRespond={p.onSwapRespond} busy={busy} />
-                <button className="btn btn--go" onClick={onTrade} disabled={busy === 'trade'}
-                  style={{ marginTop: 12 }}>
-                  {busy === 'trade' ? '맞추는 중…' : '한 번에 맞추기'}
-                </button>
+                {inbox.length > 0 && (
+                  <>
+                    <header className="shead"><h2>{`교환 요청 ${inbox.length}건`}</h2></header>
+                    <div className="swap__inbox">
+                      {inbox.map((q) => {
+                        const who = room.members.find((m) => m.id === q.from)
+                        const theirs = p.cardById.get(room.holdings?.[q.from])
+                        const ours = p.cardById.get(room.holdings?.[me])
+                        return (
+                          <div key={q.from} className="swapreq">
+                            <p className="swapreq__t"><b>{who?.name ?? q.from}</b>님이 교환을 요청했어요</p>
+                            <p className="swapreq__d">
+                              {`${theirs?.name?.slice(0, 20) ?? '카드'} (${won(theirs?.price ?? 0)})`}
+                              {' ↔ '}
+                              {`내 ${ours?.name?.slice(0, 20) ?? '카드'} (${won(ours?.price ?? 0)})`}
+                            </p>
+                            <div className="swapreq__b">
+                              <button type="button" className="btn btn--go btn--sm"
+                                onClick={() => p.onSwapRespond(q.from, true)} disabled={!!busy}>수락</button>
+                              <button type="button" className="btn btn--ghost btn--sm"
+                                onClick={() => p.onSwapRespond(q.from, false)} disabled={!!busy}>거절</button>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </>
+                )}
                 {p.swapMsg && <p className="swapmsg">{p.swapMsg}</p>}
-                <p className="dim">
-                  {`성사된 직접 교환 ${room.swaps?.length ?? 0}건`}
-                  {' · 한 번에 맞추기를 누르면 남은 요청을 정리하고 최종 배정합니다'}
-                </p>
+                <div className="cta">
+                  <button className="btn btn--go" onClick={onTrade} disabled={busy === 'trade'}>
+                    {busy === 'trade' ? '맞추는 중…' : '한 번에 맞추기'}
+                  </button>
+                  <p className="cta__note">
+                    {`성사된 직접 교환 ${room.swaps?.length ?? 0}건 · 서로 엇갈려 1:1로 안 풀리는 것은 고리로 풀어드려요`}
+                  </p>
+                </div>
               </>
             ) : (
               <>
+                <header className="shead"><h2>교환 결과</h2></header>
                 <h3 className="sub">성립한 교환 고리</h3>
                 <CycleView cycles={room.trade.cycles} />
                 <TradeTable results={room.trade.results} me={me} />
@@ -1275,7 +1348,7 @@ export default function App() {
   useEffect(() => {
     if (phase !== 'flow' || !room || room.opened || opening.current) return undefined
     if (room.members.length < teamSize) {
-      const t = setTimeout(() => act({ action: 'join', roomId: room.id, name: SIM_NAMES[room.members.length - 1] }), 1200)
+      const t = setTimeout(() => act({ action: 'join', roomId: room.id, name: nickOf(room.id, room.members.length) }), 1200)
       return () => clearTimeout(t)
     }
     // 전원 모이면 시뮬 팀원의 취향을 자동으로 깐다. 버튼 뒤에 숨겨두면
@@ -1376,6 +1449,10 @@ export default function App() {
     setBusy('')
   }
 
+  const onCheer = async (targetId) => {
+    await act({ action: 'cheer', roomId: room.id, memberId: me, targetId })
+  }
+
   const onSwapRespond = async (fromId, accept) => {
     setBusy('swap')
     await act({ action: 'swapRespond', roomId: room.id, memberId: me, fromId, accept })
@@ -1435,7 +1512,7 @@ export default function App() {
     onPay,
     onRecruit: () => setPhase('flow'),
     onOrders: () => setTab('me'),
-    onPick, onMyReady, onTrade, onSwapRequest, onSwapRespond,
+    onPick, onMyReady, onTrade, onSwapRequest, onSwapRespond, onCheer, cardById,
     onSheet: () => setSheet(true),
   }
 
@@ -1453,7 +1530,8 @@ export default function App() {
                   onClose={() => setSearch(false)} onSearch={onSearch}
                   suggest={boxes.suggest ?? []} recent={recent}
                   onClearRecent={() => { setRecent([]); saveRecent([]) }}
-                  result={searchResult} busy={searchBusy} q={q} setQ={setQ} />
+                  result={searchResult} busy={searchBusy} q={q} setQ={setQ}
+                  picks={homeCards.slice(0, 6)} />
               ) : null
         }>
         {tab === 'home' && <HomeTab cards={homeCards} deals={boxes.deals} onGoOlbox={() => setTab('olbox')}
