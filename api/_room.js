@@ -84,8 +84,8 @@ export async function counter(key, delta = 0) {
 }
 
 /**
- * 방의 초기 상태. **통 전체를 저장하지 않는다** — 뽑힌 구좌의 인덱스만 남기고
- * 남은 통은 api/_box.js의 remainingFrom()으로 복원한다(1,000구좌 ≈ 100KB 절약).
+ * 방의 초기 상태. **통 전체를 저장하지 않는다** — 뽑힌 카드의 인덱스만 남기고
+ * 남은 통은 api/_box.js의 remainingFrom()으로 복원한다(1,000장 ≈ 100KB 절약).
  * 저장된 것과 계산된 것이 두 벌로 갈라지지 않는다는 것이 더 중요한 이유다.
  */
 export const newRoom = (id, boxId = 'olbox') => ({
@@ -94,9 +94,11 @@ export const newRoom = (id, boxId = 'olbox') => ({
   rev: 0,
   createdAt: Date.now(),
   members: [],          // { id, name, ready, target, aiPrefs, aiWhy, aiSource }
-  drawn: [],            // 뽑힌 구좌 인덱스 (비복원 상태의 전부)
+  drawn: [],            // 뽑힌 카드 인덱스 (비복원 상태의 전부)
   round: 0,
   opened: false,
-  openResults: null,    // 개봉 결과 (멱등 재조회용)
-  trade: null,          // 교환 결과 (멱등 재조회용)
+  openResults: null,    // 개봉 결과 (멱등 재조회용) — **불변 기록**. 스왑이 생겨도 건드리지 않는다
+  requests: [],         // 직접 교환 요청 { from, to, at }
+  swaps: [],            // 성사된 1:1 교환 { from, to, at }
+  trade: null,          // TTC 최종 배정 (멱등 재조회용). 실행되면 직접 교환은 잠긴다
 })

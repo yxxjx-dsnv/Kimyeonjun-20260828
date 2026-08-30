@@ -4,10 +4,10 @@
  *
  * ## 이 파일에 없는 것
  * 배수, 곡선, 예산, CAC, 천장, 보정 계수. 사람이 확률을 조절할 수 있는 손잡이가
- * 하나도 없다. 확률은 재고 ÷ 구좌이고, 팀 효과는 초기하분포에서 나온다.
+ * 하나도 없다. 확률은 재고 ÷ 전체 장수이고, 팀 효과는 초기하분포에서 나온다.
  *
  * v1은 예산에서 배수를 뽑아 확률에 곱했고(CR_MIN·CR_MAX·N0·K·CAC·CAC_CAP),
- * 그 결과 1,000구좌 × 0.280% = 기대 배출 2.8개인데 재고는 1개인 모순이 남았다.
+ * 그 결과 1,000장 × 0.280% = 기대 배출 2.8개인데 재고는 1개인 모순이 남았다.
  * self-check 5,631건이 전부 통과하는 동안에도 모델은 현실과 다른 것을 재고 있었다.
  * 검사가 많은 것과 옳은 것을 재는 것은 다른 문제다. v2는 배수 자체를 만들지 않는다.
  *
@@ -28,7 +28,7 @@ const isMain = () => {
 export const pSolo = (k, n = N) => k / n
 
 /**
- * 팀 n명이 각자 1구좌씩 비복원으로 뽑을 때 등급 g가 최소 한 장 나올 확률.
+ * 팀 n명이 각자 1장씩 비복원으로 뽑을 때 등급 g가 최소 한 장 나올 확률.
  *
  *   P_team = 1 − C(N−K, n) / C(N, n)      ← 초기하분포
  *
@@ -43,7 +43,7 @@ export const pSolo = (k, n = N) => k / n
  */
 export function pTeam(k, n, total = N) {
   if (k <= 0 || n <= 0) return 0
-  if (n >= total - k + 1) return 1 // 남은 구좌보다 뽑는 수가 많으면 반드시 포함된다
+  if (n >= total - k + 1) return 1 // 남은 카드보다 뽑는 수가 많으면 반드시 포함된다
   let ratio = 1
   for (let i = 0; i < k; i++) ratio *= (total - n - i) / (total - i)
   return 1 - ratio
@@ -53,7 +53,7 @@ export function pTeam(k, n, total = N) {
 export const teamMultiple = (k, n, total = N) => pTeam(k, n, total) / pSolo(k, total)
 
 /**
- * 갱신 확률 — j구좌가 이미 뽑혔고 등급 g가 아직 안 나왔다면.
+ * 갱신 확률 — j장이 이미 뽑혔고 등급 g가 아직 안 나왔다면.
  *   P(g) = K_g / (N − j)
  *
  * 도박사의 오류("많이 안 나왔으니 이제 나올 때가 됐다")는 복원 추출에서는
@@ -63,7 +63,7 @@ export const teamMultiple = (k, n, total = N) => pTeam(k, n, total) / pSolo(k, t
  */
 export function pUpdated(k, j, total = N) {
   const left = total - j
-  // 남은 구좌가 재고보다 적으면 "j가 빠졌는데 g가 아직 안 나왔다"는 전제 자체가
+  // 남은 카드가 재고보다 적으면 "j가 빠졌는데 g가 아직 안 나왔다"는 전제 자체가
   // 성립하지 않는다. v1스러운 처리는 Math.min(1, k/left)로 1에 클램프하는 것인데,
   // 그러면 불가능한 상태가 "확률 100%"로 표시된다. 화면에 100%라고 쓰면
   // 9.85배를 10배라고 쓰는 것과 같은 종류의 거짓말이 된다. null로 두고 화면은 '—'.
@@ -74,8 +74,8 @@ export function pUpdated(k, j, total = N) {
 /**
  * 자연빈도 — 확률 오인을 줄인다(D10 Gigerenzer & Hoffrage 1995).
  *
- * 기준을 N(구좌 수)으로 고정한다. 행마다 기준이 달라지면 비교가 안 되고,
- * N으로 두면 "1,000명 중 1명"이 곧 "1,000구좌 중 재고 1장"이라 확률의 정의가
+ * 기준을 N(전체 장수)으로 고정한다. 행마다 기준이 달라지면 비교가 안 되고,
+ * N으로 두면 "1,000명 중 1명"이 곧 "1,000장 중 재고 1장"이라 확률의 정의가
  * 문장 안에서 그대로 보인다. 확률을 따로 설명할 필요가 없어진다.
  */
 export function naturalFreq(p, base = N) {
@@ -120,7 +120,7 @@ export function tierOdds(tier, box = BOX) {
 
 export const allOdds = (box = BOX) => TIERS.map((g) => tierOdds(g, box))
 
-/** 갱신 확률표. j구좌 소진 시점의 확률. */
+/** 갱신 확률표. j장 소진 시점의 확률. */
 export const updateTable = (tier, js, box = BOX) => {
   const t = box.tiers.find((x) => x.tier === tier)
   return js.map((j) => {
@@ -151,16 +151,16 @@ export function rng(seed) {
 export const drawSeed = (roomId, boxId, participantId, round) =>
   `${roomId}|${boxId}|${participantId}|${round}`
 
-/** 남은 구좌에서 하나를 뽑는다. 복원하지 않는다 — 뽑힌 구좌는 배열에서 빠진다. */
+/** 남은 카드에서 하나를 뽑는다. 복원하지 않는다 — 뽑힌 카드는 배열에서 빠진다. */
 export function drawOne(seed, remaining) {
   const i = Math.floor(rng(seed)() * remaining.length)
   return { index: i, slot: remaining[i] }
 }
 
 /**
- * 한 회차 개봉. 참여자들이 **순서대로** 같은 통에서 비복원으로 각자 1구좌씩 뽑는다.
+ * 한 회차 개봉. 참여자들이 **순서대로** 같은 통에서 비복원으로 각자 1장씩 뽑는다.
  * 뽑을 때마다 통이 줄고 남은 사람의 확률이 갱신된다 — 그 과정을 trace에 남겨
- * 화면이 "남은 구좌 999개 → S 확률 0.100%"를 실제 계산값으로 보여줄 수 있게 한다.
+ * 화면이 "남은 카드 999개 → S 확률 0.100%"를 실제 계산값으로 보여줄 수 있게 한다.
  */
 export function openRound({ roomId, boxId = 'box', participantIds, round = 1, box = BOX, remaining = null }) {
   let left = remaining ? remaining.slice() : slotsOf(box)
@@ -204,7 +204,7 @@ export function check() {
   }
   const near = (a, b, eps) => Math.abs(a - b) <= eps
 
-  // 1. 구좌 보존
+  // 1. 장 보존
   ok('Σ K_g = N', TIERS.reduce((s, g) => s + K[g], 0) === N, `${N}`)
 
   // 2. K=1이면 P_team(n) == n/N 정확히
@@ -291,7 +291,7 @@ export function check() {
   ok('다른 방은 다른 결과', JSON.stringify(a1.results) !== JSON.stringify(b1.results))
 
   // 12. 꽝 없음 1층 — 뽑힌 무엇이든 참여비 이상
-  ok('꽝 없음 1층 — 전 구좌 시가 ≥ 참여비',
+  ok('꽝 없음 1층 — 전 장 시가 ≥ 참여비',
     slotsOf().every((s) => s.price >= FEE), `최저 ${Math.min(...slotsOf().map((s) => s.price)).toLocaleString()}원`)
 
   // 13. "회사가 정한 숫자가 없다"를 주석이 아니라 검사로 지킨다.
@@ -305,7 +305,7 @@ export function check() {
   //
   //     검사 범위는 **확률 경로**다. _group.js·_daily.js는 예산 파라미터(고정비·마진·
   //     마케팅 예산)를 선언하지만, 그것이 정하는 것은 **재고**이지 확률이 아니다.
-  //     확률은 거기서도 재고 ÷ 구좌이고, 그 항등식을 각 파일의 self-check가 직접 검사한다.
+  //     확률은 거기서도 재고 ÷ 전체 장수이고, 그 항등식을 각 파일의 self-check가 직접 검사한다.
   //     범위를 안 나누면 이 검사가 "예산을 쓰면 안 된다"는 다른 주장이 되어 버린다.
   const apiDir = dirname(fileURLToPath(import.meta.url))
   const ODDS_PATH = ['_box.js', '_draw.js', '_trade.js']
@@ -324,7 +324,7 @@ export function check() {
 if (isMain()) {
   const won = (n) => n.toLocaleString('ko-KR') + '원'
   console.log('═'.repeat(78))
-  console.log(`확률 엔진 — 참여비 ${won(FEE)} · ${N}구좌 · 정원 ${TEAM_MAX}명`)
+  console.log(`확률 엔진 — 참여비 ${won(FEE)} · ${N}장 · 정원 ${TEAM_MAX}명`)
   console.log('═'.repeat(78))
 
   console.log('\n■ 인원별 확률 (개인 → 팀)')
@@ -339,7 +339,7 @@ if (isMain()) {
       o.team.map((t) => t.mul.padStart(9)).join('') + (o.exactlyLinear ? '   ← K=1이라 정확히 n배' : ''))
   }
 
-  console.log('\n■ 자연빈도 (D10) — 기준을 구좌 수로 고정하면 확률의 정의가 문장에 보인다')
+  console.log('\n■ 자연빈도 (D10) — 기준을 전체 장수로 고정하면 확률의 정의가 문장에 보인다')
   for (const o of allOdds()) {
     console.log(`   ${o.tier}  혼자 ${o.soloPct.padStart(8)}  ${o.soloFreq.padEnd(22)}` +
       `팀 10명 ${o.team[9].pct.padStart(8)}  ${o.team[9].freq}`)
@@ -350,10 +350,10 @@ if (isMain()) {
   for (const g of TIERS) {
     console.log(`    ${g}    ` + updateTable(g, [0, 250, 500, 750, 900, 990]).map((r) => r.pct.padStart(11)).join(''))
   }
-  console.log('    ※ S등급: 남은 구좌가 줄수록 확률이 오른다. 990구좌가 빠지면 10%다.')
+  console.log('    ※ S등급: 남은 카드가 줄수록 확률이 오른다. 990장이 빠지면 10%다.')
   console.log('      도박사의 오류가 비복원에서는 참이 된다. 별도 천장 장치가 없다.')
-  console.log('    ※ —는 확률 0이 아니라 **성립 불가능한 상태**다. 예: 990구좌가 빠졌는데')
-  console.log('      B등급 25장이 아직 남아 있을 수는 없다(남은 구좌가 10개뿐이므로).')
+  console.log('    ※ —는 확률 0이 아니라 **성립 불가능한 상태**다. 예: 990장이 빠졌는데')
+  console.log('      B등급 25장이 아직 남아 있을 수는 없다(남은 카드가 10개뿐이므로).')
   console.log('      1로 클램프하면 불가능한 상태가 100%로 표시된다. 그렇게 하지 않는다.')
 
   console.log('\n─────────────────────────── self-check ───────────────────────────')

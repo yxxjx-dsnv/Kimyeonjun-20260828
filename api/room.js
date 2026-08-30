@@ -14,7 +14,7 @@
  *
  * 지목은 확률을 건드리지 않는다. TTC의 1순위 선호가 될 뿐이다.
  * "지목하면 잘 나온다"는 어떤 경로도 만들지 않는다 — 만드는 순간 확률이
- * 재고 ÷ 구좌가 아니게 된다(I1).
+ * 재고 ÷ 전체 장수가 아니게 된다(I1).
  */
 import { BOX, BOXES, boxById, TEAM_MAX, slotsOf, remainingFrom, tierCountsOf } from './_box.js'
 import { openRound, fmtPct, naturalFreq, rng } from './_draw.js'
@@ -31,6 +31,24 @@ const PER_BOX = new Map(BOXES.map((b) => {
 }))
 /** 방의 통. 과거 방(boxId='olbox')은 기본 통으로 해석한다. */
 const ctxOf = (room) => PER_BOX.get(room.boxId) || PER_BOX.get(BOX.id)
+
+/**
+ * 지금 누가 무엇을 들고 있는가 — **개봉 기록에서 유도한다.**
+ *   개봉 결과(불변) → 성사된 1:1 스왑을 순서대로 적용
+ * openResults를 직접 고치지 않는 이유: 그것이 "무엇이 뽑혔는가"의 유일한 기록이고,
+ * 비복원 서사(뽑기 직전 남은 카드·그때 확률)가 거기 붙어 있기 때문이다.
+ * TTC가 실행되면 그 결과가 최종이므로 여기서 다시 계산하지 않는다.
+ */
+export function holdingsOf(room) {
+  const h = {}
+  for (const r of room.openResults ?? []) h[r.memberId] = r.cardId
+  for (const s of room.swaps ?? []) {
+    const a = h[s.from], b = h[s.to]
+    if (a === undefined || b === undefined) continue
+    h[s.from] = b; h[s.to] = a
+  }
+  return h
+}
 
 /** 클라이언트에 내려보내는 방 상태. 통 상태와 갱신된 확률을 함께 준다(I3). */
 export function view(room) {
@@ -49,6 +67,10 @@ export function view(room) {
     allReady: room.members.length > 0 && readyCount === room.members.length,
     opened: !!room.opened,
     openResults: room.openResults,
+    /** 지금 보유 — 직접 교환이 반영된 상태. TTC 후에는 trade.results가 최종이다. */
+    holdings: room.opened ? holdingsOf(room) : null,
+    requests: room.requests ?? [],
+    swaps: room.swaps ?? [],
     trade: room.trade,
     /** 지목 집계 — 같은 카드를 몇 명이 원하는지. 교환 전환율이 여기 달려 있다. */
     targets: room.members.reduce((m, x) => (x.target ? ((m[x.target] = (m[x.target] || 0) + 1), m) : m), {}),
@@ -70,7 +92,7 @@ export function view(room) {
  * "한 명이라도 안 누르면 안 열린다"가 제품의 주장이므로 판정을 프론트에 두지 않는다.
  * 프론트의 버튼 비활성화는 편의이지 보증이 아니다. 여기서 방 상태를 다시 읽어 센다.
  *
- * 비복원(I3): 뽑힌 구좌는 통에서 빠지고 다음 조회부터 갱신된 확률이 내려간다.
+ * 비복원(I3): 뽑힌 카드는 통에서 빠지고 다음 조회부터 갱신된 확률이 내려간다.
  * 멱등: 같은 방을 다시 열면 저장된 결과를 그대로 돌려준다. 통을 두 번 깎지 않는다.
  */
 async function doOpen(res, roomId) {
@@ -137,14 +159,14 @@ async function doTrade(res, roomId) {
   const next = await mutateRoom(roomId, (r) => {
     if (r.trade) return null
     const { universe } = ctxOf(r)
-    const participants = r.members.map((m) => {
-      const got = r.openResults.find((x) => x.memberId === m.id)
-      return {
-        id: m.id,
-        holding: got.cardId,
-        prefs: completePrefs({ target: m.target, aiRanked: m.aiPrefs || [], universe }),
-      }
-    })
+    // 직접 교환이 이미 일어났으면 **그 결과 위에서** 배정한다.
+    // 개봉 결과를 쓰면 성사된 스왑이 조용히 되돌려진다.
+    const held = holdingsOf(r)
+    const participants = r.members.map((m) => ({
+      id: m.id,
+      holding: held[m.id],
+      prefs: completePrefs({ target: m.target, aiRanked: m.aiPrefs || [], universe }),
+    }))
     const out = ttc(participants, tradeSeed(r.id, r.round))
     const byId = new Map(universe.map((c) => [c.id, c]))
     r.trade = {
@@ -219,6 +241,66 @@ export default async function handler(req, res) {
 
   if (action === 'open') return doOpen(res, roomId)
   if (action === 'trade') return doTrade(res, roomId)
+
+  /**
+   * 직접 교환 요청 — 내 카드와 상대 카드를 1:1로 바꾸자고 제안한다.
+   *
+   * 이 기능이 TTC를 대체하지 않는다. 서로 엇갈려 1:1로는 못 푸는 요청이 남는데
+   * (A는 B 걸 원하고 B는 C 걸 원하는 경우), 그 고리는 '한 번에 맞추기'가 푼다.
+   * 즉 **직접 요청은 선호의 표명이고, TTC는 그 선호를 다자간으로 푸는 엔진**이다.
+   */
+  if (action === 'swapRequest') {
+    const targetId = req.body?.targetId
+    let error = null
+    const room = await mutateRoom(roomId, (r) => {
+      if (!r.opened) { error = { code: 409, msg: '개봉 전에는 교환할 수 없습니다' }; return null }
+      if (r.trade) { error = { code: 409, msg: '이미 한 번에 맞추기가 끝났습니다' }; return null }
+      if (memberId === targetId) { error = { code: 400, msg: '자기 자신에게는 요청할 수 없습니다' }; return null }
+      const held = holdingsOf(r)
+      if (held[memberId] === undefined || held[targetId] === undefined) {
+        error = { code: 404, msg: '참여자가 없습니다' }; return null
+      }
+      r.requests = r.requests ?? []
+      // 같은 상대에게 두 번 보내지 않는다. 덮어쓰는 것이 아니라 무시한다.
+      if (r.requests.some((q) => q.from === memberId && q.to === targetId)) return r
+      r.requests.push({ from: memberId, to: targetId, at: Date.now() })
+      r.rev++
+      return r
+    })
+    if (!room) return res.status(error?.code ?? 404).json({ error: error?.msg ?? '방이 없습니다' })
+    if (error) return res.status(error.code).json({ error: error.msg, ...view(room) })
+    return res.status(200).json(view(room))
+  }
+
+  /** 요청에 응답한다. 수락하면 그 자리에서 카드가 바뀐다. */
+  if (action === 'swapRespond') {
+    const fromId = req.body?.fromId
+    const accept = req.body?.accept !== false
+    let error = null
+    const room = await mutateRoom(roomId, (r) => {
+      if (r.trade) { error = { code: 409, msg: '이미 한 번에 맞추기가 끝났습니다' }; return null }
+      r.requests = r.requests ?? []
+      const i = r.requests.findIndex((q) => q.from === fromId && q.to === memberId)
+      if (i < 0) { error = { code: 404, msg: '그런 요청이 없습니다' }; return null }
+      r.requests.splice(i, 1)
+      if (accept) {
+        const held = holdingsOf(r)
+        if (held[fromId] === undefined || held[memberId] === undefined) {
+          error = { code: 404, msg: '참여자가 없습니다' }; return null
+        }
+        r.swaps = r.swaps ?? []
+        r.swaps.push({ from: fromId, to: memberId, at: Date.now() })
+        // 성사되면 두 사람이 낀 나머지 요청은 의미가 없어진다 — 들고 있는 것이 바뀌었다
+        r.requests = r.requests.filter((q) =>
+          q.from !== fromId && q.to !== fromId && q.from !== memberId && q.to !== memberId)
+      }
+      r.rev++
+      return r
+    })
+    if (!room) return res.status(error?.code ?? 404).json({ error: error?.msg ?? '방이 없습니다' })
+    if (error) return res.status(error.code).json({ error: error.msg, ...view(room) })
+    return res.status(200).json(view(room))
+  }
 
   if (action === 'state') {
     const room = await readRoom(roomId)

@@ -10,7 +10,7 @@
  * v1에서 배포 성공 로그를 보고도 사용자는 옛 화면을 보고 있었다.
  *
  * 여정: 홈 → 올박스 목록 → 상세 → 결제 → 주문완료 → 모집(시간차) → 전원 게이트(409)
- *      → 자동 개봉 → 교환 → 새로고침 복구 → 주문내역 → 공동구매 → 0원 응모 → Q&A
+ *      → 자동 개봉 → 교환 → 새로고침 복구 → 주문내역 → 공동구매 → 0원 응모
  */
 import { chromium } from 'playwright'
 
@@ -44,13 +44,6 @@ ok('딜이 5개다 (팀 3통 + 공동구매 + 0원 응모)', API.deals?.length =
 ok('팀 딜에는 마감이 없다 (I10′)', API.deals.filter((d) => d.kind === 'team').every((d) => d.deadlineAt === null))
 ok('공동구매·응모 마감은 미래다', API.deals.filter((d) => d.kind !== 'team').every((d) => d.deadlineAt > Date.now()))
 ok('통이 3개 내려온다', API.boxes?.length === 3, API.boxes?.map((b) => b.box.id).join(','))
-const askRes = await fetch(`${BASE}/api/ask`, {
-  method: 'POST', headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ question: '확률은 어떻게 정해지나요?' }),
-})
-const askJ = await askRes.json().catch(() => ({}))
-ok('Q&A가 답한다 (openai 또는 문서 폴백)', askRes.ok && !!askJ.answer && ['openai', 'fallback'].includes(askJ.source),
-  `source=${askJ.source}`)
 
 console.log('\n─── 로딩과 앱 셸 ───')
 const res = await page.goto(BASE + '/' + CACHE_BUST, { waitUntil: 'networkidle', timeout: 45000 })
@@ -80,14 +73,14 @@ console.log('\n─── 올박스 목록 — 고를 것이 있다 ───')
 await page.locator('.tabbar__b.is-center').click()
 await page.waitForSelector('.deallist')
 ok('딜 카드가 5개다', (await page.locator('.deal').count()) === 5)
-ok('0원 응모 배너가 있고 마감 시계가 돈다', await page.locator('.dbanner .ticker').isVisible())
-const t1 = await page.locator('.dbanner .ticker b').textContent()
+ok('0원 응모 배너가 있고 마감 시계가 돈다', await page.locator('.dbanner .tk').isVisible())
+const t1 = await page.locator('.dbanner .tk__v').textContent()
 await page.waitForTimeout(1600)
-const t2 = await page.locator('.dbanner .ticker b').textContent()
+const t2 = await page.locator('.dbanner .tk__v').textContent()
 ok('시계가 실제로 흐른다', t1 !== t2, `${t1} → ${t2}`)
-ok('팀 딜 카드에는 시계가 없다 (I10′)', (await page.locator('.deal--team .ticker').count()) === 0)
-ok('공동구매·응모 카드에는 시계가 있다', (await page.locator('.deal--group .ticker').count()) === 1
-  && (await page.locator('.deal--daily .ticker').count()) === 1)
+ok('팀 딜 카드에는 시계가 없다 (I10′)', (await page.locator('.deal--team .tk').count()) === 0)
+ok('공동구매·응모 카드에는 시계가 있다', (await page.locator('.deal--group .tk').count()) === 1
+  && (await page.locator('.deal--daily .tk').count()) === 1)
 
 // 가격 위계 — 화면의 큰 활자가 서버 문자열 그대로인가
 const stdDeal = API.deals.find((d) => d.id === 'standard')
@@ -117,7 +110,7 @@ ok('초대 보상 없음 고지 (I12)', await page.getByText('초대한 사람�
 await page.locator('.verify').click()
 await page.waitForSelector('.sheet')
 const cells = await page.locator('.cell').count()
-ok('구좌를 전부 그린다 (요약하지 않는다)', cells === 1000, `${cells}칸`)
+ok('장을 전부 그린다 (요약하지 않는다)', cells === 1000, `${cells}칸`)
 await page.locator('.sheet__x').click()
 
 console.log('\n─── 결제 — 커머스 규격, 서버 값, 시뮬 표기 ───')
@@ -131,7 +124,7 @@ await page.locator('.cta .btn--go').click()
 await page.waitForSelector('.done')
 const orderNo = (await page.locator('.done .order__row b').first().textContent()).trim()
 ok('주문번호는 서버가 발급한다', /^[a-z0-9]{4,8}$/.test(orderNo), orderNo)
-ok('산 시점의 남은 구좌가 주문서에 박힌다', await page.getByText('내가 산 시점').isVisible())
+ok('산 시점의 남은 카드가 주문서에 박힌다', await page.getByText('내가 산 시점').isVisible())
 
 console.log('\n─── 모집 — 시간차 입장, 전원 게이트는 서버가 판정 ───')
 await page.getByText('팀 모으러 가기').click()
@@ -149,25 +142,43 @@ ok('전원 게이트가 서버에서 판정된다 (I8)', gateVisible,
 
 console.log('\n─── 개봉 — 자동, 비복원, 실재 증명 ───')
 ok('전원 준비되면 자동으로 열린다', await page.waitForSelector('.rv__list', { timeout: 60000 }).then(() => true).catch(() => false))
-const scene = page.locator('.scene button').first()
-if (await scene.isVisible().catch(() => false)) await scene.click()
+// 개봉 극장은 폰 전체를 덮는 오버레이라 닫지 않으면 이후 클릭을 전부 가로챈다
+await page.locator('.scene').click({ timeout: 5000 }).catch(() => {})
+await page.waitForSelector('.scene', { state: 'detached', timeout: 8000 }).catch(() => {})
 ok('결과 카드가 10장이다', (await page.locator('.rv').count()) === 10)
 const myPrice = await page.locator('.rv.is-mine .rv__pr').first().textContent()
 ok('내 카드가 참여비 이상이다 (꽝 없음 1층)', parseInt(myPrice.replace(/[^\d]/g, ''), 10) >= API.boxes[0].box.fee, myPrice)
-ok('뽑기 직전 남은 구좌·확률이 카드에 박힌다', await page.locator('.rv.is-mine .rv__before').isVisible())
+ok('뽑기 직전 남은 카드·확률이 카드에 박힌다', await page.locator('.rv.is-mine .rv__before').isVisible())
 ok('내 카드에 판매처 링크가 있다 (실재 증명)', (await page.locator('.rv__src a').count()) === 1)
 ok('배송 미구현을 그 자리에 적는다', await page.getByText('실물 배송·수령은 이 MVP에서 구현하지 않았습니다').isVisible())
-ok('빠진 구좌 게이지가 서버 값으로 찬다', /빠진 구좌 10/.test(await page.locator('.gauge__t').textContent()))
+ok('빠진 카드 게이지가 서버 값으로 찬다', /빠진 카드 10/.test(await page.locator('.gauge__t').textContent()))
 
-console.log('\n─── 교환 — 정리가 보증하고 화면이 확인한다 ───')
-await page.getByText('교환 실행').click()
+console.log('\n─── 교환 — 사람에게 요청하고, 못 푸는 고리는 정리가 푼다 ───')
+// 직접 요청 — 소비자가 먼저 사람에게 말을 건다
+await page.waitForSelector('.swap__list', { timeout: 15000 })
+ok('팀원별 보유 카드가 보인다', (await page.locator('.swapcard').count()) === 9,
+  `${await page.locator('.swapcard').count()}명`)
+await page.locator('.swapcard__go').first().click()
+await page.waitForTimeout(700)
+ok('요청을 보내면 버튼이 요청함으로 바뀐다',
+  (await page.locator('.swapcard__go.is-sent').count()) >= 1)
+await page.waitForTimeout(3200)
+const swapLine = await page.locator('.dim').filter({ hasText: '성사된 직접 교환' }).textContent()
+ok('시뮬 팀원이 요청에 응답한다 (수락 또는 거절)', /성사된 직접 교환 \d+건/.test(swapLine),
+  swapLine.split('·')[0].trim())
+// 한 번에 맞추기 — 1:1로 안 풀리는 고리를 TTC가 푼다
+await page.getByRole('button', { name: '한 번에 맞추기' }).click()
 await page.waitForSelector('.cycle, .tradetable, #sec-trade table', { timeout: 15000 }).catch(() => {})
 await page.waitForTimeout(800)
 const tradeNote = await page.locator('#sec-trade .notice p').textContent()
 ok('개선 인원과 무손해가 함께 표기된다', /\d+명이 원하던 쪽으로/.test(tradeNote) && /손해 본 사람은 없습니다/.test(tradeNote),
   tradeNote.match(/\d+명/)?.[0])
+// 오리파 대조는 구매 흐름에 늘 펼쳐 두지 않는다 — ⓘ로 접혀 있고, 눌러야 열린다
+ok('오리파 대조는 기본적으로 접혀 있다', (await page.locator('.compare').count()) === 0)
+await page.locator('.infotoggle').click()
+await page.waitForSelector('.compare', { timeout: 5000 })
 const unknowns = await page.locator('.compare .unknown').count()
-ok('오리파 대조표의 모르는 칸은 물음표로 남는다', unknowns >= 4, `${unknowns}칸`)
+ok('펼치면 모르는 칸이 물음표로 남는다', unknowns >= 4, `${unknowns}칸`)
 ok('추첨·교환 시드가 공개된다', /추첨 시드/.test(await page.locator('.seed').textContent()))
 
 console.log('\n─── 새로고침 복구 — 주문이 사라지지 않는다 ───')
@@ -185,7 +196,7 @@ await page.locator('.tabbar__b.is-center').click()
 await page.getByText('올박스 목록').first().click().catch(() => {})
 await page.getByText('브랜드 공동구매').first().click()
 await page.waitForSelector('.pricebox')
-ok('회차 마감 시계가 있다', await page.locator('.ticker').first().isVisible())
+ok('회차 마감 시계가 있다', await page.locator('.tk').first().isVisible())
 ok('웃돈 0원이 명시된다', await page.getByText('웃돈 0원').first().isVisible())
 const gDeal = API.deals.find((d) => d.kind === 'group')
 ok('환불 구간표가 서버 값 그대로다', (await page.locator('.body tbody tr').count()) === gDeal.milestones.length,
@@ -202,21 +213,6 @@ ok('취소선·할인율·특가가 서버 문자열이다',
 ok('하락 방향이 명시된다 (반대 방향 고지)', await page.getByText('반대 방향').isVisible())
 await page.getByText('0원으로 응모하기').click()
 ok('응모 접수가 시뮬로 표기된다', await page.getByText('집계는 저장되지 않습니다').isVisible())
-
-console.log('\n─── 프로젝트 Q&A — 문서에 근거해 답한다 ───')
-await page.locator('.dock--closed').click()
-await page.waitForSelector('.dock--open')
-await page.getByText('왜 올웨이즈인가요?').click()
-const answered = await page.waitForSelector('.dockmsg--assistant:not(.dockmsg--wait) p', { timeout: 30000 })
-  .then(() => true).catch(() => false)
-ok('질문에 답이 돌아온다', answered)
-if (answered) {
-  const ans = await page.locator('.dockmsg--assistant:not(.dockmsg--wait) p').first().textContent()
-  ok('답이 비어 있지 않다', ans.length > 30 && !/응답을 받지 못했습니다/.test(ans), `${ans.slice(0, 32)}…`)
-  const grounded = (await page.locator('.dockmsg footer details').count()) > 0
-    || (await page.locator('.dockmsg footer .simtag').count()) > 0
-  ok('근거(발췌 목록) 또는 폴백 표기가 붙는다', grounded)
-}
 
 console.log('\n─── 콘솔 무결성 ───')
 ok('콘솔 에러가 없다', consoleErrors.length === 0, consoleErrors.slice(0, 2).join(' | ') || '0건')

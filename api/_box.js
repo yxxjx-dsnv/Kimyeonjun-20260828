@@ -3,7 +3,7 @@
  *   node api/_box.js     구성 결과와 self-check 출력
  *
  * 이 파일이 정하는 것은 **무엇이 통에 들어가는가**다.
- * 확률이 얼마인가는 정하지 않는다 — 그것은 재고 ÷ 구좌이고 api/_draw.js가 센다.
+ * 확률이 얼마인가는 정하지 않는다 — 그것은 재고 ÷ 전체 장수이고 api/_draw.js가 센다.
  * 사람이 확률을 적을 수 있는 자리가 이 코드에 없다는 것이 요점이다.
  */
 import pool from './_pool.js'
@@ -32,7 +32,7 @@ const isMain = () => {
  */
 export const FEE = 10000
 
-/** 구좌 수. 확률의 분모다. */
+/** 전체 장수. 확률의 분모다. */
 export const N = 1000
 
 /** 팀 정원. 설계 선택이며 근거는 UI 제약이다(SPEC §12). 확률식에는 개입하지 않는다. */
@@ -49,7 +49,7 @@ export const TIERS = ['S', 'A', 'B', 'C']
  *             제품의 핵심 주장이 화면에서 증명되려면 재고가 1이어야 한다.
  *  K_A = 4    K>1이면 정확히 n배가 아니다. n=10에서 9.85배다. 그 차이를 화면에
  *             그대로 보여주기 위한 대조군이다. 반올림해서 10배라고 쓰지 않는다.
- *  K_B = 25   S·A가 1구좌씩 유일 카드인 것과 달리 여러 종이 들어간다.
+ *  K_B = 25   S·A가 1장씩 유일 카드인 것과 달리 여러 종이 들어간다.
  *  K_C = 970  나머지 전부. Σ K_g = N을 self-check가 검사한다.
  *
  * 이 값들은 **설계 선택**이며 SPEC §12 가정 표에 그렇게 적혀 있다.
@@ -87,7 +87,7 @@ function pick(sorted, k) {
   return Array.from({ length: k }, (_, i) => sorted[Math.round((i * (sorted.length - 1)) / (k - 1))])
 }
 
-/** 구좌를 카드에 나눈다. 나머지는 앞에서부터 한 장씩. 결정적이다. */
+/** 장을 카드에 나눈다. 나머지는 앞에서부터 한 장씩. 결정적이다. */
 function spread(cards, slots) {
   const base = Math.floor(slots / cards.length)
   const extra = slots - base * cards.length
@@ -141,10 +141,10 @@ export const BOX = BOXES[0]
 export const boxById = (id) => BOXES.find((b) => b.id === id) || null
 
 /**
- * 구좌 하나하나를 펼친 배열. 추첨은 이 위에서 비복원으로 일어난다.
+ * 장 하나하나를 펼친 배열. 추첨은 이 위에서 비복원으로 일어난다.
  *
- * 각 구좌에 안정적인 인덱스 i를 준다. 통 구성이 결정적이므로(self-check가 확인한다)
- * i는 재실행해도 같은 구좌를 가리킨다. 덕분에 방 상태에 1,000구좌를 통째로 저장하지
+ * 각 장에 안정적인 인덱스 i를 준다. 통 구성이 결정적이므로(self-check가 확인한다)
+ * i는 재실행해도 같은 장을 가리킨다. 덕분에 방 상태에 1,000장을 통째로 저장하지
  * 않고 **뽑힌 인덱스만** 남겨도 남은 통을 정확히 복원할 수 있다.
  * KV에 100KB를 밀어 넣지 않아도 되고, 저장된 것과 계산된 것이 어긋날 여지도 없다.
  */
@@ -163,7 +163,7 @@ export const remainingFrom = (drawnIdx, box = BOX) => {
   return slotsOf(box).filter((s) => !taken.has(s.i))
 }
 
-/** 남은 통의 등급별 재고. 확률은 이것을 구좌 수로 나눈 것이다. */
+/** 남은 통의 등급별 재고. 확률은 이것을 전체 장수로 나눈 것이다. */
 export const tierCountsOf = (remaining) =>
   Object.fromEntries(TIERS.map((g) => [g, remaining.filter((s) => s.tier === g).length]))
 
@@ -179,10 +179,10 @@ export function check(box = BOX) {
   ok('Σ K_g = N', sumK === box.N, `${box.tiers.map((t) => `${t.tier}:${t.K}`).join(' + ')} = ${sumK}`)
 
   const slots = slotsOf(box)
-  ok('펼친 구좌 수 = N', slots.length === box.N, `${slots.length}`)
+  ok('펼친 카드 수 = N', slots.length === box.N, `${slots.length}`)
   for (const t of box.tiers) {
     const n = slots.filter((s) => s.tier === t.tier).length
-    ok(`  ${t.tier}등급 구좌 = K_${t.tier}`, n === t.K, `${n}/${t.K}`)
+    ok(`  ${t.tier}등급 장 = K_${t.tier}`, n === t.K, `${n}/${t.K}`)
   }
 
   // 꽝 없음 1층 — 모든 등급의 최저가가 참여비 이상 (SPEC §6)
@@ -219,12 +219,12 @@ if (isMain()) {
   const allFails = []
   for (const box of BOXES) {
     console.log('═'.repeat(70))
-    console.log(`통 「${box.name}」 (${box.desc}) — 참여비 ${won(box.fee)} · ${box.N}구좌 · 정원 ${box.teamMax}명`)
+    console.log(`통 「${box.name}」 (${box.desc}) — 참여비 ${won(box.fee)} · ${box.N}장 · 정원 ${box.teamMax}명`)
     console.log('═'.repeat(70))
     for (const t of box.tiers) {
-      console.log(`\n■ ${t.tier}등급  재고 ${t.K}구좌  ·  카드 ${t.cards.length}종  ·  후보 ${t.available}건`)
+      console.log(`\n■ ${t.tier}등급  재고 ${t.K}장  ·  카드 ${t.cards.length}종  ·  후보 ${t.available}건`)
       console.log(`  밴드 ${won(t.band[0])} ~ ${t.band[1] === Infinity ? '∞' : won(t.band[1])}   실제 ${won(t.minPrice)} ~ ${won(t.maxPrice)}`)
-      for (const c of t.cards.slice(0, 2)) console.log(`    ${won(c.price).padStart(12)} × ${String(c.slots).padStart(3)}구좌  ${c.name.slice(0, 46)}`)
+      for (const c of t.cards.slice(0, 2)) console.log(`    ${won(c.price).padStart(12)} × ${String(c.slots).padStart(3)}장  ${c.name.slice(0, 46)}`)
       if (t.cards.length > 2) console.log(`    … 외 ${t.cards.length - 2}종`)
     }
     const slots = slotsOf(box)

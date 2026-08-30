@@ -8,7 +8,7 @@
  *
  *   확률 = 환불 인원 R ÷ 참여 인원 M
  *
- * ①(팀 뽑기)과 정확히 같은 규칙이다 — 재고 ÷ 구좌. 재고가 카드에서 환불 슬롯으로 바뀌었을 뿐이고,
+ * ①(팀 뽑기)과 정확히 같은 규칙이다 — 재고 ÷ 전체 장수. 재고가 카드에서 환불 슬롯으로 바뀌었을 뿐이고,
  * 둘 다 화면에서 셀 수 있다.
  *
  * ## 첫 설계가 왜 틀렸나 (검증에서 잡힌 것)
@@ -83,7 +83,7 @@ export const roundDeadline = (now) => EPOCH + roundOf(now) * DEADLINE_DAYS * 864
 
 /** 환불 인원. 재고다 — 확률이 아니다. 화면에서 셀 수 있다. */
 export const refundSlots = (M) => Math.max(0, Math.floor((MARGIN * M - FIXED) / PRICE))
-/** 개인 확률 = 재고 ÷ 구좌 */
+/** 개인 확률 = 재고 ÷ 전체 장수 */
 export const oddsAt = (M) => (M > 0 ? refundSlots(M) / M : 0)
 /** 상한 — 고정비가 다 상각되면 더 나올 곳이 없다 */
 export const CEIL = MARGIN / PRICE
@@ -151,7 +151,7 @@ export function check() {
   // 확률에 손을 댔다면 이 항등식이 깨진다. v1은 여기서 배수를 곱해 깨뜨렸다.
   let identity = true
   for (let M = 1; M <= M_MAX; M++) if (Math.abs(oddsAt(M) * M - refundSlots(M)) > 1e-9) identity = false
-  ok('확률 × 구좌 = 재고 (예산이 확률을 만지지 않았다)', identity, `M=1..${M_MAX}`)
+  ok('확률 × 장 = 재고 (예산이 확률을 만지지 않았다)', identity, `M=1..${M_MAX}`)
 
   // 마감이 실재하는지 — 없는 마감을 만들지 않는다는 것의 최소 검사
   const t0 = 1_800_000_000_000

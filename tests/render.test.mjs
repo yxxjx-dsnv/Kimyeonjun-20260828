@@ -99,7 +99,7 @@ console.log('\n─────── 텍스트 노드 분리 (v1에서 깨진 �
 t('숫자와 단위가 한 노드에 붙어 있다 — <!-- -->로 쪼개지지 않는다', () => {
   const legend = decode(render(h(GridLegend, { tiers: BOX.tiers })))
   for (const tier of BOX.tiers) {
-    const s = `${tier.K.toLocaleString('ko-KR')}구좌`
+    const s = `${tier.K.toLocaleString('ko-KR')}장`
     assert.ok(legend.includes(s), `"${s}"가 통째로 있어야 한다`)
   }
   assert.ok(!/\d<!-- -->/.test(legend), '숫자 뒤에 주석 노드가 끼면 안 된다')
@@ -171,7 +171,7 @@ t('등급별 셀 수가 재고와 정확히 같다', () => {
   }
 })
 
-t('뽑힌 구좌는 꺼진 상태로 그려진다 (비복원 시각화, I3)', () => {
+t('뽑힌 카드는 꺼진 상태로 그려진다 (비복원 시각화, I3)', () => {
   const html = render(h(BoxGrid, { slotTiers: slotsOf().map((s) => s.tier).join(''), drawn: [0, 5, 9] }))
   assert.equal((html.match(/ gone/g) || []).length, 3)
 })
@@ -239,8 +239,8 @@ t('①의 화면 조각에 시계가 없다', () => {
 })
 
 t('재고 표시는 사실 표시로만 쓴다', () => {
-  assert.ok(APP.includes('남은 구좌'), '재고 개수의 사실 표시는 허용된다')
-  assert.ok(!/남은 구좌[^`'"]{0,20}!/.test(APP_CODE), '재고 표시에 감정 유도 부호가 붙으면 안 된다')
+  assert.ok(APP.includes('남은 카드'), '재고 개수의 사실 표시는 허용된다')
+  assert.ok(!/남은 카드[^`'"]{0,20}!/.test(APP_CODE), '재고 표시에 감정 유도 부호가 붙으면 안 된다')
 })
 
 t('가격 블록 — 취소선·할인율은 서버가 내려준 것만 그린다 (I4)', () => {
@@ -340,9 +340,9 @@ t('데스크톱 폰 프레임이 실제 기기 비율로 고정된다', () => {
   const css = src('src/index.css')
   // 어느 탭을 눌러도 같은 크기여야 한다. grid 중간 트랙이 auto면 내용이 짧은 탭에서
   // 267px로 쪼그라들었다. 실제로 그렇게 깨져 있었다.
-  assert.ok(/grid-template-columns:\s*320px\s+390px\s+340px/.test(css), 'grid 중간 트랙이 폰 폭으로 고정')
-  assert.ok(/aspect-ratio:\s*390\s*\/\s*844/.test(css), '실제 기기 비율(iPhone 14/15)')
-  assert.ok(/\.phone\s*\{[^}]*width:\s*390px/s.test(css) || /width:\s*390px/.test(css), '폰 폭 고정')
+  assert.ok(/grid-template-columns:\s*300px\s+430px\s+320px/.test(css), 'grid 중간 트랙이 폰 폭으로 고정')
+  assert.ok(/aspect-ratio:\s*430\s*\/\s*932/.test(css), '실제 기기 비율(iPhone 15 Pro Max)')
+  assert.ok(/\.phone\s*\{[^}]*width:\s*430px/s.test(css) || /width:\s*430px/.test(css), '폰 폭 고정')
 })
 
 t('좌우 레일은 데스크톱에서만 뜬다', () => {

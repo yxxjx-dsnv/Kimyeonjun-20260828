@@ -5,7 +5,6 @@
  *   왼쪽  BriefRail  무엇을 왜 만들었나 (데스크톱 1180px↑)
  *   가운데 phone      **실제 유저가 보는 그대로**. 올웨이즈 앱 문법 + 하단 탭바
  *   오른쪽 OpsRail    확률이 어디서 나오는지, 지금 값이 얼마인지 (심사자·운영자용)
- *   하단   ChatDock   프로젝트 Q&A — 채용 담당자가 의도·근거를 묻는 자리 (VS Code 터미널 문법)
  *
  * ## 올박스 탭의 커머스 흐름
  *   목록(딜 5개) → 상세 → 결제 → 주문완료 → 모집 → 개봉 → 교환 → 주문내역(내 정보 탭)
@@ -22,8 +21,8 @@ import {
   won, Delta, TIERS, TIER_LABEL, Rarity, Badge, SimBadge,
   ProductCard, BoxGrid, GridLegend, TierShowcase, MemberRail,
   RevealScene, RevealCard, OddsTable, UpdateTable,
-  CardPick, CycleView, TradeTable,
-  DealCard, DeadlineTicker, Gauge, ChatDock,
+  CardPick, CycleView, TradeTable, SwapBoard, InviteBox,
+  DealCard, DeadlineTicker, Gauge, Marquee, SearchScreen,
   IconHome, IconContent, IconHeart, IconUser, IconBox, IconCart, IconSearch,
 } from './parts.jsx'
 
@@ -37,6 +36,17 @@ const TABS = [
 
 const SIM_NAMES = ['민서', '지호', '서연', '도윤', '하은', '준우', '수아', '시우', '나윤']
 
+/**
+ * 문자열 → 32bit 해시. 시뮬 팀원의 준비 순서를 섞는 데만 쓴다.
+ * 순서가 2·3·4…10이면 사람이 준비하는 모습이 아니라 루프가 도는 모습이다.
+ * 방 id를 섞어 넣어 **방마다 다르되 같은 방에서는 같은 순서**가 나오게 한다.
+ */
+const hash = (str) => {
+  let h = 2166136261
+  for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619) }
+  return (h >>> 0)
+}
+
 const api = async (path, body) => {
   const res = await fetch(path, body
     ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
@@ -49,6 +59,8 @@ const api = async (path, body) => {
 const saveOrder = (o) => { try { localStorage.setItem('olbox.order', JSON.stringify(o)) } catch { /* 프라이빗 모드 등 */ } }
 const loadOrder = () => { try { return JSON.parse(localStorage.getItem('olbox.order') || 'null') } catch { return null } }
 const clearOrder = () => { try { localStorage.removeItem('olbox.order') } catch { /* noop */ } }
+const loadRecent = () => { try { return JSON.parse(localStorage.getItem('olbox.recent') || '[]') } catch { return [] } }
+const saveRecent = (a) => { try { localStorage.setItem('olbox.recent', JSON.stringify(a.slice(0, 8))) } catch { /* noop */ } }
 
 /* ── 좌측 배경 레일 (데스크톱) ──────────────────────────────── */
 function BriefRail({ box, oripa, crawl }) {
@@ -104,7 +116,6 @@ function BriefRail({ box, oripa, crawl }) {
         <p className="brief__p">
           다나와에서 직접 수집한 <b>{`${crawl.toLocaleString('ko-KR')}건`}</b>.
           박스 3종의 구성 · 교환 선호 · 홈 화면의 상품 <b>세 곳</b>에 씁니다.
-          ChatGPT는 화면 하단 <b>프로젝트 Q&A</b>가 씁니다 — 저장소 문서에서만 답합니다.
         </p>
         <p className="brief__dim">
           상품 가격이 바뀌면 구성도 확률도 함께 바뀝니다 — 크롤 데이터가 장식이 아니라 연산의 입력입니다.
@@ -164,8 +175,8 @@ function BriefRail({ box, oripa, crawl }) {
       <section className="brief__sec">
         <h3>오리파와 무엇이 다른가</h3>
         <ul>
-          <li><b>전 구성 공개</b> — {box ? `${box.N.toLocaleString('ko-KR')}구좌를 전부 그린다` : '구성 전체를 그린다'}</li>
-          <li><b>확률 검증</b> — 재고 ÷ 구좌. 세면 확인된다</li>
+          <li><b>전 구성 공개</b> — {box ? `${box.N.toLocaleString('ko-KR')}장을 전부 그린다` : '구성 전체를 그린다'}</li>
+          <li><b>확률 검증</b> — 재고 ÷ 전체 장수. 세면 확인된다</li>
           <li><b>뽑힌 뒤 갱신</b> — 비복원. 빠진 만큼 확률이 오른다</li>
           <li><b>안 나왔을 때</b> — 팀 안에서 교환. 아무도 나빠지지 않는다</li>
         </ul>
@@ -192,7 +203,7 @@ function OpsRail({ sel, conversion, room, teamSize, gateMsg }) {
         <div className="opsw">
           <div className="opsw__name">사람이 적는 자리가 없습니다</div>
           <p className="opsw__eq">
-            {`P(등급) = 재고 ÷ 구좌\nP_team(g,n) = 1 − C(N−K,n) / C(N,n)`}
+            {`P(등급) = 재고 ÷ 전체 장수\nP_team(g,n) = 1 − C(N−K,n) / C(N,n)`}
           </p>
           <p className="opsw__body">
             개인 확률은 <b>정의</b>이고 팀 확률은 <b>초기하분포</b>입니다.
@@ -215,8 +226,8 @@ function OpsRail({ sel, conversion, room, teamSize, gateMsg }) {
         <h4 className="ops__h">{`박스 현황 — ${box.name}`}</h4>
         <p className="ops__row">
           {live
-            ? `남은 구좌 ${live.left.toLocaleString('ko-KR')} / ${box.N.toLocaleString('ko-KR')} · 뽑힌 ${live.drawn}개`
-            : `${box.N.toLocaleString('ko-KR')}구좌 · 아직 아무도 뽑지 않음`}
+            ? `남은 카드 ${live.left.toLocaleString('ko-KR')} / ${box.N.toLocaleString('ko-KR')} · 뽑힌 ${live.drawn}개`
+            : `${box.N.toLocaleString('ko-KR')}장 · 아직 아무도 뽑지 않음`}
         </p>
         <div className="ops__kpis">
           {(live ? live.tiers : odds.map((o) => ({ tier: o.tier, K: o.K, pct: o.soloPct }))).map((t) => (
@@ -236,10 +247,10 @@ function OpsRail({ sel, conversion, room, teamSize, gateMsg }) {
       </section>
 
       <section className="ops__sec">
-        <h4 className="ops__h">구좌가 빠지면 확률이 오릅니다</h4>
+        <h4 className="ops__h">장이 빠지면 확률이 오릅니다</h4>
         <UpdateTable updates={updates} tiers={TIERS} />
         <p className="opsw__ref">
-          —는 확률 0이 아니라 성립 불가능한 상태입니다. 990구좌가 빠졌는데 B등급 25장이 남을 수는 없습니다.
+          —는 확률 0이 아니라 성립 불가능한 상태입니다. 990장이 빠졌는데 B등급 25장이 남을 수는 없습니다.
         </p>
       </section>
 
@@ -306,7 +317,7 @@ const CATS = [
 ]
 
 /* ── 홈 탭 — 실제 올웨이즈 홈 구조 ────────────────────────── */
-function HomeTab({ cards, deals, onGoOlbox }) {
+function HomeTab({ cards, deals, onGoOlbox, onOpenSearch }) {
   const [cat, setCat] = useState('all')
   const shown = useMemo(() => {
     const c = cat === 'all' ? cards : cards.filter((x) => x.group === cat)
@@ -314,10 +325,11 @@ function HomeTab({ cards, deals, onGoOlbox }) {
   }, [cards, cat])
   return (
     <>
-      <div className="hsearch">
+      {/* 눌리는데 아무 일도 안 일어나는 검색창이 가장 나쁜 상태다 — 실제로 연다. */}
+      <button type="button" className="hsearch" onClick={onOpenSearch}>
         <IconSearch />
-        <span className="top__q">포켓몬 카드</span>
-      </div>
+        <span className="top__q">올웨이즈에서 상품 검색하기</span>
+      </button>
 
       {/* 골드박스 문법의 노란 히어로 — 올박스 목록으로 가는 문 */}
       <button type="button" className="goldhero" onClick={onGoOlbox}>
@@ -337,6 +349,12 @@ function HomeTab({ cards, deals, onGoOlbox }) {
             onClick={() => setCat(c.id)}>{c.label}</button>
         ))}
       </div>
+
+      {/* 올웨이즈 홈처럼 기획 상품이 오른쪽에서 왼쪽으로 흐른다 */}
+      <section className="hsec">
+        <header className="shead"><h2>실시간으로 많이 찾는 카드</h2></header>
+        <Marquee items={cards.slice(0, 10)} />
+      </section>
 
       <section className="hsec">
         <header className="shead">
@@ -392,13 +410,13 @@ function MeTab({ room, sel, me, onGoOlbox }) {
         <header className="shead"><h2>주문 내역</h2></header>
         <div className="order">
           <div className="order__row"><span>주문번호</span><b>{room.id}</b></div>
-          <div className="order__row"><span>상품</span><b>{`${box.name} 올박스 1구좌`}</b></div>
+          <div className="order__row"><span>상품</span><b>{`${box.name} 올박스 1장`}</b></div>
           <div className="order__row"><span>결제금액</span><b>{won(box.fee)}</b></div>
           <div className="order__row"><span>상태</span><b>{state}</b></div>
           {room.live && (
             <div className="order__row">
               <span>박스 현황</span>
-              <b>{`남은 구좌 ${room.live.left.toLocaleString('ko-KR')} / ${box.N.toLocaleString('ko-KR')}`}</b>
+              <b>{`남은 카드 ${room.live.left.toLocaleString('ko-KR')} / ${box.N.toLocaleString('ko-KR')}`}</b>
             </div>
           )}
         </div>
@@ -432,24 +450,24 @@ function HonestySheet({ sel, conversion, oripa, room, teamSize, onClose }) {
       <h3>확률이 어떻게 정해지나요</h3>
 
       <p className="sheet__lead">
-        확률표를 <b>사람이 적지 않습니다.</b> 재고를 구좌 수로 나눈 값이고,
+        확률표를 <b>사람이 적지 않습니다.</b> 재고를 전체 장수로 나눈 값이고,
         팀 효과는 비복원 추출의 성질에서 나옵니다. 화면과 추첨이 같은 값을 씁니다.
       </p>
 
       <section className="sheet__verify">
-        <h4>{`${box.N.toLocaleString('ko-KR')}구좌를 전부 그렸습니다`}</h4>
+        <h4>{`${box.N.toLocaleString('ko-KR')}장을 전부 그렸습니다`}</h4>
         <BoxGrid slotTiers={slotTiers} drawn={room?.openResults?.map((r) => r.i) ?? []} />
         <GridLegend tiers={box.tiers} />
         <p className="sheet__lead">
-          네모 하나가 구좌 하나입니다. 세어보시면 재고와 정확히 맞습니다.
-          {room?.live && ` 지금 ${room.live.drawn}개가 빠져 ${room.live.left.toLocaleString('ko-KR')}구좌 남았습니다.`}
+          네모 하나가 장 하나입니다. 세어보시면 재고와 정확히 맞습니다.
+          {room?.live && ` 지금 ${room.live.drawn}개가 빠져 ${room.live.left.toLocaleString('ko-KR')}장 남았습니다.`}
         </p>
       </section>
 
       <dl className="sheet__grid">
-        <dt>⓪ 기본 확률 = 재고 ÷ 구좌</dt>
+        <dt>⓪ 기본 확률 = 재고 ÷ 전체 장수</dt>
         <dd>
-          {`박스는 ${box.N.toLocaleString('ko-KR')}구좌입니다. 어떤 등급의 재고가 1장이면 확률은 ${odds[0].soloPct}입니다.`}
+          {`박스는 ${box.N.toLocaleString('ko-KR')}장입니다. 어떤 등급의 재고가 1장이면 확률은 ${odds[0].soloPct}입니다.`}
           <br />이것은 수식이 아니라 <b>정의</b>라서 근거가 필요 없습니다.
           그리고 이것이 오리파와의 차이 전부입니다 — 오리파는 재고를 공개하지 않으므로
           확률을 계산할 수도 검증할 수도 없습니다.
@@ -465,7 +483,7 @@ function HonestySheet({ sel, conversion, oripa, room, teamSize, onClose }) {
 
         <dt>② 뽑히면 박스에서 빠집니다</dt>
         <dd>
-          비복원입니다. 남은 구좌가 줄면 확률이 오릅니다.
+          비복원입니다. 남은 카드가 줄면 확률이 오릅니다.
           &ldquo;많이 안 나왔으니 이제 나올 때가 됐다&rdquo;는 생각은 매번 다시 채워넣는 방식에서는
           착각이지만 <b>빼고 나면 참</b>이 됩니다.
           <br />그래서 <b>천장 같은 장치를 만들지 않았습니다.</b> 재고가 줄어드는 것 자체가 천장입니다.
@@ -489,7 +507,7 @@ function HonestySheet({ sel, conversion, oripa, room, teamSize, onClose }) {
 
       <h4>무엇이 사실이고 무엇이 가정인가</h4>
       <ul className="sheet__ul">
-        <li><b>정의</b> — 확률 = 재고 ÷ 구좌</li>
+        <li><b>정의</b> — 확률 = 재고 ÷ 전체 장수</li>
         <li><b>정의에서 유도</b> — 팀 확률(초기하분포), 비복원 갱신</li>
         <li><b>정리</b> — 교환의 네 가지 성질, 꽝 없음 2층</li>
         <li><b>실측</b> — 크롤 875건, 오리파 확률 미표기 {oripa ? `${oripa.probNum}/${oripa.total}건` : ''}</li>
@@ -515,12 +533,37 @@ const KIND_PILLS = [
   { id: 'group', label: '공동구매' }, { id: 'daily', label: '0원 응모' },
 ]
 
-function DealListScreen({ deals, onOpenDeal }) {
+function DealListScreen({ deals, onOpenDeal, sel }) {
   const [kind, setKind] = useState('all')
   const shown = kind === 'all' ? deals : deals.filter((d) => d.kind === kind)
   const daily = deals.find((d) => d.kind === 'daily')
+  const top = sel?.box?.tiers?.[0]
   return (
     <>
+      {/* 올또처럼 — 탭을 처음 열면 이 기능이 무엇인지부터 말한다.
+          스크롤을 내리면 그때 "지금 열려 있는 올박스" 목록이 나온다. */}
+      <section className="intro">
+        <p className="intro__k">구성을 전부 공개하는 뽑기</p>
+        <h2 className="intro__h">
+          {top ? <>최대 <b>{won(top.maxPrice)}</b></> : '올박스'}
+        </h2>
+        <p className="intro__s">
+          박스에 뭐가 들었는지 <b>{`${(sel?.box?.N ?? 1000).toLocaleString('ko-KR')}장 전부`}</b> 보여드려요
+        </p>
+        <div className="intro__art" aria-hidden="true">
+          {top?.cards?.[0]?.image && <img src={top.cards[0].image} alt="" />}
+          <span className="intro__bubble">
+            어떤 카드가 몇 장인지<br />세어볼 수 있어요
+          </span>
+        </div>
+        <ul className="intro__pts">
+          <li><b>전 구성 공개</b><span>확률을 직접 계산해볼 수 있어요</span></li>
+          <li><b>뽑히면 빠져요</b><span>남을수록 확률이 올라갑니다</span></li>
+          <li><b>꽝 없음</b><span>어떤 카드가 나와도 참여비 이상</span></li>
+        </ul>
+        <p className="intro__scroll" aria-hidden="true">아래로 내리면 열려 있는 올박스 ↓</p>
+      </section>
+
       {/* 풀블리드 배너 — ③ 0원 응모. 문구가 전부 참이라 과장 카피가 필요 없는
           유일한 배너다: 응모가 실제로 0원이고, 마감(자정)이 실재한다. */}
       {daily && (
@@ -573,7 +616,7 @@ function TeamDetail({ sel, deal, teamSize, setTeamSize, busy, onBack, onBuy, onS
           <span className="bcard__shine" aria-hidden="true" />
           <span className="bcard__body">
             <span className="bcard__name">{`${box.name} 올박스`}</span>
-            <span className="bcard__blurb">{`${box.N.toLocaleString('ko-KR')}구좌 구성을 전부 공개합니다`}</span>
+            <span className="bcard__blurb">{`${box.N.toLocaleString('ko-KR')}장 구성을 전부 공개합니다`}</span>
             <span className="bcard__odds">
               {'최고 '}<b>{(box.tiers[0].cards[0]?.name ?? '').replace(/^\[[^\]]*\]\s*/, '').slice(0, 20)}</b>
               {` · 시가 ${won(box.tiers[0].maxPrice)}`}
@@ -616,8 +659,8 @@ function TeamDetail({ sel, deal, teamSize, setTeamSize, busy, onBack, onBuy, onS
             </svg>
           </span>
           <span className="verify__t">
-            {`${box.N.toLocaleString('ko-KR')}구좌를 직접 세어보기`}
-            <em>어떤 카드가 몇 구좌인지 하나도 빠짐없이 화면에 있습니다</em>
+            {`${box.N.toLocaleString('ko-KR')}장을 직접 세어보기`}
+            <em>어떤 카드가 몇 장인지 하나도 빠짐없이 화면에 있습니다</em>
           </span>
           <span className="verify__go" aria-hidden="true">›</span>
         </button>
@@ -628,7 +671,7 @@ function TeamDetail({ sel, deal, teamSize, setTeamSize, busy, onBack, onBuy, onS
         <div className="notice">
           <h3>친구를 부르면 뭐가 달라지나요</h3>
           <p>
-            같은 박스에서 각자 한 구좌씩 뽑아요. 사람이 많을수록 <b>팀 안에 좋은 카드가 나올 확률</b>이 올라갑니다.
+            같은 박스에서 각자 한 장씩 뽑아요. 사람이 많을수록 <b>팀 안에 좋은 카드가 나올 확률</b>이 올라갑니다.
             팀에 나온 걸 내가 갖는 건 <b>교환</b>으로 정해요.
             <b> 초대한 사람이 더 받는 건 없어요. 팀 전원이 똑같은 확률입니다.</b>
           </p>
@@ -672,8 +715,8 @@ function CheckoutScreen({ sel, teamSize, busy, onBack, onPay }) {
       <section className="hsec">
         <header className="shead"><h2>주문서</h2></header>
         <div className="order">
-          <div className="order__row"><span>주문 상품</span><b>{`${box.name} 올박스 · 1구좌`}</b></div>
-          <div className="order__row"><span>수량</span><b>1구좌 (참여자당 1구좌 고정)</b></div>
+          <div className="order__row"><span>주문 상품</span><b>{`${box.name} 올박스 · 1장`}</b></div>
+          <div className="order__row"><span>수량</span><b>1장 (1인 1장 고정)</b></div>
           <div className="order__row"><span>상품 금액</span><b>{won(box.fee)}</b></div>
           <div className="order__row order__row--dim">
             <span>배송비</span><b>이 MVP는 배송을 모델링하지 않았습니다</b>
@@ -706,7 +749,7 @@ function CheckoutScreen({ sel, teamSize, busy, onBack, onPay }) {
 
 /* ── ① 주문 완료 — 커머스의 종결 신호 ─────────────────────────
    주문번호는 지어내지 않는다 — 서버가 발급한 room.id 그대로다. 이후 조회에도 진짜로 쓰인다.
-   "내가 산 시점의 남은 구좌"를 박아두면 개봉 결과의 slotsBefore와 이어져
+   "내가 산 시점의 남은 카드"를 박아두면 개봉 결과의 slotsBefore와 이어져
    비복원 서사가 주문서에서부터 시작된다. */
 function OrderDoneScreen({ sel, room, deal, onRecruit, onOrders }) {
   const { box } = sel
@@ -721,7 +764,7 @@ function OrderDoneScreen({ sel, room, deal, onRecruit, onOrders }) {
         {room.live && (
           <div className="order__row">
             <span>내가 산 시점</span>
-            <b>{`남은 구좌 ${room.live.left.toLocaleString('ko-KR')} / ${box.N.toLocaleString('ko-KR')}`}</b>
+            <b>{`남은 카드 ${room.live.left.toLocaleString('ko-KR')} / ${box.N.toLocaleString('ko-KR')}`}</b>
           </div>
         )}
         {room.live && (
@@ -751,7 +794,7 @@ function GroupScreen({ deal, onBack }) {
         {deal.image && <img className="hero__img" src={deal.image} alt="" loading="lazy" />}
         <h2 className="hero__t">{deal.title}</h2>
         <p className="hero__s">{deal.subtitle}</p>
-        <DeadlineTicker deadlineAt={deal.deadlineAt} label={`${deal.round}회차 마감까지`} />
+        <DeadlineTicker deadlineAt={deal.deadlineAt} label={`${deal.round}회차 마감까지`} size="lg" />
       </section>
 
       <section className="pricebox">
@@ -810,13 +853,13 @@ function DailyScreen({ deal, onBack }) {
         {deal.image && <img className="hero__img" src={deal.image} alt="" loading="lazy" />}
         <h2 className="hero__t">{deal.title}</h2>
         <p className="hero__s">{deal.subtitle}</p>
-        <DeadlineTicker deadlineAt={deal.deadlineAt} label="오늘 자정 마감까지" />
+        <DeadlineTicker deadlineAt={deal.deadlineAt} label="오늘 자정 마감까지" size="lg" />
       </section>
 
-      <section className="pricebox">
+      <section className="pricebox pricebox--sale">
         <span className="pricebox__strike">
-          <s>{deal.price.strike}</s>
           <em>{deal.price.discount}</em>
+          <s>{deal.price.strike}</s>
         </span>
         <b className="pricebox__big">{deal.price.big}</b>
         <span className="pricebox__sub">{deal.price.sub}</span>
@@ -843,7 +886,7 @@ function DailyScreen({ deal, onBack }) {
             </tbody>
           </table>
         </div>
-        <p className="dim">추첨은 비복원·시드 공개 방식입니다 — 같은 날 같은 응모자면 같은 결과가 재현됩니다.</p>
+        <p className="dim">당첨된 사람은 빼면서 뽑고, 뽑기 기록을 공개해 같은 조건이면 결과를 다시 확인할 수 있어요.</p>
       </section>
 
       <div className="cta">
@@ -852,7 +895,7 @@ function DailyScreen({ deal, onBack }) {
         ) : (
           <div className="notice">
             <h3>응모가 접수되었습니다 <SimBadge what="응모 — 집계는 저장되지 않습니다" /></h3>
-            <p>자정에 응모자 전체에서 비복원으로 추첨합니다. 결과 통지는 이 MVP에서 구현하지 않았습니다.</p>
+            <p>자정에 응모하신 분들 중에서 한 분씩 빼면서 뽑습니다. 결과 알림은 이 MVP에서 구현하지 않았습니다.</p>
           </div>
         )}
         <p className="cta__note">응모에는 비용이 들지 않습니다 · 당첨 시 1,000원에 구매합니다</p>
@@ -864,6 +907,7 @@ function DailyScreen({ deal, onBack }) {
 /* ── ① 참여 후 — 모집 → 준비 → 개봉 → 교환 ─────────────────── */
 function TeamFlow(p) {
   const { sel, room, me, teamSize, busy, gateMsg, onMyReady, onTrade, onSheet, oripa } = p
+  const [vs, setVs] = useState(false)
   const { box, odds } = sel
   const live = room?.live
   const left = live ? live.left : box.N
@@ -888,10 +932,13 @@ function TeamFlow(p) {
             {' · '}<SimBadge what="나 외 팀원" />
           </p>
         )}
+        {!room?.opened && room?.id && (
+          <InviteBox roomId={room.id} teamMax={teamSize} joined={room.members.length} />
+        )}
         <Gauge num={live?.drawn ?? 0} den={box.N}
           label={live?.drawn
-            ? `이 박스에서 빠진 구좌 ${live.drawn.toLocaleString('ko-KR')} / ${box.N.toLocaleString('ko-KR')}`
-            : `아직 아무도 뽑지 않은 박스 · 남은 구좌 ${left.toLocaleString('ko-KR')} / ${box.N.toLocaleString('ko-KR')}`} />
+            ? `이 박스에서 빠진 카드 ${live.drawn.toLocaleString('ko-KR')} / ${box.N.toLocaleString('ko-KR')}`
+            : `아직 아무도 뽑지 않은 박스 · 남은 카드 ${left.toLocaleString('ko-KR')} / ${box.N.toLocaleString('ko-KR')}`} />
       </section>
 
       {!room?.opened && (
@@ -938,7 +985,7 @@ function TeamFlow(p) {
             <div className="notice">
               <h3>뽑힌 카드는 박스에서 빠져요</h3>
               <p>
-                {`한 명씩 뽑을 때마다 남은 구좌가 줄고 확률이 올라갑니다. 지금 ${left.toLocaleString('ko-KR')}구좌 남았어요. `}
+                {`한 명씩 뽑을 때마다 남은 카드가 줄고 확률이 올라갑니다. 지금 ${left.toLocaleString('ko-KR')}장 남았어요. `}
                 <b>안 나올수록 다음 사람 확률이 실제로 높아집니다.</b>
               </p>
             </div>
@@ -946,11 +993,25 @@ function TeamFlow(p) {
 
           <section className="hsec" id="sec-trade">
             <header className="shead"><h2>안 나온 것은 팀 안에서 바꿉니다</h2></header>
-            <p className="lead">팀에 나온 카드를 서로 바꿉니다. 원하는 사람에게 가도록 자동으로 맞춰드려요.</p>
+            <p className="lead">
+              원하는 카드를 가진 사람에게 <b>직접 요청</b>하세요.
+              서로 엇갈려 1:1로 안 풀리는 것은 <b>한 번에 맞추기</b>가 고리로 풀어줍니다.
+            </p>
             {!room.trade ? (
-              <button className="btn btn--go" onClick={onTrade} disabled={busy === 'trade'}>
-                {busy === 'trade' ? '교환 계산 중…' : '교환 실행'}
-              </button>
+              <>
+                <SwapBoard members={members} holdings={room.holdings} byId={p.cardById} me={me}
+                  requests={room.requests ?? []} onRequest={p.onSwapRequest}
+                  onRespond={p.onSwapRespond} busy={busy} />
+                <button className="btn btn--go" onClick={onTrade} disabled={busy === 'trade'}
+                  style={{ marginTop: 12 }}>
+                  {busy === 'trade' ? '맞추는 중…' : '한 번에 맞추기'}
+                </button>
+                {p.swapMsg && <p className="swapmsg">{p.swapMsg}</p>}
+                <p className="dim">
+                  {`성사된 직접 교환 ${room.swaps?.length ?? 0}건`}
+                  {' · 한 번에 맞추기를 누르면 남은 요청을 정리하고 최종 배정합니다'}
+                </p>
+              </>
             ) : (
               <>
                 <h3 className="sub">성립한 교환 고리</h3>
@@ -968,8 +1029,18 @@ function TeamFlow(p) {
             )}
           </section>
 
+          {/* 오리파 대조는 **검증하고 싶은 사람**을 위한 정보다.
+              구매 흐름에 늘 펼쳐 두면 소비자에게는 논쟁으로 읽힌다.
+              ⓘ로 접어 두고, 누른 사람에게만 보여준다. */}
           <section className="hsec" id="sec-vs">
-            <header className="shead"><h2>오리파와 뭐가 다른가요</h2></header>
+            <button type="button" className="infotoggle" onClick={() => setVs((v) => !v)}
+              aria-expanded={vs}>
+              <span className="infotoggle__i" aria-hidden="true">i</span>
+              <span className="infotoggle__t">오리파와 뭐가 다른가요</span>
+              <span className="infotoggle__go" aria-hidden="true">{vs ? '▲' : '▼'}</span>
+            </button>
+            {vs && (
+              <>
             <div className="tablewrap compare">
               <table>
                 <thead>
@@ -1002,6 +1073,8 @@ function TeamFlow(p) {
                 <b>모르는 칸을 그럴듯한 숫자로 채우지 않았습니다.</b>
               </p>
             </div>
+              </>
+            )}
             <p className="seed">{`추첨 시드 ${room.id}|${room.boxId}|${me}|${room.round}`}{room.trade && ` · 교환 시드 ${room.trade.seed}`}</p>
           </section>
         </>
@@ -1013,7 +1086,7 @@ function TeamFlow(p) {
 /* ── 올박스 탭 라우터 ─────────────────────────────────────── */
 function OlboxTab(p) {
   const { deals, phase, deal, sel } = p
-  if (phase === 'list' || !deal) return <DealListScreen deals={deals} onOpenDeal={p.onOpenDeal} />
+  if (phase === 'list' || !deal) return <DealListScreen deals={deals} sel={sel} onOpenDeal={p.onOpenDeal} />
   if (deal.kind === 'group') return <GroupScreen deal={deal} onBack={p.onBackToList} />
   if (deal.kind === 'daily') return <DailyScreen deal={deal} onBack={p.onBackToList} />
   if (phase === 'detail') {
@@ -1057,9 +1130,12 @@ export default function App() {
   const [dealId, setDealId] = useState(null)
   const [count, setCount] = useState(null)       // 3 · 2 · 1 · 0
   const [sheet, setSheet] = useState(false)
-  const [dockOpen, setDockOpen] = useState(false)
-  const [dockMsgs, setDockMsgs] = useState([])
-  const [dockBusy, setDockBusy] = useState(false)
+  const [search, setSearch] = useState(false)
+  const [q, setQ] = useState('')
+  const [searchResult, setSearchResult] = useState(null)
+  const [searchBusy, setSearchBusy] = useState(false)
+  const [recent, setRecent] = useState(() => loadRecent())
+  const [swapMsg, setSwapMsg] = useState(null)
   const countTimer = useRef(null)
   const timer = useRef(null)
   const opening = useRef(false)
@@ -1092,6 +1168,8 @@ export default function App() {
     () => (sel ? sel.box.tiers.flatMap((t) => t.cards.map((c) => ({ ...c, tier: t.tier }))) : []),
     [sel]
   )
+  /** 카드 id → 카드. 교환 보드가 "누가 무엇을 들고 있는가"를 그릴 때 쓴다. */
+  const cardById = useMemo(() => new Map(cards.map((c) => [c.id, c])), [cards])
   const homeCards = useMemo(
     () => (boxes ? boxes.boxes[0].box.tiers.flatMap((t) => t.cards.map((c) => ({ ...c, tier: t.tier }))) : []),
     [boxes]
@@ -1136,7 +1214,10 @@ export default function App() {
       act({ action: 'simPrefs', roomId: room.id, memberId: me })
       return undefined
     }
-    const idle = room.members.find((m) => m.id !== me && !m.ready)
+    // 준비 순서를 섞는다 — 입장 순서대로 준비하면 사람이 아니라 루프로 보인다
+    const idle = room.members
+      .filter((m) => m.id !== me && !m.ready)
+      .sort((a, b) => hash(room.id + a.id) - hash(room.id + b.id))[0]
     if (idle) {
       const t = setTimeout(() => act({ action: 'ready', roomId: room.id, memberId: idle.id, ready: true }), 900)
       return () => clearTimeout(t)
@@ -1203,33 +1284,69 @@ export default function App() {
     }, 800)
   }
 
+  const onSearch = async (text) => {
+    setSearchBusy(true); setSearchResult(null)
+    const next = [text, ...recent.filter((t) => t !== text)].slice(0, 8)
+    setRecent(next); saveRecent(next)
+    const r = await api(`/api/search?q=${encodeURIComponent(text)}`)
+    setSearchResult(r.ok ? r.data : { q: text, count: 0, total: 875, items: [] })
+    setSearchBusy(false)
+  }
+
   const onTrade = async () => {
     setBusy('trade')
     await act({ action: 'trade', roomId: room.id })
     setBusy('')
   }
 
-  /** 프로젝트 Q&A — /api/ask 는 저장소 문서 발췌 안에서만 답한다. */
-  const onDockSend = async (text) => {
-    setDockMsgs((m) => [...m, { role: 'user', content: text }])
-    setDockBusy(true)
-    const history = dockMsgs.slice(-6).map(({ role, content }) => ({ role, content }))
-    const r = await api('/api/ask', { question: text, history })
-    setDockMsgs((m) => [...m, {
-      role: 'assistant',
-      content: r.data?.answer ?? '응답을 받지 못했어요. 잠시 뒤 다시 시도해 주세요.',
-      source: r.data?.source, refs: r.data?.refs,
-    }])
-    setDockBusy(false)
+  const onSwapRequest = async (targetId) => {
+    setBusy('swap')
+    await act({ action: 'swapRequest', roomId: room.id, memberId: me, targetId })
+    setBusy('')
   }
+
+  const onSwapRespond = async (fromId, accept) => {
+    setBusy('swap')
+    await act({ action: 'swapRespond', roomId: room.id, memberId: me, fromId, accept })
+    setBusy('')
+  }
+
+  /**
+   * 시뮬 팀원의 응답 — 내가 보낸 요청에 사람처럼 답한다.
+   * 방 id로 시드를 만들어 **같은 방에서는 같은 판단**이 나오게 한다.
+   * 실제 사용자라면 이 자리를 그 사람이 채운다(그래서 시뮬 배지를 단다).
+   */
+  useEffect(() => {
+    if (!room?.opened || room.trade) return undefined
+    const pending = (room.requests ?? []).filter((q) => q.from === me)
+    if (!pending.length) return undefined
+    const q = pending[0]
+    const t = setTimeout(() => {
+      /* 사람의 판단을 흉내낸다.
+         시세만으로 거절하게 두면 내 카드가 더 비쌀 때만 성사돼 데모에서 거의 항상 거절된다.
+         실제로 사람은 **자기 취향**으로 받는다 — 싼 카드를 더 원할 수도 있다.
+         그래서 방·상대로 시드를 만들어 약 60%를 수락하게 한다. 시뮬이므로 배지를 단다. */
+      const accept = hash(`${room.id}|${q.to}|swap`) % 100 < 60
+      const who = room.members.find((m) => m.id === q.to)?.name ?? '상대'
+      api('/api/room', { action: 'swapRespond', roomId: room.id, memberId: q.to, fromId: me, accept })
+        .then((r) => {
+          if (r.data?.id) setRoom(r.data)
+          setSwapMsg(accept ? `${who}님이 교환을 수락했어요` : `${who}님이 이번 교환은 거절했어요`)
+          setTimeout(() => setSwapMsg(null), 3200)
+        })
+    }, 1600)
+    return () => clearTimeout(t)
+  }, [room, me, cardById])
+
+
 
   if (err) return <div className="stage"><div className="phone"><div className="empty"><p>{err}</p><p className="empty__sub">새로고침해 주세요.</p></div></div></div>
   if (!boxes) return <div className="stage"><div className="phone"><div className="empty"><p>구성을 불러오는 중…</p></div></div></div>
 
   const olboxProps = {
     deals: boxes.deals, deal, sel, phase, setPhase,
-    room, me, teamSize, setTeamSize, cards, myTarget,
-    busy, gateMsg, oripa: boxes.oripa,
+    room, me, teamSize, setTeamSize, cards, cardById, myTarget,
+    busy, gateMsg, swapMsg, oripa: boxes.oripa,
     onOpenDeal: (d) => {
       // 진행 중인 내 주문(같은 통)이 있으면 그 흐름으로 돌아간다 — 주문이 사라지지 않게
       setDealId(d.id)
@@ -1241,7 +1358,7 @@ export default function App() {
     onPay,
     onRecruit: () => setPhase('flow'),
     onOrders: () => setTab('me'),
-    onPick, onMyReady, onTrade,
+    onPick, onMyReady, onTrade, onSwapRequest, onSwapRespond,
     onSheet: () => setSheet(true),
   }
 
@@ -1255,16 +1372,20 @@ export default function App() {
             : scene ? <RevealScene r={scene} fee={sel.box.fee} onClose={() => setScene(null)} />
               : null
         }>
-        {tab === 'home' && <HomeTab cards={homeCards} deals={boxes.deals} onGoOlbox={() => setTab('olbox')} />}
+        {tab === 'home' && <HomeTab cards={homeCards} deals={boxes.deals} onGoOlbox={() => setTab('olbox')}
+          onOpenSearch={() => { setSearch(true); setSearchResult(null); setQ('') }} />}
         {tab === 'olbox' && <OlboxTab {...olboxProps} />}
         {tab === 'content' && <StubTab title="콘텐츠" body="이 과제에서는 구현하지 않았습니다." />}
         {tab === 'wish' && <StubTab title="관심상품" body="이 과제에서는 구현하지 않았습니다." />}
         {tab === 'me' && <MeTab room={room} sel={sel} me={me} onGoOlbox={() => setTab('olbox')} />}
       </Shell>
+      {search && <SearchScreen
+        onClose={() => setSearch(false)} onSearch={onSearch}
+        suggest={boxes.suggest ?? []} recent={recent}
+        onClearRecent={() => { setRecent([]); saveRecent([]) }}
+        result={searchResult} busy={searchBusy} q={q} setQ={setQ} />}
       {sheet && <HonestySheet sel={sel} conversion={boxes.conversion} oripa={boxes.oripa}
         room={room} teamSize={teamSize} onClose={() => setSheet(false)} />}
-      <ChatDock open={dockOpen} onToggle={() => setDockOpen((v) => !v)}
-        messages={dockMsgs} onSend={onDockSend} busy={dockBusy} />
     </>
   )
 }

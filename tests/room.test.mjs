@@ -2,12 +2,10 @@
  * 서버 테스트 — 프레임워크 없이. `node tests/room.test.mjs`
  *
  * 네트워크를 타지 않는다. KV 환경변수가 없으면 api/_room.js가 메모리로 내려앉고,
- * OPENAI_API_KEY가 없으면 api/ask.js가 문서 발췌 폴백으로 내려앉는다.
  * 환각 id 차단만 fetch를 모킹해서 확인한다.
  */
 import assert from 'node:assert/strict'
 import room from '../api/room.js'
-import ask, { rank, fallbackAnswer, trimPraise } from '../api/ask.js'
 import boxes from '../api/boxes.js'
 import { TEAM_MAX, slotsOf } from '../api/_box.js'
 
@@ -146,7 +144,7 @@ t('비복원 — 확률이 갱신됐다 (I3)', () => {
   const after = opened.live.tiers.find((x) => x.tier === 'C')
   assert.equal(before.N, 1000)
   assert.equal(after.N, 1000 - TEAM_MAX)
-  // 남은 구좌가 줄었으므로 같은 재고라면 확률이 오르고, 재고도 줄었다면 그에 맞게 바뀐다.
+  // 남은 카드가 줄었으므로 같은 재고라면 확률이 오르고, 재고도 줄었다면 그에 맞게 바뀐다.
   assert.notEqual(before.pct, after.pct, '확률 문자열이 그대로면 갱신되지 않은 것이다')
   const drawnC = opened.openResults.filter((x) => x.tier === 'C').length
   assert.equal(after.K, before.K - drawnC, '남은 재고가 뽑힌 만큼 정확히 줄어야 한다')
@@ -192,96 +190,99 @@ await ta('개봉된 방에 join → 409', async () => {
   assert.equal(r.code, 409)
 })
 
-console.log('\n─────── ChatGPT Q&A (I9·I13) ───────')
+console.log('\n─────── 직접 교환 요청 ───────')
 
-t('검색 — 질문이 관련 문서 섹션을 찾는다', () => {
-  const hits = rank('오리파의 문제가 뭔가요')
-  assert.ok(hits.length > 0)
-  assert.ok(hits.slice(0, 3).some((s) => /오리파/.test(s.title + s.text)))
-})
+/** 개봉까지 끝난 방 하나를 만든다. */
+const openedRoom = async (n = 3) => {
+  const c = await call(room, { action: 'create', name: '나' })
+  const rid = c.body.id, me = c.body.you
+  const ids = [me]
+  for (let i = 1; i < n; i++) {
+    const j = await call(room, { action: 'join', roomId: rid, name: `p${i}` })
+    ids.push(j.body.you)
+  }
+  for (const id of ids) await call(room, { action: 'ready', roomId: rid, memberId: id, ready: true })
+  const o = await call(room, { action: 'open', roomId: rid })
+  return { rid, ids, view: o.body }
+}
 
-t('검색 — 한국어 조사를 접두 일치로 흡수한다', () => {
-  // "올웨이즈인가요"는 문서에 없지만 "올웨이즈"는 있다. 접두 매칭이 없으면 0건이 된다.
-  const hits = rank('왜 올웨이즈인가요?')
-  assert.ok(hits.length > 0, '조사 붙은 질문이 0건이면 안 된다')
-  assert.ok(hits.slice(0, 3).some((s) => /올웨이즈/.test(s.title + s.text)))
-})
-
-t('폴백 — 키 없이도 문서 발췌를 그대로 준다. 지어내지 않는다', () => {
-  const r = fallbackAnswer('교환은 어떻게 동작하나요')
-  assert.equal(r.source, 'fallback')
-  assert.ok(r.refs.length >= 1, '어느 문서에서 왔는지 표기한다')
-  assert.match(r.answer, /AI 없이 문서를 그대로/, '요약이 아니라 인용임을 첫 줄에 밝힌다')
-  // 발췌가 실제 문서 본문이어야 한다 — 지어낸 문장이 아니라
-  assert.ok(r.refs.every((ref) => r.answer.includes(ref)), '인용마다 출처 제목이 붙는다')
-})
-
-t('폴백 — 문서에 없는 주제는 없다고 말한다', () => {
-  const r = fallbackAnswer('zzqqxx 배당률')
-  assert.ok(r.refs.length === 0 || /찾지 못했/.test(r.answer))
-})
-
-await ta('키 없으면 폴백으로 내려앉고 그 사실을 표기한다 (I13)', async () => {
-  delete process.env.OPENAI_API_KEY
-  const r = await call(ask, { question: '확률은 어떻게 정해지나요' })
+await ta('요청하면 상대에게 쌓이고, 카드는 아직 안 바뀐다', async () => {
+  const { rid, ids, view: v0 } = await openedRoom()
+  const before = { ...v0.holdings }
+  const r = await call(room, { action: 'swapRequest', roomId: rid, memberId: ids[0], targetId: ids[1] })
   assert.equal(r.code, 200)
-  assert.equal(r.body.source, 'fallback')
+  assert.equal(r.body.requests.length, 1)
+  assert.deepEqual(r.body.holdings, before, '요청만으로 카드가 바뀌면 안 된다')
 })
 
-await ta('빈 질문은 400', async () => {
-  const r = await call(ask, { question: '   ' })
+await ta('수락하면 두 사람의 카드가 정확히 맞바뀐다', async () => {
+  const { rid, ids, view: v0 } = await openedRoom()
+  const [a, b] = ids
+  const A = v0.holdings[a], B = v0.holdings[b]
+  await call(room, { action: 'swapRequest', roomId: rid, memberId: a, targetId: b })
+  const r = await call(room, { action: 'swapRespond', roomId: rid, memberId: b, fromId: a, accept: true })
+  assert.equal(r.code, 200)
+  assert.equal(r.body.holdings[a], B, 'A가 B의 카드를 받아야 한다')
+  assert.equal(r.body.holdings[b], A, 'B가 A의 카드를 받아야 한다')
+  assert.equal(r.body.requests.length, 0, '성사된 요청은 목록에서 빠진다')
+})
+
+await ta('거절하면 요청만 사라지고 카드는 그대로', async () => {
+  const { rid, ids, view: v0 } = await openedRoom()
+  const before = { ...v0.holdings }
+  await call(room, { action: 'swapRequest', roomId: rid, memberId: ids[0], targetId: ids[1] })
+  const r = await call(room, { action: 'swapRespond', roomId: rid, memberId: ids[1], fromId: ids[0], accept: false })
+  assert.equal(r.body.requests.length, 0)
+  assert.deepEqual(r.body.holdings, before)
+})
+
+await ta('개봉 기록은 스왑에 훼손되지 않는다 (비복원 서사의 근거)', async () => {
+  const { rid, ids, view: v0 } = await openedRoom()
+  const drawn0 = v0.openResults.map((x) => x.cardId)
+  await call(room, { action: 'swapRequest', roomId: rid, memberId: ids[0], targetId: ids[1] })
+  const r = await call(room, { action: 'swapRespond', roomId: rid, memberId: ids[1], fromId: ids[0], accept: true })
+  assert.deepEqual(r.body.openResults.map((x) => x.cardId), drawn0, 'openResults는 뽑힌 기록이라 불변이어야 한다')
+  assert.ok(r.body.openResults.every((x) => x.slotsBefore > 0), '뽑기 직전 상태가 남아 있어야 한다')
+})
+
+await ta('같은 상대에게 두 번 요청해도 하나만 쌓인다', async () => {
+  const { rid, ids } = await openedRoom()
+  await call(room, { action: 'swapRequest', roomId: rid, memberId: ids[0], targetId: ids[1] })
+  const r = await call(room, { action: 'swapRequest', roomId: rid, memberId: ids[0], targetId: ids[1] })
+  assert.equal(r.body.requests.length, 1)
+})
+
+await ta('자기 자신에게는 요청할 수 없다', async () => {
+  const { rid, ids } = await openedRoom()
+  const r = await call(room, { action: 'swapRequest', roomId: rid, memberId: ids[0], targetId: ids[0] })
   assert.equal(r.code, 400)
 })
 
-await ta('키가 있으면 ChatGPT 응답 + 근거 섹션 목록 (fetch 모킹)', async () => {
-  process.env.OPENAI_API_KEY = 'test-key'
-  const realFetch = globalThis.fetch
-  let sentBody = null
-  globalThis.fetch = async (url, opt) => {
-    sentBody = JSON.parse(opt.body)
-    return { ok: true, json: async () => ({ choices: [{ message: { content: '지원자는 확률을 재고 나누기 구좌로 정의했다 [1]' } }] }) }
-  }
-  try {
-    const r = await call(ask, { question: '확률은 어떻게 정해지나요' })
-    assert.equal(r.body.source, 'openai')
-    assert.ok(r.body.refs.length >= 1)
-    assert.match(sentBody.messages[0].content, /지어내지 않는다/, '시스템 프롬프트가 문서 밖 답변을 금지한다')
-    assert.match(sentBody.messages[0].content, /문서 발췌/, '컨텍스트가 실제로 실린다')
-  } finally { globalThis.fetch = realFetch; delete process.env.OPENAI_API_KEY }
+await ta('TTC는 직접 교환 결과 위에서 배정한다 (스왑을 되돌리지 않는다)', async () => {
+  const { rid, ids, view: v0 } = await openedRoom(3)
+  const [a, b] = ids
+  const B = v0.holdings[b]
+  await call(room, { action: 'swapRequest', roomId: rid, memberId: a, targetId: b })
+  await call(room, { action: 'swapRespond', roomId: rid, memberId: b, fromId: a, accept: true })
+  const t = await call(room, { action: 'trade', roomId: rid })
+  assert.equal(t.code, 200)
+  const ra = t.body.trade.results.find((x) => x.memberId === a)
+  assert.equal(ra.before.id, B, 'TTC의 출발점이 스왑 이후 보유여야 한다')
+  assert.ok(t.body.trade.noneWorse, '개별 합리성은 그대로 보장된다')
 })
 
-t('마무리 자평 한 문장을 잘라낸다 — 프롬프트로는 안 막힌다', () => {
-  // gpt-4o-mini는 금지해도 "…중요한 역할을 해요"를 끝에 붙인다. 코드가 보증한다.
-  assert.equal(
-    trimPraise('천장이 없어요. 비복원이 대체해요. 재고가 줄면 확률이 올라요. 이건 중요한 역할을 해요.'),
-    '천장이 없어요. 비복원이 대체해요. 재고가 줄면 확률이 올라요.')
+await ta('한 번에 맞추기가 끝나면 직접 교환은 잠긴다', async () => {
+  const { rid, ids } = await openedRoom()
+  await call(room, { action: 'trade', roomId: rid })
+  const r = await call(room, { action: 'swapRequest', roomId: rid, memberId: ids[0], targetId: ids[1] })
+  assert.equal(r.code, 409)
 })
 
-t('자평이 아니면 건드리지 않는다', () => {
-  const keep = '확률은 재고를 구좌로 나눈 값이에요. 팀이면 커져요. K가 1일 때 정확히 n배예요.'
-  assert.equal(trimPraise(keep), keep)
-})
-
-t('사실이 든 문장은 자평 어휘가 있어도 지우지 않는다', () => {
-  // 숫자가 있으면 사실을 담은 문장이다 — 자르면 정보를 잃는다
-  const keep = 'A예요. B예요. 이 값이 3건으로 중요한 역할을 해요.'
-  assert.equal(trimPraise(keep), keep)
-})
-
-t('두 문장 이하는 자르지 않는다 (답이 사라지면 안 된다)', () => {
-  const keep = '오리파는 검증이 안 돼요. 그래서 중요한 역할을 해요.'
-  assert.equal(trimPraise(keep), keep)
-})
-
-await ta('OpenAI 오류 시 폴백으로 내려앉는다', async () => {
-  process.env.OPENAI_API_KEY = 'test-key'
-  const realFetch = globalThis.fetch
-  globalThis.fetch = async () => ({ ok: false, status: 500 })
-  try {
-    const r = await call(ask, { question: '교환은 어떻게 동작하나요' })
-    assert.equal(r.code, 200)
-    assert.equal(r.body.source, 'fallback')
-  } finally { globalThis.fetch = realFetch; delete process.env.OPENAI_API_KEY }
+await ta('개봉 전에는 요청할 수 없다', async () => {
+  const c = await call(room, { action: 'create', name: '나' })
+  const j = await call(room, { action: 'join', roomId: c.body.id, name: 'p1' })
+  const r = await call(room, { action: 'swapRequest', roomId: c.body.id, memberId: c.body.you, targetId: j.body.you })
+  assert.equal(r.code, 409)
 })
 
 console.log('\n─────── 다통 (통 선택) ───────')

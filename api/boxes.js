@@ -11,6 +11,7 @@ import { BOX, BOXES, TIERS, slotsOf, remainingFrom, tierCountsOf } from './_box.
 import { allOdds, updateTable, pSolo, fmtPct, naturalFreq } from './_draw.js'
 import * as G from './_group.js'
 import * as D from './_daily.js'
+import { SUGGEST } from './search.js'
 import { readRoom, kvEnabled } from './_room.js'
 import conversion from '../data/conversion.json' with { type: 'json' }
 import oripaAudit from '../data/oripa-audit.json' with { type: 'json' }
@@ -121,6 +122,8 @@ export default async function handler(req, res) {
   }
 
   res.status(200).json({
+    /** 추천 검색어 — 크롤 상품명 빈도에서 유도. 손으로 고르지 않는다. */
+    suggest: SUGGEST,
     /** 딜 목록 — 목록 화면의 유일한 출처. */
     deals: buildDeals(Date.now()),
     /** 통별 상세 — ① 상세 화면이 통 선택에 따라 읽는다. */
@@ -132,7 +135,7 @@ export default async function handler(req, res) {
     })),
     box: BOX,
     /**
-     * 구좌별 등급을 인덱스 순서대로 이어붙인 문자열 (길이 N).
+     * 장별 등급을 인덱스 순서대로 이어붙인 문자열 (길이 N).
      * 화면의 1,000칸 그리드가 이것을 그대로 읽는다. 클라이언트가 통을 다시
      * 펼치면 서버와 두 벌이 되고, 두 벌은 반드시 어긋난다(I15).
      */
@@ -162,10 +165,10 @@ export default async function handler(req, res) {
     },
     // 계산 근거 — 화면의 '근거' 시트가 이 문자열을 그대로 쓴다.
     basis: {
-      individual: 'P(g) = K_g / N  (재고 ÷ 구좌). 정의이지 수식이 아니다.',
+      individual: 'P(g) = K_g / N  (재고 ÷ 전체 장수). 정의이지 수식이 아니다.',
       team: 'P_team(g,n) = 1 − C(N−K_g, n) / C(N, n)  (초기하분포, 비복원)',
       exact: 'K_g = 1이면 정확히 n/N — 혼자 대비 정확히 n배. 회사가 보태는 값이 없다.',
-      update: 'j구좌가 빠지고 g가 안 나왔다면 P(g) = K_g / (N − j). 이것이 천장을 대체한다.',
+      update: 'j장이 빠지고 g가 안 나왔다면 P(g) = K_g / (N − j). 이것이 천장을 대체한다.',
       overflow: 'C(N−K,n)/C(N,n)은 곱 형태 ∏(N−n−i)/(N−i)로 계산한다. 로그감마와 1e-10 이내 일치를 self-check가 확인한다.',
       noCeiling: '천장 장치가 없다. 비복원 추출이 그 역할을 한다.',
       source: `크롤 ${BOX.crawledAt} · 다나와 · data/pool.json`,

@@ -91,7 +91,7 @@ export function BoxGrid({ slotTiers, drawn = [], revealed = null }) {
   const taken = new Set(revealed === null ? drawn : drawn.slice(0, revealed))
   return (
     <div className="boxgrid" role="img"
-      aria-label={`통 ${slotTiers.length}구좌. 뽑힌 구좌 ${taken.size}개.`}>
+      aria-label={`통 ${slotTiers.length}장. 뽑힌 카드 ${taken.size}개.`}>
       {Array.from(slotTiers, (t, i) => (
         <div key={i} className={`cell t-${t}${taken.has(i) ? ' gone' : ''}`} />
       ))}
@@ -106,7 +106,7 @@ export function GridLegend({ tiers }) {
         <span className="legend-item" key={t.tier}>
           <Rarity tier={t.tier} />
           <span>{`${t.tier}등급`}</span>
-          <span className="num">{`${t.K.toLocaleString('ko-KR')}구좌`}</span>
+          <span className="num">{`${t.K.toLocaleString('ko-KR')}장`}</span>
         </span>
       ))}
     </div>
@@ -158,7 +158,7 @@ export function TierShowcase({ tier, pct, freq, hero }) {
       )}
 
       <p className="tshow__foot">
-        {`${tier.K.toLocaleString('ko-KR')}구좌 · ${tier.cards.length}종`}
+        {`${tier.K.toLocaleString('ko-KR')}장 · ${tier.cards.length}종`}
         {tier.cards.length > shown.length && `  ·  외 ${tier.cards.length - shown.length}종`}
         {`  ·  ${won(tier.minPrice)} ~ ${won(tier.maxPrice)}`}
       </p>
@@ -201,7 +201,7 @@ export function MemberRail({ members, teamMax, readyCount, phase }) {
    등급색 광선 + 카드 플립. S/A만 색종이가 떨어진다.
    prefers-reduced-motion이면 전역 규칙이 모든 animation을 끈다.
 
-   v2에서 한 줄 더한다 — 뽑기 직전의 남은 구좌와 그때의 확률.
+   v2에서 한 줄 더한다 — 뽑기 직전의 남은 카드와 그때의 확률.
    비복원이라는 주장을 개봉 순간에 바로 보여주기 위해서다. */
 export function RevealScene({ r, fee, onClose }) {
   const big = r.tier === 'S' || r.tier === 'A'
@@ -225,7 +225,7 @@ export function RevealScene({ r, fee, onClose }) {
           <Delta v={r.price - fee} />
         </p>
         <p className="scene__odds">
-          {`뽑기 직전 남은 구좌 ${r.slotsBefore.toLocaleString('ko-KR')}개 · 그때 ${r.tier}등급 확률 ${r.oddsBefore[r.tier].pct}`}
+          {`뽑기 직전 남은 카드 ${r.slotsBefore.toLocaleString('ko-KR')}개 · 그때 ${r.tier}등급 확률 ${r.oddsBefore[r.tier].pct}`}
         </p>
       </div>
       <p className="scene__hint">탭해서 전체 결과 보기</p>
@@ -254,7 +254,7 @@ export function RevealCard({ r, mine, fee, delay }) {
         <Delta v={r.price - fee} />
       </p>
       <p className="rv__before">
-        {`뽑기 직전 ${r.slotsBefore.toLocaleString('ko-KR')}구좌 남음 · S등급 ${r.oddsBefore.S.pct}`}
+        {`뽑기 직전 ${r.slotsBefore.toLocaleString('ko-KR')}장 남음 · S등급 ${r.oddsBefore.S.pct}`}
       </p>
       {/* 이 카드가 실재하고 지금 이 가격에 팔린다는 증명 — 크롤 url을 그대로 쓴다.
           배송 리드타임은 가진 데이터가 없으므로 지어내지 않고 한계를 그 자리에 적는다. */}
@@ -313,7 +313,7 @@ export function UpdateTable({ updates, tiers }) {
   return (
     <div className="tablewrap">
       <table>
-        <thead><tr><th>등급</th>{js.map((j) => <th key={j} className="num">{`${j}구좌`}</th>)}</tr></thead>
+        <thead><tr><th>등급</th>{js.map((j) => <th key={j} className="num">{`${j}장`}</th>)}</tr></thead>
         <tbody>
           {tiers.map((g) => (
             <tr key={g}>
@@ -402,31 +402,36 @@ export function TradeTable({ results, me }) {
    ①(팀 뽑기)은 전원 준비 시 즉시 열리므로 마감이 실재하지 않고, 서버가
    deadlineAt을 null로 내려 이 컴포넌트 자체가 그려지지 않는다(I10').
    "얼마 안 남았어요" 같은 감정 문구는 쓰지 않는다 — 시각은 사실이고 재촉은 연출이다. */
-export function DeadlineTicker({ deadlineAt, label = '마감까지' }) {
+export function DeadlineTicker({ deadlineAt, label = '', size = 'sm' }) {
   const [now, setNow] = useState(() => Date.now())
   useEffect(() => {
     if (!deadlineAt) return undefined
-    const t = setInterval(() => setNow(Date.now()), 1000)
+    // 올웨이즈 팀구매 타이머는 0.1초까지 흐른다 — 그 감각을 맞춘다
+    const t = setInterval(() => setNow(Date.now()), 100)
     return () => clearInterval(t)
   }, [deadlineAt])
   if (!deadlineAt) return null
   const left = deadlineAt - now
-  if (left <= 0) return <span className="ticker ticker--over">마감됨</span>
+  if (left <= 0) return <span className={`tk tk--${size} tk--over`}>마감됨</span>
   const s = Math.floor(left / 1000)
   const d = Math.floor(s / 86400)
   const pad = (x) => String(x).padStart(2, '0')
   const hms = `${pad(Math.floor(s / 3600) % 24)}:${pad(Math.floor(s / 60) % 60)}:${pad(s % 60)}`
+  const tenth = Math.floor((left % 1000) / 100)
   return (
-    <span className="ticker" role="timer">
-      <em>{label}</em>
-      <b>{d > 0 ? `${d}일 ${hms}` : hms}</b>
+    <span className={`tk tk--${size}`} role="timer">
+      {label && <em className="tk__l">{label}</em>}
+      <b className="tk__v">
+        {d > 0 ? `${d}일 ${hms}` : `${hms}.${tenth}`}
+      </b>
+      <i className="tk__s">남음</i>
     </span>
   )
 }
 
 /* ── 판매 게이지 — 이 제품에서 분모는 장식이 아니라 확률이다 ─────
    누적 판매량은 서버가 세지 않으므로 표시하지 않는다(가짜 판매량 금지).
-   그리는 것은 "이 방의 통에서 빠진 구좌"뿐 — 서버 값이고 세면 맞는다. */
+   그리는 것은 "이 방의 통에서 빠진 카드"뿐 — 서버 값이고 세면 맞는다. */
 export function Gauge({ num, den, label }) {
   const ratio = den > 0 ? Math.min(1, num / den) : 0
   return (
@@ -445,18 +450,18 @@ export function Gauge({ num, den, label }) {
 export function DealCard({ deal, onOpen }) {
   const KIND = { team: '팀 뽑기', group: '공동구매', daily: '0원 응모' }
   return (
+    /* 올웨이즈 상품 그리드 문법 — 2열, 정사각 썸네일, 배지, 취소선 위 / 할인율+최종가 아래.
+       할인율만 빨강이고 금액은 잉크색이다(실제 올웨이즈 표기). */
     <button type="button" className={`deal deal--${deal.kind}`} onClick={() => onOpen(deal)}>
       <span className="deal__media">
         {deal.image ? <img src={deal.image} alt="" loading="lazy" /> : <span className="deal__ph" />}
         <span className="deal__kind">{KIND[deal.kind]}</span>
-        {deal.deadlineAt && <span className="deal__due"><DeadlineTicker deadlineAt={deal.deadlineAt} label="" /></span>}
       </span>
       <span className="deal__body">
         <span className="deal__title">{deal.title}</span>
-        <span className="deal__sub">{deal.subtitle}</span>
+        {deal.price.strike && <s className="deal__was">{deal.price.strike}</s>}
         <span className="deal__price">
           {deal.price.discount && <b className="deal__disc">{deal.price.discount}</b>}
-          {deal.price.strike && <s>{deal.price.strike}</s>}
           <b className="deal__big">{deal.price.big}</b>
         </span>
         <span className="deal__note">{deal.price.sub}</span>
@@ -464,79 +469,211 @@ export function DealCard({ deal, onOpen }) {
         <span className={`deal__dir deal__dir--${deal.dir}`}>
           {deal.dir === 'up' ? '↑ ' : '↓ '}{deal.dirLine}
         </span>
+        {deal.deadlineAt && <DeadlineTicker deadlineAt={deal.deadlineAt} label="마감" />}
       </span>
-      <span className="deal__go" aria-hidden="true">›</span>
     </button>
   )
 }
 
-/* ── 프로젝트 Q&A 독 — VS Code 터미널 문법 ────────────────────
-   채용 담당자용. 화면 하단에 접혀 있다가 열면 패널이 올라온다.
-   답변은 /api/ask가 저장소 문서 발췌 안에서만 생성한다. 키가 없으면
-   문서 발췌를 그대로 보여주는 폴백으로 내려앉고 배지로 표기한다(I13). */
-export function ChatDock({ open, onToggle, messages, onSend, busy }) {
-  const [q, setQ] = useState('')
-  const listRef = useRef(null)
-  useEffect(() => {
-    if (listRef.current) listRef.current.scrollTop = listRef.current.scrollHeight
-  }, [messages, busy])
-  const submit = (text) => {
-    const t = (text ?? q).trim()
-    if (!t || busy) return
-    setQ('')
-    onSend(t)
-  }
-  const PRESETS = ['왜 이 문제를 골랐나요?', '확률은 어떻게 정해지나요?', '왜 올웨이즈인가요?', '수집한 상품 데이터는 어디에 쓰이나요?']
-  if (!open) {
-    return (
-      <button type="button" className="dock dock--closed" onClick={onToggle} aria-expanded="false">
-        <span className="dock__dot" aria-hidden="true">●</span>
-        프로젝트 Q&A — 이 과제에 대해 물어보세요
-        <span className="dock__caret" aria-hidden="true">▲</span>
-      </button>
-    )
+/* ── 팀원별 보유 카드 + 직접 교환 요청 ────────────────────────
+   자동 배정만 있으면 "내 카드가 동의 없이 넘어갔다"로 읽힌다.
+   먼저 사람에게 요청하게 하고, 서로 엇갈려 1:1로 안 풀리는 고리만
+   '한 번에 맞추기'(TTC)가 푼다. 요청은 곧 선호의 표명이다. */
+export function SwapBoard({ members, holdings, byId, me, requests, onRequest, onRespond, busy }) {
+  const mine = holdings?.[me]
+  const sent = new Set(requests.filter((q) => q.from === me).map((q) => q.to))
+  const inbox = requests.filter((q) => q.to === me)
+  return (
+    <div className="swap">
+      {inbox.length > 0 && (
+        <div className="swap__inbox">
+          {inbox.map((q) => {
+            const who = members.find((m) => m.id === q.from)
+            const theirs = byId.get(holdings?.[q.from])
+            const ours = byId.get(mine)
+            return (
+              <div key={q.from} className="swapreq">
+                <p className="swapreq__t">
+                  <b>{who?.name ?? q.from}</b>님이 교환을 요청했어요
+                </p>
+                <p className="swapreq__d">
+                  {`${theirs?.name?.slice(0, 22) ?? '카드'} (${won(theirs?.price ?? 0)})`}
+                  {' ↔ '}
+                  {`내 ${ours?.name?.slice(0, 22) ?? '카드'} (${won(ours?.price ?? 0)})`}
+                </p>
+                <div className="swapreq__b">
+                  <button type="button" className="btn btn--go btn--sm"
+                    onClick={() => onRespond(q.from, true)} disabled={!!busy}>수락</button>
+                  <button type="button" className="btn btn--ghost btn--sm"
+                    onClick={() => onRespond(q.from, false)} disabled={!!busy}>거절</button>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+      <ul className="swap__list">
+        {members.filter((m) => m.id !== me).map((m) => {
+          const c = byId.get(holdings?.[m.id])
+          const asked = sent.has(m.id)
+          return (
+            <li key={m.id} className="swapcard">
+              {c?.image ? <img src={c.image} alt="" loading="lazy" /> : <span className="tstrip__ph" />}
+              <div className="swapcard__b">
+                <span className="swapcard__who">
+                  {m.name}{m.sim && <span className="simtag">시뮬</span>}
+                </span>
+                <span className="swapcard__nm">{c?.name?.slice(0, 30) ?? '—'}</span>
+                <span className="swapcard__pr">
+                  {c && <span className={`tier tier--${c.tier}`}>{c.tier}</span>}
+                  {c ? won(c.price) : ''}
+                </span>
+              </div>
+              <button type="button" className={`swapcard__go ${asked ? 'is-sent' : ''}`}
+                onClick={() => onRequest(m.id)} disabled={asked || !!busy}>
+                {asked ? '요청함' : '교환 요청'}
+              </button>
+            </li>
+          )
+        })}
+      </ul>
+    </div>
+  )
+}
+
+/* ── 친구 초대 (목업) ──────────────────────────────────────────
+   링크 복사는 **진짜로 동작한다**. 다만 링크를 받은 사람이 실제로 입장하는 것은
+   구현하지 않았다(방 저장소가 인스턴스별 메모리라 다른 기기에서 못 찾는다).
+   그 한계를 화면에 적는다 — 되는 척하면 그게 이 제품이 비판하는 것과 같아진다. */
+export function InviteBox({ roomId, teamMax, joined }) {
+  const [copied, setCopied] = useState(false)
+  const [open, setOpen] = useState(true)
+  const link = typeof window !== 'undefined'
+    ? `${window.location.origin}/?room=${roomId}`
+    : `/?room=${roomId}`
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(link) } catch { /* 권한 없으면 조용히 넘어간다 */ }
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
   return (
-    <section className="dock dock--open" aria-label="프로젝트 Q&A">
-      <header className="dock__head">
-        <span className="dock__dot" aria-hidden="true">●</span>
-        <b>프로젝트 Q&A</b>
-        <span className="dock__hint">저장소 문서(README · SPEC · 근거 대장)에서만 답합니다</span>
-        <button type="button" className="dock__x" onClick={onToggle} aria-label="접기">▼</button>
-      </header>
-      <div className="dock__list" ref={listRef}>
-        {messages.length === 0 && (
-          <div className="dock__empty">
-            <p>지원자의 의도와 설계 근거를 물어보세요.</p>
-            <div className="dock__chips">
-              {PRESETS.map((t) => (
-                <button key={t} type="button" onClick={() => submit(t)}>{t}</button>
+    <div className="invite">
+      <div className="invite__head">
+        <b>{`친구 ${Math.max(0, teamMax - joined)}명을 더 부를 수 있어요`}</b>
+        <span>같은 박스를 함께 열면 팀 전원의 확률이 올라갑니다</span>
+      </div>
+      <div className="invite__link">
+        <code>{link}</code>
+        <button type="button" onClick={copy}>{copied ? '복사됨' : '링크 복사'}</button>
+      </div>
+      <div className="invite__row">
+        <button type="button" className={`invite__mode ${open ? 'is-on' : ''}`} onClick={() => setOpen(true)}>
+          공개 참여 {open && '·  켜짐'}
+        </button>
+        <button type="button" className={`invite__mode ${!open ? 'is-on' : ''}`} onClick={() => setOpen(false)}>
+          초대한 사람만
+        </button>
+      </div>
+      <p className="invite__note">
+        <SimBadge what="링크 입장" /> 링크 복사는 실제로 됩니다.
+        받은 사람이 이 방에 입장하는 것은 이 MVP에서 구현하지 않았습니다 —
+        방을 인스턴스 메모리에 두고 있어 다른 기기에서 찾을 수 없습니다.
+      </p>
+      <p className="invite__note">초대한 사람이 더 받는 건 없어요. 팀 전원이 똑같은 확률입니다.</p>
+    </div>
+  )
+}
+
+/* ── 자동 흐르는 상품 띠 ────────────────────────────────────
+   올웨이즈 홈은 기획전 상품이 오른쪽에서 왼쪽으로 계속 흐른다.
+   목록을 두 벌 이어 붙이고 CSS로만 밀어 끊김 없이 순환시킨다 —
+   타이머도 라이브러리도 쓰지 않는다. 접근성: 움직임 최소화 설정을 존중한다. */
+export function Marquee({ items, speed = 42 }) {
+  if (!items.length) return null
+  const loop = [...items, ...items]
+  return (
+    <div className="mq" aria-label="지금 많이 찾는 카드">
+      <div className="mq__track" style={{ animationDuration: `${speed}s` }}>
+        {loop.map((it, i) => (
+          <a key={`${it.id}-${i}`} className="mq__card" href={it.url}
+            target="_blank" rel="noreferrer" aria-hidden={i >= items.length}>
+            {it.image ? <img src={it.image} alt="" loading="lazy" /> : <span className="mq__ph" />}
+            <span className="mq__nm">{it.name.replace(/^\[[^\]]*\]\s*/, '').slice(0, 24)}</span>
+            <span className="mq__pr">{won(it.price)}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+/* ── 검색 화면 — 올웨이즈 검색 문법 ─────────────────────────
+   최근 검색어(이 기기에만 저장) · 추천 검색어(크롤 데이터에서 유도) · 결과.
+   눌리는데 아무 일도 안 일어나는 검색창이 가장 나쁜 상태다. */
+export function SearchScreen({ onClose, onSearch, suggest, recent, onClearRecent, result, busy, q, setQ }) {
+  const inputRef = useRef(null)
+  useEffect(() => { inputRef.current?.focus() }, [])
+  const submit = (text) => {
+    const t = (text ?? q).trim()
+    if (!t) return
+    setQ(t)
+    onSearch(t)
+  }
+  return (
+    <div className="srch">
+      <form className="srch__bar" onSubmit={(e) => { e.preventDefault(); submit() }}>
+        <button type="button" className="srch__back" onClick={onClose} aria-label="닫기">‹</button>
+        <span className="srch__field">
+          <IconSearch />
+          <input ref={inputRef} value={q} onChange={(e) => setQ(e.target.value)}
+            placeholder="올웨이즈에서 상품 검색하기" aria-label="상품 검색" maxLength={40} />
+          {q && <button type="button" className="srch__x" onClick={() => setQ('')} aria-label="지우기">✕</button>}
+        </span>
+      </form>
+
+      {result ? (
+        <section className="srch__sec">
+          <header className="srch__h">
+            <b>{`'${result.q}' 검색 결과`}</b>
+            <span>{`${result.count}건${result.count >= 24 ? ' 이상' : ''}`}</span>
+          </header>
+          {result.count === 0 ? (
+            <p className="srch__empty">{`수집한 ${result.total.toLocaleString('ko-KR')}건에서 찾지 못했어요. 다른 낱말로 찾아보세요.`}</p>
+          ) : (
+            <div className="grid">
+              {result.items.map((it) => <ProductCard key={it.id} item={it} />)}
+            </div>
+          )}
+        </section>
+      ) : (
+        <>
+          {recent.length > 0 && (
+            <section className="srch__sec">
+              <header className="srch__h">
+                <b>최근 검색어</b>
+                <button type="button" onClick={onClearRecent}>모두 삭제</button>
+              </header>
+              <div className="chips">
+                {recent.map((t) => (
+                  <button key={t} type="button" className="chip" onClick={() => submit(t)}>{t}</button>
+                ))}
+              </div>
+            </section>
+          )}
+          <section className="srch__sec">
+            <header className="srch__h">
+              <b>올박스 추천 검색어</b>
+              <span>수집한 상품명에서 뽑았어요</span>
+            </header>
+            <div className="chips">
+              {suggest.map((t) => (
+                <button key={t} type="button" className="chip chip--sug" onClick={() => submit(t)}>{t}</button>
               ))}
             </div>
-          </div>
-        )}
-        {messages.map((m, i) => (
-          <div key={i} className={`dockmsg dockmsg--${m.role}`}>
-            <p>{m.content}</p>
-            {m.role === 'assistant' && (
-              <footer>
-                {m.source === 'fallback' && <span className="simtag">문서 발췌 · AI 미사용</span>}
-                {m.source === 'openai' && m.refs?.length > 0 && (
-                  <details><summary>근거 {m.refs.length}건</summary>
-                    <ul>{m.refs.map((r) => <li key={r}>{r}</li>)}</ul>
-                  </details>
-                )}
-              </footer>
-            )}
-          </div>
-        ))}
-        {busy && <div className="dockmsg dockmsg--assistant dockmsg--wait"><p className="dock__wait">문서를 찾는 중…</p></div>}
-      </div>
-      <form className="dock__input" onSubmit={(e) => { e.preventDefault(); submit() }}>
-        <input value={q} onChange={(e) => setQ(e.target.value)}
-          placeholder="예: 천장이 왜 없나요?" aria-label="질문" maxLength={300} />
-        <button type="submit" disabled={busy || !q.trim()}>질문</button>
-      </form>
-    </section>
+          </section>
+        </>
+      )}
+      {busy && <p className="srch__empty">찾는 중…</p>}
+    </div>
   )
 }
