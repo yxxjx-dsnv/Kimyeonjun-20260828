@@ -1121,19 +1121,25 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
 }
 
 /* ── 0원 응모 풀블리드 배너 — 문구가 전부 참인 배너 ── */
+/* 올웨이즈의 프로모 배너는 **단색 빨강 밴드 + 검정 라벨칩**이다.
+   보라 그라데이션은 이 앱 어디에도 없는 색이라 붙이는 순간 남의 화면이 된다. */
 .dbanner {
-  display: flex; flex-direction: column; align-items: flex-start; gap: var(--s1);
+  display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
   width: 100%; margin: var(--s3) 0; padding: var(--s4);
-  border: 0; border-radius: 14px; cursor: pointer; text-align: left;
-  background: linear-gradient(135deg, #2b2350, #4a2a6d 60%, #6d2a5e);
-  color: #fff;
+  border: 0; border-radius: 12px; cursor: pointer; text-align: left;
+  background: var(--brand); color: #fff;
 }
-.dbanner__k { font-size: var(--fs-micro); font-weight: 800; letter-spacing: 0.08em; opacity: 0.85; }
+.dbanner:hover { background: var(--brand-dk); }
+.dbanner__k {
+  display: inline-block; padding: 3px 9px; border-radius: 5px;
+  background: var(--ink); color: #fff;
+  font-size: var(--fs-micro); font-weight: 800;
+}
 .dbanner__line { display: flex; align-items: baseline; gap: var(--s2); }
 .dbanner__line s { font-size: var(--fs-body); opacity: 0.6; }
 .dbanner__line b { font-size: var(--fs-display); font-weight: 900; letter-spacing: -0.02em; }
-.dbanner__line em { font-style: normal; font-weight: 800; font-size: var(--fs-lead); color: #ffd76a; }
-.dbanner__sub { font-size: var(--fs-label); opacity: 0.85; }
+.dbanner__line em { font-style: normal; font-weight: 900; font-size: var(--fs-lead); color: #FFD84D; }
+.dbanner__sub { font-size: var(--fs-label); opacity: 0.92; }
 .dbanner .ticker { margin-top: var(--s1); }
 
 /* ── 마감 시계 — 올웨이즈 팀구매 타이머와 같은 문법 ──
@@ -1149,8 +1155,10 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
 .tk--over .tk__v, .tk--over { color: var(--muted); font-size: var(--fs-micro); font-weight: 700; }
 .tk--lg .tk__v { font-size: var(--fs-title); }
 .tk--lg .tk__l, .tk--lg .tk__s { font-size: var(--fs-label); }
-.dbanner .tk__v, .dbanner .tk__s { color: #ffd76a; }
-.dbanner .tk__l { color: rgba(255,255,255,0.7); }
+/* 빨강 밴드 위의 시계 — 흰 칩에 검정 숫자. 배경과 같은 계열로 두면 안 읽힌다. */
+.dbanner .tk { background: #fff; padding: 4px 10px; border-radius: 999px; margin-top: 2px; }
+.dbanner .tk__v { color: var(--ink); }
+.dbanner .tk__s, .dbanner .tk__l { color: var(--muted); }
 
 /* ── 딜 목록 — 올웨이즈 상품 그리드(2열) ── */
 .deallist { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s3); }
@@ -1236,7 +1244,12 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
 
 /* 상세 히어로(②③) */
 .hero--flat { text-align: center; padding: var(--s3) 0; }
-.hero__img { width: 132px; height: 132px; object-fit: cover; border-radius: 14px; background: #f3f4f6; }
+/* img가 전역 리셋으로 display:block이라 text-align:center가 먹지 않는다.
+   블록 요소는 margin auto로 가운데를 잡아야 한다. */
+.hero__img {
+  display: block; margin: 0 auto;
+  width: 132px; height: 132px; object-fit: cover; border-radius: 14px; background: #f3f4f6;
+}
 .hero__t { font-size: var(--fs-title); font-weight: 900; letter-spacing: -0.02em; margin: var(--s2) 0 2px; }
 .hero__s { font-size: var(--fs-label); color: var(--muted); margin-bottom: var(--s2); }
 
@@ -1317,23 +1330,25 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
   margin: 0 calc(-1 * var(--s4)); padding: var(--s6) var(--s4) var(--s5);
   min-height: 430px; display: flex; flex-direction: column;
   align-items: center; justify-content: center; text-align: center;
-  background: radial-gradient(ellipse at 50% 42%, #7a1420 0%, #3b0a12 46%, #17060a 100%);
+  /* 반복 conic 광선은 전형적인 생성물 룩이다. 무대 조명 하나로 바꾼다. */
+  background:
+    radial-gradient(ellipse 120% 70% at 50% 34%, rgba(255,255,255,0.16), transparent 62%),
+    linear-gradient(180deg, #C6303A 0%, #9E2029 52%, #6E1119 100%);
   isolation: isolate;
 }
+/* 바닥에 깔린 그림자 — 카드가 무대 위에 놓인 느낌을 만든다 */
 .hero3__rays {
-  position: absolute; inset: -30%; z-index: 0;
-  background: repeating-conic-gradient(from 0deg at 50% 50%,
-    rgba(255,255,255,0.11) 0deg 4deg, transparent 4deg 13deg);
-  animation: rays 26s linear infinite;
+  position: absolute; left: 50%; bottom: 8%; width: 260px; height: 34px;
+  margin-left: -130px; z-index: 0; border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(0,0,0,0.45), transparent 70%);
 }
 .hero3__glow {
-  position: absolute; left: 50%; top: 42%; width: 340px; height: 340px;
-  margin: -170px 0 0 -170px; border-radius: 50%; z-index: 0;
-  background: radial-gradient(circle, rgba(255,210,120,0.42), transparent 66%);
-  animation: heroGlow 4.2s ease-in-out infinite;
+  position: absolute; left: 50%; top: 36%; width: 300px; height: 300px;
+  margin: -150px 0 0 -150px; border-radius: 50%; z-index: 0;
+  background: radial-gradient(circle, rgba(255,255,255,0.22), transparent 68%);
+  animation: heroGlow 5s ease-in-out infinite;
 }
-@keyframes rays { to { transform: rotate(360deg) } }
-@keyframes heroGlow { 0%,100% { opacity: 0.55; transform: scale(1) } 50% { opacity: 0.9; transform: scale(1.13) } }
+@keyframes heroGlow { 0%,100% { opacity: 0.5 } 50% { opacity: 0.85 } }
 
 .hero3__cards { position: absolute; inset: 0; z-index: 1; }
 .hero3__c {
@@ -1351,13 +1366,14 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
 
 .hero3__brand { position: relative; z-index: 2; }
 .hero3__k {
-  display: block; font-size: var(--fs-micro); font-weight: 800; letter-spacing: 0.1em;
-  color: #ffd76a; text-shadow: 0 1px 6px rgba(0,0,0,0.6);
+  display: inline-block; padding: 3px 10px; border-radius: 999px;
+  background: rgba(0,0,0,0.28); color: #fff;
+  font-size: var(--fs-micro); font-weight: 800; letter-spacing: 0.02em;
 }
 .hero3__logo {
   margin: 6px 0 4px; font-size: 58px; font-weight: 900; letter-spacing: -0.045em;
   color: #fff; line-height: 1;
-  text-shadow: 0 0 22px rgba(255,190,110,0.55), 0 4px 0 #8d1220, 0 7px 20px rgba(0,0,0,0.65);
+  text-shadow: 0 3px 0 rgba(0,0,0,0.22), 0 8px 18px rgba(0,0,0,0.35);
 }
 .hero3__tag {
   display: inline-block; padding: 4px 14px; border-radius: 999px;
@@ -1368,7 +1384,7 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
   position: relative; z-index: 2; margin-top: var(--s4);
   color: #fff; font-size: var(--fs-lead); font-weight: 700;
 }
-.hero3__max b { color: #ffd76a; font-weight: 900; }
+.hero3__max b { color: #FFD84D; font-weight: 900; }
 .hero3__max em { display: block; margin-top: 2px; font-style: normal; font-size: var(--fs-micro); color: rgba(255,255,255,0.72); }
 .hero3__scroll {
   position: relative; z-index: 2; margin-top: var(--s5);

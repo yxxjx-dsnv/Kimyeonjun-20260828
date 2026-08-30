@@ -736,9 +736,7 @@ function TeamDetail({ sel, deal, teamSize, setTeamSize, busy, onBack, onBuy, onS
           <b>{won(box.fee)}</b><span>팀으로 열기</span>
         </button>
       </div>
-      <p className="cta__note cta__note--two">
-        {`꽝 없음 · 어떤 카드가 나와도 ${won(box.fee)} 이상입니다`}
-      </p>
+
     </>
   )
 }
