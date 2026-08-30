@@ -204,6 +204,9 @@ j=990  10.0000%  (100배)
 | A5 | 시점 맥락 | **2026년 = 포켓몬스터 출시 30주년** | 매일신문·한국경제 | 2026 |
 | A6 | 구매층 | 주 구매층 **20~40대**. 당시 콘텐츠를 소비한 세대가 구매력을 갖춘 30~40대로 성장한 것이 시장 확대 요인 | 한국경제 | 2026-04-30 |
 | A7 | 유통 상황 | 대형마트 완구매장 입고 당일 소진, 인기 품목은 30분 완판 | 한국경제 | 2026-04-30 |
+| A8 | 30주년 행사 인파 | 2026-05-01 서울 성수동 포켓몬 30주년 행사가 인파로 **중단**, 경찰·소방 출동 | 아시아경제(연합뉴스 사진) | 2026-06-23 |
+| A9 | 경매 낙찰가 | Goldin 2026 봄 경매: 1996 일본판 베이스세트 102장 **$178,120(약 2억 7,300만 원)**, 2002 리자몽 $122,000, 2003 크리스탈 리자몽 $109,800. 2026-02 피카츄 일러스트레이터 **$16,492,000(약 252억 원)** — 트레이딩카드 경매 사상 최고가 | 아시아경제 | 2026-06-23 |
+| A10 | **자체 시세 측정** | 다나와 월별 최저가 **12개월(25-09~26-08)** 시계열을 상품 **51종**에서 수집. 각 상품 첫 달=100 정규화 중앙값 지수가 **100.0 → 112.6**. 상승 품목 **34종(66.7%)**, 중앙 변동률 **+12.6%**. 지수가 100을 넘어 유지되기 시작하는 달은 **2026-04** — A1·A2(크림 4월 급증)와 A8(5월 성수)과 같은 창 | **직접 조사** (`npm run trend`) | 2026-08-30 크롤 |
 
 - 매일신문 https://www.imaeil.com/page/view/2026081816275799244
 - 한국경제 https://www.hankyung.com/article/202604308759g
@@ -269,6 +272,10 @@ j=990  10.0000%  (100배)
 | D9 | 전략 방지 | Roth, A. E. (1982). *Incentive compatibility in a market with indivisible goods.* Economics Letters, 9(2), 127–132 | 교환 |
 | D10 | 자연빈도가 확률 오인을 줄임 | Gigerenzer, G. & Hoffrage, U. (1995). *How to improve Bayesian reasoning without instruction: Frequency formats.* Psychological Review, 102(4), 684–704 | 표기법 |
 | D11 | 낮은 확률의 과대평가 | Prelec, D. (1998). *The probability weighting function.* Econometrica, 66(3), 497–527 | 현상 분석 |
+| D12 | **레어 카드 19.1%가 매출 58.8%를 만든다** — 포켓몬 카드 300장을 eBay에 12개월간 실제 출품한 전향적 현장연구. 73.3%(220/300) 판매, 총 923.60€. 판매가 분포가 **뚜렷하게 치우침**(중앙값 1.95€). 등급별 중앙 판매가 Rare **9.48€** vs Uncommon 1.95€ vs Common 1.50€. 표본 구성은 Common 48.0% · Uncommon 34.3% · Rare 17.3% | Heck, J., Schormann, S., Krichevsky, B., Groh, A., Pape, T., Schröder, S., Glahn, A., Schumacher, C., & Schulze Westhoff, M. (2026). *Sales characteristics of Pokémon trading cards: A prospective one-year field study.* PLoS One, 21(3), e0334289. DOI 10.1371/journal.pone.0334289 | **가치 집중도의 실측 기준선 — 우리 통과 직접 대조(F8)** |
+| D13 | **확률은 표시되지 않지만 이용자는 낮다는 걸 안다** — "The loot box mechanics do not explicitly display the odds for each item, but the players were aware that the odds are extremely low for rare items." 참여 **시작** 이유는 대체로 **사회적**이고, **지속** 이유는 사회적·심리적 보상. "The rarity of the outputs was directly positively associated with the level of excitement." 신규 유입은 **확정 레어를 주는 '루키 배너'**로 설계됨 | Culbong, H., Masters, A., Noble-Carr, D., & Suomi, A. (2026). *Why do young people engage with gambling features in videogames: rewards and motivations.* Journal of Youth Studies. DOI 10.1080/13676261.2026.2690206. 호주 18–24세 질적 인터뷰 | **문제 정의의 핵심 근거. B7(확률 0건·확정 30건)과 독립적으로 같은 메커니즘을 가리킴** |
+| D14 | 인원 무작위 지급은 **위험회피를 낮춘다** — "We find that between-subjects randomization reduces risk aversion." 참가자 일부만 무작위로 뽑아 실제 지급하는 방식(between-subjects)에서 위험회피가 감소. 저자들은 이를 **실험 설계상의 편향**으로 보고함 | Baltussen, G., Post, T., van den Assem, M. J., & Wakker, P. P. (2012). *Random incentive systems in a dynamic choice experiment.* Experimental Economics, 15(3), 418–443 | **형식②③(인원 중 일부만 환급·당첨)의 위험 신호.** 이 논문은 가챠 심리 연구가 **아니라** 실험방법론 연구다 — 인원 무작위 지급 구조가 판단을 흐릴 수 있다는 경고로만 인용한다 |
+| D15 | **사회적 보상이 과다사용의 최강 예측자** — 인상관리·사회비교·FoMO로 구성된 '사회적 보상' 요인이 확인 빈도와 문제적 사용 **양쪽 모두의 가장 강한 예측변수**이며 5개 요인 중 최대 고유값 | Wadsley, M., Covey, J., & Ihssen, N. (2022). *The predictive utility of reward-based motives underlying excessive and problematic social networking site use.* Psychological Reports, 125(5), 2485–2516. DOI 10.1177/00332941211025271. 청년 411명 | **우리 설계에 대한 경고.** 카드·가챠 연구가 **아니라 SNS 연구**다 — 형식①이 쓰는 사회적 보상이 곧 위험 요인이라는 근거로만 인용하고, 정원 10명 고정·천장/스트릭 없음의 이유로 삼는다 |
 
 **D1과 D2가 상충한다.** D1은 불확실성이 구매의도를 높인다고 하고 D2는 낮춘다고 한다. 맥락(수집품 vs 항공권)과 방법(설문 vs 시나리오 실험)이 다르다. **우리는 D2를 채택했고, 그 이유는 D2가 실행 가능한 설계 지침(자율성을 넣어라)을 주기 때문이며, 이것이 우리 제품 전제에 불리한 결과라는 점도 함께 적는다.**
 
@@ -295,11 +302,13 @@ j=990  10.0000%  (100배)
 | F1 | 크롤 수집 건수 | **875건** (검색어 37개, 빈 응답 0, 실패 0, 이미지 확보 875/875). 분류: 카드 472 · 액세서리 321 · 오리파 38 · 카드 생태계 밖 44 | `node crawler/crawl.js` (2026-08-29) |
 | F2 | 카드 가격 분포 | 472건. 최소 90원 · 25% 18,900원 · **중앙 63,360원** · 75% 153,030원 · 최대 1,565,570원<br>구간별: ~2천 18 · 2~5천 20 · 5천~1만 31 · 1~3만 87 · 3~10만 142 · 10~50만 145 · 50만~ 29 | `node crawler/report.mjs` |
 | F3 | 오리파 확률 미공시 | **37 / 37건** (확률 수치 0건, 확률 단어 0건, '확정·보장' 30건). 상세 도달 1/1건 확인, 중개 36건 도달 불가 | `node crawler/crawl.js oripa` |
-| F4 | 통 구성 (N, K_g) | ___ | Phase 2 |
-| F5 | 인원별 팀 확률표 | ___ | `node api/_draw.js` |
-| F6 | 교환 전환율 (지목자 수별) | ___ | 시뮬레이션 |
-| F7 | TTC 개선 인원 비율 (n=2,5,10) | ___ | `node api/_trade.js` |
-| F8 | self-check 총 건수 | ___ | `npm test` |
+| F4 | 통 구성 (N, K_g) | 참여비 **10,000원** · **1,000구좌** · 정원 10명. 재고 **S 1 · A 4 · B 25 · C 970**. 밴드는 참여비 배수로 정의 — C 1.0~1.5배 · B 1.5~4배 · A 4~20배 · S 20배 이상 | `node api/_box.js` |
+| F5 | 인원별 팀 확률표 | 등급 · 1명 · 5명 · 10명 → **S 0.100% · 0.500% · 1.000%** / A 0.400% · 1.988% · 3.946% / B 2.500% · 11.913% · 22.457% / C 97.000% · >99.999% · >99.999%. K=1인 S는 10명에서 정확히 10배 | `npm run odds` |
+| F6 | 교환 전환율 (지목자 수별) | 팀 10명 · 10만 회. **남이 뽑은 S가 교환으로 나에게 오는 비율** — 지목자 1명일 때 동질 선호 **1.9%** vs 이질 선호 **51.9%**(27배). 지목자 3명 1.5% vs 19.3%, 5명 1.0% vs 8.9%, 10명 0.0% vs 0.0%. **교환의 가치는 전적으로 선호 이질성에 달려 있고, 모두가 같은 것을 원하면 0이 된다** | `node api/_trade.js` → `data/conversion.json` |
+| F7 | TTC 개선 인원 비율 (n=2,5,10) | 이질 선호·2만 회 기준 **2명 24.5% · 5명 52.8% · 10명 68.3%**. 회차당 교환 사이클 0.24 · 1.13 · 2.54. **교환의 주된 가치는 S 획득이 아니라 중복 해소**에 있다 — S 전환율보다 개선 인원 비율이 훨씬 크다 | `node api/_trade.js` |
+| F8 | self-check 총 건수 | **144건** 전부 통과 — _box 18 · _draw 15 · _trade 12 · _group 13 · _daily 17 · trend 11 · room 28 · render 30. 네트워크 없이 동작 | `npm test` |
+| F9 | **시세 시계열** | 다나와 월별 최저가 12개월(25-09~26-08) · 상품 **51/55종** 확보. 첫 달=100 정규화 중앙값 지수 **100.0 → 112.6**. 상승 34종(66.7%), 중앙 변동률 **+12.6%**. 지수가 100을 넘어 유지되는 첫 달은 **2026-04**(코드가 데이터에서 유도) | `npm run trend` → `npm run chart` |
+| F10 | **가치 집중도 — 논문 대조** | 동일 절단점(상위 19.1% 구좌)에서 우리 통의 가치 비중은 **34.1%**. D12가 실측한 실제 시장은 같은 절단점에서 **58.8%**. 우리 통이 **1.73배 덜 쏠려 있다** — 꽝 없음 1층이 가치를 바닥에 넓게 깔기 때문 | `node api/_box.js` + D12 |
 
 **F 항목은 전부 코드 실행 출력이다. 손으로 타이핑하지 않는다.**
 

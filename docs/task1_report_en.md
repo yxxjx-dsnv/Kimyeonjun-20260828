@@ -35,9 +35,32 @@ Oripa (オリパ, "original pack") are mystery packs that a card shop assembles 
 | A6 | Buyer base | Primary buyers are in their **20s–40s**; the generation that consumed the content as children now has purchasing power, and that is cited as the main driver of market expansion | Hankyung, 2026-04-30 |
 | A7 | Supply | Mart toy sections sell out the day stock arrives; popular items in 30 minutes | Hankyung, 2026-04-30 |
 
-### Evidence we produced ourselves
+### Evidence we produced ourselves — 1. The price move, in our own data
 
-Press coverage establishes that the boom is real. It does not establish *what is broken inside it*. So we measured that directly: we crawled a Korean price-comparison marketplace, identified every oripa listing, and audited how each one describes its odds.
+Press coverage reports the boom. We wanted to see it in prices we collected ourselves, over exactly the window the brief asks about — the last year.
+
+We pulled **12 months of monthly low prices (2025-09 → 2026-08) for 51 Pokémon-card products** from a Korean price-comparison marketplace. Each product is normalised to 100 at its own first month, and we take the **median** across products, so that one expensive card cannot drag the series.
+
+![Pokémon card price index, own collection](img/trend.svg)
+
+> **The index runs 100.0 → 112.6. 34 of 51 products (66.7%) ended higher, median change +12.6%.**
+> The series is flat for seven months, then turns: **the first month the index rises above 100 and stays there is 2026-04.**
+
+That date is not one we chose. The chart script derives it from the series. It matters because **three independent sources point at the same window**:
+
+| Source | What it says | Window |
+|---|---|---|
+| KREAM transaction value (press) | +15,325% in a single month | **2026-04** |
+| Pokémon 30th-anniversary event, Seongsu-dong, Seoul (press) | Halted by the crowd; police and fire dispatched | **2026-05-01** |
+| **Our price index** (own crawl) | Turns upward and holds | **2026-04** |
+
+Two of these are reported; one is ours, collected without reference to the other two. They agree.
+
+> **Stated limits.** These are marketplace *listing* low prices, not completed-transaction prices, and the 51 products are those with a stable product code on this one marketplace — not a representative sample of the Korean card market. The median is robust to outliers but the tail is extreme: the largest single rise we measured is **+2,048%** (5,500 → 118,150 KRW). We report the median, not that number, as the headline.
+
+### Evidence we produced ourselves — 2. What is broken inside it
+
+A price rise is not a problem statement. Press coverage does not establish *what is broken inside the boom*. So we measured that directly: we crawled a Korean price-comparison marketplace, identified every oripa listing, and audited how each one describes its odds.
 
 > **Of 37 oripa listings, the number that state a probability is 0.**
 > Of the same 37, **30 (81.1%)** advertise a *guarantee* — "SAR guaranteed", "3 RR cards guaranteed", "high return rate".
@@ -86,11 +109,45 @@ For a collector who is inside the culture, low odds are a known cost of play. Fo
 
 ### 2.4 What the literature says
 
+Three questions, answered from published work rather than from our own conviction.
+
+**(a) Why does a resale market form at all? Because value is extremely concentrated.**
+
+Heck et al. (*PLoS One*, 2026) is the closest published study to our subject: they listed **300 Pokémon cards on eBay for one year** and recorded what actually sold.
+
+> "**Remarkably, while Rare cards accounted for only 19.1% (42/220) of all cards sold, they contributed 58.8% (543.45 €/923.60 €) to the total revenue.**"
+> Median sale price was **1.95 €**; the distribution is "markedly skewed." By rarity the medians were Rare **9.48 €**, Uncommon 1.95 €, Common 1.50 €.
+
+This is the mechanism behind the problem in §2.2, measured rather than asserted. When roughly a fifth of the cards carry three-fifths of the value, a buyer who wants one specific high-grade card cannot get there by buying packs at a sensible cost — and a secondary market at a premium becomes the rational route. The same paper notes that "dependence on the thrill of pulling rare cards from booster packs share[s] characteristics with gambling and addictive behaviors."
+
+**(b) Why do people engage with probability mechanics? Socially first — and knowingly in the dark.**
+
+Culbong et al. (*Journal of Youth Studies*, 2026) interviewed Australians aged 18–24 about loot boxes and gacha.
+
+> "**We found that initial reasons to engage with gambling features were largely social**, as well as the desire to improve the gaming experience." Continued engagement was "strongly associated with social and psychological rewards."
+> "The rarity of the outputs, or 'rewards', was **directly positively associated with the level of excitement** participants experienced."
+
+Two of their findings matter to us more than the rest, because they match what our own crawl found, from a completely different direction:
+
+> "**The loot box mechanics do not explicitly display the odds for each item, but the players were aware that the odds are extremely low for rare items.**"
+> New players are drawn in by a "rookie banner… a gambling mechanic **with a guaranteed rare item**."
+
+Their qualitative interviews in Australia and our listing audit in Korea describe the same two-part pattern: **odds are not shown, and a guarantee is offered in their place.** Our measurement of it is B7 — of 37 oripa listings, **0 state a probability and 30 (81.1%) advertise a guarantee.** We did not go looking for this correspondence; we found the paper after the crawl.
+
+**(c) What the literature says against us.**
+
+We treat two of the five sources as warnings about our own design rather than as support for it, and we say so because each one is easy to misuse in the other direction.
+
+- **Randomising *who gets paid* makes people less risk-averse.** Baltussen et al. (*Experimental Economics*, 2012) find that "between-subjects randomization reduces risk aversion" — when only some participants are selected to receive a real payment, people take more risk. The authors report this as an *experimental-design bias*, not as consumer psychology. **It is not a gacha study, and we do not cite it as one.** We cite it because Olbox formats ② and ③ pay only some of the participants, which is structurally the same shape. It is a reason for caution about those two formats, not a reason for confidence.
+- **Social reward is the strongest predictor of problematic use.** Wadsley et al. (*Psychological Reports*, 2022) found that a 'social reward' factor — impression management, social comparison, FoMO — was "the strongest predictor" of both checking frequency and problematic use. **This is a study of social networking sites, not of cards or gacha**, so it transfers only as a caution. But the caution lands squarely on us: Olbox format ① *runs on* social reward. That is why team size is capped at 10, why there is no invite bonus, no streak, and no pity counter. The mechanism the paper identifies as the risk factor is the mechanism our product uses.
+
+And the three findings we already carried:
+
 - **Uncertainty depresses purchase intention; autonomy raises it.** (*Current Issues in Tourism*, 2025) → randomness alone is not a product. People must be able to choose something.
-- **The gambler's fallacy and immediate gratification mediate irrational consumption, and perceived scarcity moderates it.** (Xia et al., *BMC Psychology*, 2025) → publish the non-replacement mechanics; never use scarcity as pressure.
+- **The gambler's fallacy and immediate gratification mediate irrational consumption; perceived scarcity moderates it.** (Xia et al., *BMC Psychology*, 2025) → publish the non-replacement mechanics; never use scarcity as pressure.
 - **Loot-box spending correlates with problem gambling at r = 0.26 (0.37 after trim-and-fill), meta-analysis of 15 studies.** (Garea et al., *International Gambling Studies*, 2021) → the magnitude of harm is documented; a losing outcome must not exist.
 
-> We also cite what cuts against us. A separate study (Zhang & Zhang, 2022) finds uncertainty *raises* purchase intention. **We adopted the unfavorable finding**, because it yields an actionable design constraint (add autonomy) rather than a permission slip. Both studies use Chinese consumer samples; applying them to Korea is an assumption. The r = 0.26 figure is cross-sectional and its authors do not claim causation.
+> **We also cite what cuts against us.** Zhang & Zhang (2022) find uncertainty *raises* purchase intention. **We adopted the unfavorable finding**, because it yields an actionable design constraint (add autonomy) rather than a permission slip. Both studies use Chinese consumer samples; applying them to Korea is an assumption. The r = 0.26 figure is cross-sectional and its authors do not claim causation. Heck et al. sampled the German eBay market, and Culbong et al. interviewed 18–24-year-old Australians — neither is a Korean sample, and we mark that as a limit rather than smoothing over it.
 
 ---
 
@@ -164,6 +221,15 @@ This is why "get your friends and your odds go up" is not a slogan here. It is a
 | 2 | After trading, no participant is worse off than before | **Theorem** (Roth & Postlewaite, 1977) |
 
 Layer 2 is what makes layer 1 affordable. Supporting "you cannot lose" on layer 1 alone requires a large supply of items priced near the entry fee — and an earlier version of this product could not find those among cards, so it mixed in household goods. The result was a Pokémon card box that dispensed sesame oil, and the culture signal and the product stopped matching. With layer 2 carrying part of the load, layer 1 only needs "at or above entry price," which the card market supplies on its own.
+
+**What the no-loss floor does to the value distribution — measured against the literature.** §2.4(a) gave us a published benchmark for how concentrated card value really is: in Heck et al.'s year-long field study, the **top 19.1% of cards sold carried 58.8% of revenue.** We can ask the same question of our box at the identical cut point.
+
+| | Top 19.1% of items | Share of total value |
+|---|---|---|
+| Real market (Heck et al., 2026) | Rare cards sold | **58.8%** |
+| **Olbox** (`node api/_box.js`) | Top 191 of 1,000 slots by price | **34.1%** |
+
+**Value in our box is 1.73× less concentrated than in the market the paper measured.** That is not a marketing choice; it is a direct consequence of layer 1. Requiring every slot to be worth at least the entry fee raises the floor, and raising the floor is arithmetically the same thing as flattening the distribution. The box is less top-heavy than the market it is drawn from — which is the entire point, and it is checkable from the repository.
 
 ### 3.6 Why Alwayz specifically
 
