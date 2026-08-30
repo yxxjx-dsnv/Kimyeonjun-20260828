@@ -1340,26 +1340,23 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
 .intro__pts span { font-size: var(--fs-micro); color: var(--muted); }
 .intro__scroll { margin-top: var(--s4); font-size: var(--fs-micro); color: var(--muted); font-weight: 700; }
 
-/* ── 흐르는 상품 띠 — 올웨이즈 홈 문법 ──
-   목록을 두 벌 이어 붙이고 -50%까지 밀면 끊김 없이 순환한다. */
-.mq { margin: 0 calc(-1 * var(--s4)); overflow: hidden; }
-.mq__track {
-  display: flex; gap: var(--s3); width: max-content; padding: 0 var(--s4);
-  animation: mqRun linear infinite;
+/* ── 흐르는 상품 띠 ──
+   스크롤 컨테이너를 rAF로 민다. 호버로 멈추지 않고 드래그로 잡을 수 있다. */
+.mq {
+  margin: 0 calc(-1 * var(--s4)); overflow-x: auto; overflow-y: hidden;
+  scrollbar-width: none; -ms-overflow-style: none;
+  cursor: grab; touch-action: pan-x;
 }
-.mq:hover .mq__track { animation-play-state: paused; }
-@keyframes mqRun { from { transform: translateX(0) } to { transform: translateX(-50%) } }
-@media (prefers-reduced-motion: reduce) {
-  .mq__track { animation: none; }
-  .mq { overflow-x: auto; }
-}
+.mq::-webkit-scrollbar { display: none; }
+.mq:active { cursor: grabbing; }
+.mq__track { display: flex; gap: var(--s3); width: max-content; padding: 0 var(--s4); }
 .mq__card {
   flex: none; width: 116px; display: flex; flex-direction: column; gap: 3px;
-  text-decoration: none; color: inherit;
+  text-decoration: none; color: inherit; user-select: none;
 }
 .mq__card img, .mq__ph {
   width: 116px; height: 116px; object-fit: cover; border-radius: 10px;
-  background: #f3f4f6; border: 1px solid var(--line);
+  background: #f3f4f6; border: 1px solid var(--line); pointer-events: none;
 }
 .mq__nm { font-size: var(--fs-micro); line-height: 1.3; color: var(--ink-2); }
 .mq__pr { font-size: var(--fs-label); font-weight: 800; font-variant-numeric: tabular-nums; }
@@ -1410,3 +1407,50 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
 .setup__opt.is-on { border-color: var(--brand); background: var(--brand-weak); }
 .setup__opt b { font-size: var(--fs-label); }
 .setup__opt span { font-size: var(--fs-micro); color: var(--muted); }
+
+/* ── 인원 고르기 (팀 모으기 화면) ── */
+.pick {
+  display: flex; flex-direction: column; gap: var(--s3);
+  padding: var(--s4); margin: var(--s3) 0;
+  border: 1px solid var(--line); border-radius: 12px; background: var(--paper);
+}
+.pick__now { display: flex; align-items: baseline; gap: 4px; }
+.pick__now b { font-size: var(--fs-display); font-weight: 900; letter-spacing: -0.03em; }
+.pick__now span { font-size: var(--fs-lead); color: var(--muted); font-weight: 700; }
+.pick input[type="range"] { width: 100%; accent-color: var(--brand); }
+.pick__quick { display: flex; gap: var(--s2); }
+.pick__chip {
+  flex: 1; padding: 8px 0; border: 1px solid var(--line); border-radius: 999px;
+  background: var(--paper); font-size: var(--fs-label); font-weight: 700;
+  color: var(--muted); cursor: pointer;
+}
+.pick__chip.is-on { border-color: var(--brand); background: var(--brand-weak); color: var(--brand-dk); }
+
+/* ── 인트로 등장 연출 — 시선을 헤드라인 → 상품 → 근거 → 아래로 유도한다 ── */
+@keyframes introUp { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
+@keyframes introPop { 0% { opacity: 0; transform: scale(0.86) rotate(-6deg) } 60% { transform: scale(1.04) rotate(1.5deg) } 100% { opacity: 1; transform: none } }
+@keyframes introFloat { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-7px) } }
+@keyframes introGlow { 0%, 100% { opacity: 0.35; transform: scale(1) } 50% { opacity: 0.6; transform: scale(1.08) } }
+@keyframes introNudge { 0%, 100% { transform: translateY(0); opacity: 0.75 } 50% { transform: translateY(5px); opacity: 1 } }
+
+.intro__k, .intro__h, .intro__s { animation: introUp 0.5s cubic-bezier(.2,.7,.3,1) both; }
+.intro__h { animation-delay: 0.06s; }
+.intro__s { animation-delay: 0.14s; }
+.intro__art { animation: introUp 0.5s cubic-bezier(.2,.7,.3,1) 0.2s both; }
+/* 상품이 살짝 떠 있게 — 시선이 여기 머문다 */
+.intro__art img { animation: introFloat 3.6s ease-in-out 0.9s infinite; }
+.intro__art::before {
+  content: ''; position: absolute; top: 50%; left: 50%;
+  width: 150px; height: 150px; margin: -75px 0 0 -75px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(234,63,72,0.30), transparent 68%);
+  animation: introGlow 3.6s ease-in-out infinite; z-index: -1;
+}
+.intro__bubble { animation: introPop 0.5s cubic-bezier(.2,.9,.3,1.2) 0.62s both; }
+.intro__pts li { animation: introUp 0.45s cubic-bezier(.2,.7,.3,1) both; }
+/* 아래에 더 있다는 신호 — 스크롤을 유도한다 */
+.intro__scroll { animation: introNudge 1.9s ease-in-out 1.1s infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .intro__k, .intro__h, .intro__s, .intro__art, .intro__bubble, .intro__pts li,
+  .intro__art img, .intro__art::before, .intro__scroll { animation: none; opacity: 1; transform: none; }
+}

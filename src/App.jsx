@@ -557,9 +557,15 @@ function DealListScreen({ deals, onOpenDeal, sel }) {
           </span>
         </div>
         <ul className="intro__pts">
-          <li><b>전체 확률 100% 공개</b><span>박스에 뭐가 몇 장 들었는지 전부 보여드려요</span></li>
-          <li><b>참여할수록 올라가는 확률</b><span>같이 열면 팀 전원의 확률이 올라갑니다</span></li>
-          <li><b>꽝 없음 · 모두가 당첨</b><span>어떤 카드가 나와도 참여비 이상</span></li>
+          {[
+            ['전체 확률 100% 공개', '박스에 뭐가 몇 장 들었는지 전부 보여드려요'],
+            ['참여할수록 올라가는 확률', '같이 열면 팀 전원의 확률이 올라갑니다'],
+            ['꽝 없음 · 모두가 당첨', '어떤 카드가 나와도 참여비 이상'],
+          ].map(([t, d], i) => (
+            <li key={t} style={{ animationDelay: `${0.35 + i * 0.12}s` }}>
+              <b>{t}</b><span>{d}</span>
+            </li>
+          ))}
         </ul>
         <p className="intro__scroll" aria-hidden="true">아래로 내리면 열려 있는 올박스 ↓</p>
       </section>
@@ -677,11 +683,11 @@ function TeamDetail({ sel, deal, teamSize, setTeamSize, busy, onBack, onBuy, onS
       {/* 올웨이즈 팀구매 문법 — 혼자 살지 팀으로 열지를 먼저 고른다.
           팀을 고르면 주문서 앞에 **팀 모으기** 화면이 온다. */}
       <div className="cta cta--two">
-        <button className="btn btn--alt" onClick={() => onBuy(1)} disabled={busy === 'pay'}>
+        <button className="btn btn--alt" onClick={() => onBuy('solo')} disabled={busy === 'pay'}>
           <b>{won(box.fee)}</b><span>혼자 열기</span>
         </button>
-        <button className="btn btn--go" onClick={() => onBuy(box.teamMax)} disabled={busy === 'pay'}>
-          <b>{won(box.fee)}</b><span>{`${box.teamMax}명 팀으로 열기`}</span>
+        <button className="btn btn--go" onClick={() => onBuy('team')} disabled={busy === 'pay'}>
+          <b>{won(box.fee)}</b><span>팀으로 열기</span>
         </button>
       </div>
       <p className="cta__note cta__note--two">
@@ -694,21 +700,41 @@ function TeamDetail({ sel, deal, teamSize, setTeamSize, busy, onBack, onBuy, onS
 /* ── ① 팀 모으기 — 주문서 **앞** 단계 ─────────────────────────
    올웨이즈 팀구매가 그렇듯, 결제 전에 "누구랑 열지"를 먼저 정한다.
    결제부터 시키면 팀이 왜 필요한지가 흐려진다. */
-function TeamSetupScreen({ sel, deal, teamSize, busy, onBack, onNext }) {
+function TeamSetupScreen({ sel, deal, teamSize, setTeamSize, busy, onBack, onNext }) {
   const { box, odds } = sel
   const [mode, setMode] = useState('open')
   const t = odds[0].team[teamSize - 1]
   const solo = odds[0]
+  const QUICK = [2, 4, 6, 10].filter((n) => n <= box.teamMax)
   return (
     <>
       <button type="button" className="backrow" onClick={onBack}>‹ 상세로</button>
       <section className="hsec">
-        <header className="shead"><h2>{`${teamSize}명이 같이 열어요`}</h2></header>
+        <header className="shead"><h2>몇 명이서 열까요?</h2></header>
+
+        {/* 인원은 여기서 정한다. 상세의 슬라이더는 확률을 설명하는 자리였고,
+            실제 결정은 결제 직전에 하는 것이 자연스럽다. */}
+        <div className="pick">
+          <div className="pick__now">
+            <b>{teamSize}</b><span>명</span>
+          </div>
+          <input type="range" min="2" max={box.teamMax} value={teamSize}
+            onChange={(e) => setTeamSize(Number(e.target.value))} aria-label="팀 인원" />
+          <div className="pick__quick">
+            {QUICK.map((n) => (
+              <button key={n} type="button"
+                className={`pick__chip ${teamSize === n ? 'is-on' : ''}`}
+                onClick={() => setTeamSize(n)}>{`${n}명`}</button>
+            ))}
+          </div>
+        </div>
+
         <p className="lead">
           같은 박스를 함께 열면 <b>팀 전원의 확률이 올라갑니다.</b>
           {` 혼자면 S등급 ${solo.soloPct}, ${teamSize}명이면 `}<b>{t.pct}</b>
           {` — 혼자 대비 ${t.mul}예요.`}
         </p>
+        <OddsTable odds={odds} n={teamSize} />
 
         <div className="setup">
           <button type="button" className={`setup__opt ${mode === 'open' ? 'is-on' : ''}`}
@@ -735,7 +761,7 @@ function TeamSetupScreen({ sel, deal, teamSize, busy, onBack, onNext }) {
 
       <div className="cta">
         <button className="btn btn--go" onClick={() => onNext(mode)} disabled={busy === 'pay'}>
-          {`${won(box.fee)} 결제하러 가기`}
+          {`${won(box.fee)} · ${teamSize}명으로 결제하기`}
         </button>
         <p className="cta__note">결제 후 초대 링크를 받을 수 있어요 · 인원이 차면 자동으로 열립니다</p>
       </div>
@@ -1134,8 +1160,8 @@ function OlboxTab(p) {
       busy={p.busy} onBack={p.onBackToList} onBuy={p.onBuy} onSheet={p.onSheet} />
   }
   if (phase === 'team') {
-    return <TeamSetupScreen sel={sel} deal={deal} teamSize={p.teamSize} busy={p.busy}
-      onBack={() => p.setPhase('detail')} onNext={p.onTeamNext} />
+    return <TeamSetupScreen sel={sel} deal={deal} teamSize={p.teamSize} setTeamSize={p.setTeamSize}
+      busy={p.busy} onBack={() => p.setPhase('detail')} onNext={p.onTeamNext} />
   }
   if (phase === 'checkout') {
     return <CheckoutScreen sel={sel} teamSize={p.teamSize} busy={p.busy}
@@ -1399,7 +1425,12 @@ export default function App() {
       else setPhase('detail')
     },
     onBackToList: () => setPhase('list'),
-    onBuy: (n) => { setTeamSize(n); setPhase(n > 1 ? 'team' : 'checkout') },
+    onBuy: (how) => {
+      // 혼자면 인원이 1로 확정되고 주문서로 직행한다.
+      // 팀이면 인원을 팀 모으기 화면에서 고르므로 여기서 정하지 않는다.
+      if (how === 'solo') { setTeamSize(1); setPhase('checkout') }
+      else { setTeamSize((n) => (n > 1 ? n : 10)); setPhase('team') }
+    },
     onTeamNext: (mode) => { setTeamMode(mode); setPhase('checkout') },
     onPay,
     onRecruit: () => setPhase('flow'),
@@ -1414,9 +1445,16 @@ export default function App() {
         brief={<BriefRail box={sel.box} oripa={boxes.oripa} crawl={875} />}
         ops={<OpsRail sel={sel} conversion={boxes.conversion} room={room} teamSize={teamSize} gateMsg={gateMsg} />}
         overlay={
+          /* 폰 프레임 **안에** 뜨는 것들. 밖에 두면 오버레이가 뷰포트 전체를 덮는다. */
           count !== null ? <CountDown n={count} />
             : scene ? <RevealScene r={scene} fee={sel.box.fee} onClose={() => setScene(null)} />
-              : null
+              : search ? (
+                <SearchScreen
+                  onClose={() => setSearch(false)} onSearch={onSearch}
+                  suggest={boxes.suggest ?? []} recent={recent}
+                  onClearRecent={() => { setRecent([]); saveRecent([]) }}
+                  result={searchResult} busy={searchBusy} q={q} setQ={setQ} />
+              ) : null
         }>
         {tab === 'home' && <HomeTab cards={homeCards} deals={boxes.deals} onGoOlbox={() => setTab('olbox')}
           onOpenSearch={() => { setSearch(true); setSearchResult(null); setQ('') }} />}
@@ -1425,11 +1463,6 @@ export default function App() {
         {tab === 'wish' && <StubTab title="관심상품" body="이 과제에서는 구현하지 않았습니다." />}
         {tab === 'me' && <MeTab room={room} sel={sel} me={me} onGoOlbox={() => setTab('olbox')} />}
       </Shell>
-      {search && <SearchScreen
-        onClose={() => setSearch(false)} onSearch={onSearch}
-        suggest={boxes.suggest ?? []} recent={recent}
-        onClearRecent={() => { setRecent([]); saveRecent([]) }}
-        result={searchResult} busy={searchBusy} q={q} setQ={setQ} />}
       {sheet && <HonestySheet sel={sel} conversion={boxes.conversion} oripa={boxes.oripa}
         room={room} teamSize={teamSize} onClose={() => setSheet(false)} />}
     </>

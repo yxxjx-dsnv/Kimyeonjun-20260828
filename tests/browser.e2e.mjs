@@ -109,9 +109,15 @@ ok('혼자 열기 / 팀으로 열기 두 버튼이 있다', (await page.locator(
 await page.getByRole('button', { name: /팀으로 열기/ }).click()
 await page.waitForSelector('.setup')
 ok('결제 전에 팀 구성을 먼저 고른다', (await page.locator('.setup__opt').count()) === 2)
+// 인원은 여기서 정한다 — 상세에서 고정되지 않는다
+ok('인원을 여기서 고를 수 있다', (await page.locator('.pick__chip').count()) >= 3)
+const TEAM = 4
+await page.getByRole('button', { name: `${TEAM}명`, exact: true }).click()
+ok('고른 인원이 확률표에 반영된다',
+  (await page.locator('.tablewrap--odds th').last().textContent()).includes(`${TEAM}명`))
 ok('초대자 개별 보상 없음 고지가 여기에도 있다 (I12)',
   await page.getByText('초대한 사람이 더 받는 건 없어요').isVisible())
-await page.getByRole('button', { name: /결제하러 가기/ }).click()
+await page.getByRole('button', { name: /명으로 결제하기/ }).click()
 await page.waitForSelector('.agree')
 ok('배송비 자리에 한계를 적는다 (지어내지 않는다)', await page.getByText('배송을 모델링하지 않았습니다').isVisible())
 ok('결제수단이 시뮬로 표기된다 (I13)', (await page.locator('.order .simtag').count()) >= 1)
@@ -127,7 +133,7 @@ console.log('\n─── 모집 — 시간차 입장, 전원 게이트는 서버
 await page.getByText('팀 모으러 가기').click()
 await page.waitForFunction(() => document.querySelectorAll('.av.is-in').length >= 2, null, { timeout: 8000 }).catch(() => {})
 const joined1 = await page.locator('.av.is-in').count()
-ok('시뮬 팀원이 시간차로 들어온다', joined1 >= 2 && joined1 < 10, `${joined1}명 (진행 중)`)
+ok('시뮬 팀원이 시간차로 들어온다', joined1 >= 2 && joined1 <= TEAM, `${joined1}/${TEAM}명`)
 ok('시뮬 표기가 있다', (await page.locator('.simtag').count()) >= 1)
 
 // 전원 준비 전에 준비 완료 → 서버 409 경로가 실재함을 사람 말로 확인
@@ -142,19 +148,21 @@ ok('전원 준비되면 자동으로 열린다', await page.waitForSelector('.rv
 // 개봉 극장은 폰 전체를 덮는 오버레이라 닫지 않으면 이후 클릭을 전부 가로챈다
 await page.locator('.scene').click({ timeout: 5000 }).catch(() => {})
 await page.waitForSelector('.scene', { state: 'detached', timeout: 8000 }).catch(() => {})
-ok('결과 카드가 10장이다', (await page.locator('.rv').count()) === 10)
+ok('결과 카드가 고른 인원만큼 나온다', (await page.locator('.rv').count()) === TEAM, `${TEAM}명`)
 const myPrice = await page.locator('.rv.is-mine .rv__pr').first().textContent()
 ok('내 카드가 참여비 이상이다 (꽝 없음 1층)', parseInt(myPrice.replace(/[^\d]/g, ''), 10) >= API.boxes[0].box.fee, myPrice)
 ok('뽑기 직전 남은 카드·확률이 카드에 박힌다', await page.locator('.rv.is-mine .rv__before').isVisible())
 ok('내 카드에 판매처 링크가 있다 (실재 증명)', (await page.locator('.rv__src a').count()) === 1)
 ok('배송 미구현을 그 자리에 적는다', await page.getByText('실물 배송·수령은 이 MVP에서 구현하지 않았습니다').isVisible())
-ok('빠진 카드 게이지가 서버 값으로 찬다', /빠진 카드 10/.test(await page.locator('.gauge__t').textContent()))
+ok('빠진 카드 게이지가 서버 값으로 찬다',
+  new RegExp(`빠진 카드 ${TEAM}`).test(await page.locator('.gauge__t').textContent()),
+  await page.locator('.gauge__t').textContent())
 
 console.log('\n─── 교환 — 사람에게 요청하고, 못 푸는 고리는 정리가 푼다 ───')
 // 직접 요청 — 소비자가 먼저 사람에게 말을 건다
 await page.waitForSelector('.swap__list', { timeout: 15000 })
-ok('팀원별 보유 카드가 보인다', (await page.locator('.swapcard').count()) === 9,
-  `${await page.locator('.swapcard').count()}명`)
+ok('팀원별 보유 카드가 보인다', (await page.locator('.swapcard').count()) === TEAM - 1,
+  `${await page.locator('.swapcard').count()}명 (나 제외)`)
 await page.locator('.swapcard__go').first().click()
 await page.waitForTimeout(700)
 ok('요청을 보내면 버튼이 요청함으로 바뀐다',

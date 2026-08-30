@@ -585,19 +585,67 @@ export function InviteBox({ roomId, teamMax, joined }) {
 }
 
 /* ── 자동 흐르는 상품 띠 ────────────────────────────────────
-   올웨이즈 홈은 기획전 상품이 오른쪽에서 왼쪽으로 계속 흐른다.
-   목록을 두 벌 이어 붙이고 CSS로만 밀어 끊김 없이 순환시킨다 —
-   타이머도 라이브러리도 쓰지 않는다. 접근성: 움직임 최소화 설정을 존중한다. */
-export function Marquee({ items, speed = 42 }) {
+   CSS 애니메이션으로 밀면 사용자가 드래그로 잡을 수 없다(변형과 스크롤이 따로 논다).
+   그래서 **스크롤 컨테이너를 프레임마다 조금씩 밀어** 자동 흐름과 손 조작이
+   같은 축을 쓰게 했다. 호버로 멈추지 않고, 잡아끄는 동안만 양보한다.
+   목록을 두 벌 이어 붙여 절반 지점에서 되감으면 이음매가 보이지 않는다. */
+export function Marquee({ items, pxPerSec = 26 }) {
+  const ref = useRef(null)
+  const drag = useRef({ on: false, x: 0, left: 0 })
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return undefined
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return undefined
+    let raf = 0, prev = performance.now()
+    // scrollLeft은 브라우저가 정수로 맞추므로 프레임당 0.4px씩 더하면 전부 버려진다.
+    // 실수 위치를 따로 누적하고 그 값을 대입한다.
+    let pos = el.scrollLeft
+    const step = (now) => {
+      const dt = Math.min((now - prev) / 1000, 0.05)
+      prev = now
+      if (drag.current.on) {
+        pos = el.scrollLeft                                   // 손이 잡은 위치를 따라간다
+      } else {
+        const half = el.scrollWidth / 2
+        pos += pxPerSec * dt
+        if (half > 0 && pos >= half) pos -= half               // 이음매 없이 되감기
+        el.scrollLeft = pos
+      }
+      raf = requestAnimationFrame(step)
+    }
+    raf = requestAnimationFrame(step)
+    return () => cancelAnimationFrame(raf)
+  }, [pxPerSec, items])
+
   if (!items.length) return null
   const loop = [...items, ...items]
+  const down = (e) => {
+    drag.current = { on: true, x: e.clientX, left: ref.current.scrollLeft }
+    ref.current.setPointerCapture?.(e.pointerId)
+  }
+  const move = (e) => {
+    if (!drag.current.on) return
+    const dx = e.clientX - drag.current.x
+    if (Math.abs(dx) > 4) drag.current.moved = true   // 끌었으면 클릭으로 안 열리게
+    ref.current.scrollLeft = drag.current.left - dx
+  }
+  const up = (e) => {
+    drag.current.on = false
+    ref.current.releasePointerCapture?.(e.pointerId)
+    setTimeout(() => { drag.current.moved = false }, 0)
+  }
   return (
-    <div className="mq" aria-label="지금 많이 찾는 카드">
-      <div className="mq__track" style={{ animationDuration: `${speed}s` }}>
+    /* 링크의 네이티브 드래그(HTML5 drag)가 포인터 이벤트를 가로채 손 조작이 끊긴다.
+       앵커에 draggable=false를 주고 dragstart를 막는다. */
+    <div className="mq" ref={ref} aria-label="지금 많이 찾는 카드"
+      onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}
+      onDragStart={(e) => e.preventDefault()}>
+      <div className="mq__track">
         {loop.map((it, i) => (
-          <a key={`${it.id}-${i}`} className="mq__card" href={it.url}
-            target="_blank" rel="noreferrer" aria-hidden={i >= items.length}>
-            {it.image ? <img src={it.image} alt="" loading="lazy" /> : <span className="mq__ph" />}
+          <a key={`${it.id}-${i}`} className="mq__card" href={it.url} draggable="false"
+            target="_blank" rel="noreferrer" aria-hidden={i >= items.length}
+            onClick={(e) => { if (drag.current.moved) e.preventDefault() }}>
+            {it.image ? <img src={it.image} alt="" loading="lazy" draggable="false" /> : <span className="mq__ph" />}
             <span className="mq__nm">{it.name.replace(/^\[[^\]]*\]\s*/, '').slice(0, 24)}</span>
             <span className="mq__pr">{won(it.price)}</span>
           </a>
