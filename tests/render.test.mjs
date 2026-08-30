@@ -334,6 +334,26 @@ t(`E2E 셀렉터 ${SELECTORS.length}개가 실제로 존재한다`, () => {
   }
 })
 
+t('JSX가 쓰는 클래스에 CSS 정의가 있다', () => {
+  /* CSS를 인덱스 범위로 잘라 편집하다 사이에 낀 무관한 규칙까지 삼킨 적이 있다.
+     .mq/.srch/.pick/.setup/.chips/.cta--two/.infotoggle 일곱 블록이 통째로 사라져
+     화면이 깨진 채 배포될 뻔했다. 스타일 없는 클래스는 화면에서만 티가 나므로
+     여기서 잡는다. 템플릿 조각(${...})은 대조할 수 없어 제외한다. */
+  const css = src('src/index.css')
+  const used = new Set()
+  for (const m of (APP + PARTS).matchAll(/className=(?:"([^"]+)"|\{`([^`]+)`\})/g)) {
+    // ${...}는 표현식이다. 앞뒤 낱말과 붙어 있으면(tier--${g}) 그 토큰 전체를 지운다 —
+    // 접두만 남기면 '.tier--'를 CSS에서 찾게 되어 없는 클래스로 오판한다.
+    const raw = (m[1] || m[2] || '').replace(/\S*\$\{[^}]*\}\S*/g, ' ')
+    for (const tok of raw.split(/\s+/)) {
+      const t = tok.trim()
+      if (/^[a-z][a-z0-9_-]*$/i.test(t)) used.add(t)
+    }
+  }
+  const missing = [...used].filter((c) => !css.includes(`.${c}`))
+  assert.deepEqual(missing, [], `CSS에 없는 클래스: ${missing.join(', ')}`)
+})
+
 console.log('\n─────── CSS 캐스케이드 함정 ───────')
 
 t('데스크톱 폰 프레임이 실제 기기 비율로 고정된다', () => {
