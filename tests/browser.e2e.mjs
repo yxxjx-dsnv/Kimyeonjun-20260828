@@ -67,7 +67,7 @@ ok('어느 탭에서도 폰 크기가 동일하다', size1.width === size2.width
 
 console.log('\n─── 홈 — 카테고리 필터가 실제로 동작한다 ───')
 await page.locator('.tabbar__b').first().click()
-ok('골드박스 히어로가 올박스를 소개한다', await page.getByText('구성품·확률 전체 공개').isVisible())
+ok('골드박스 히어로가 올박스를 소개한다', await page.locator('.goldhero__sub').isVisible())
 const allCount = await page.locator('.grid .pcard').count()
 const allText = await page.locator('.grid').textContent()
 await page.getByRole('button', { name: '벌크·입문' }).click()

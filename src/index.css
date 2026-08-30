@@ -1214,12 +1214,17 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
 /* ═══════════ 프로젝트 Q&A 독 — VS Code 터미널 문법 ═══════════ */
 .dock {
   position: fixed; left: 50%; bottom: 0; transform: translateX(-50%);
-  width: min(760px, calc(100vw - 24px)); z-index: 60;
+  /* VS Code 터미널 문법 — 하단 공간을 패널이 소유한다. 데스크톱은 3단 작업영역
+     폭(320+390+340+간격)에 맞추고, 모바일은 가장자리까지 붙인다. */
+  width: min(1100px, 100vw); z-index: 60;
   font-size: var(--fs-body);
 }
+@media (max-width: 1179px) {
+  .dock--closed, .dock--open { border-radius: 0; border-left: 0; border-right: 0; }
+}
 .dock--closed {
-  display: flex; align-items: center; gap: var(--s2);
-  padding: 10px var(--s4); border: 1px solid #2d3748; border-bottom: 0;
+  display: flex; align-items: center; gap: var(--s2); width: 100%;
+  padding: 13px var(--s5); border: 1px solid #2d3748; border-bottom: 0;
   border-radius: 12px 12px 0 0; cursor: pointer;
   background: #111827; color: #d1d9e6; font-size: var(--fs-label); font-weight: 600;
 }

@@ -250,11 +250,11 @@ export function RevealCard({ r, mine, fee, delay }) {
         </li>
       </ul>
       <p className="rv__settle">
-        {`낸 돈 ${won(fee)} · 받은 시가 `}<b>{won(r.price)}</b>{' '}
+        {`낸 돈 ${won(fee)} · 받은 카드 시가 `}<b>{won(r.price)}</b>{' '}
         <Delta v={r.price - fee} />
       </p>
       <p className="rv__before">
-        {`뽑기 직전 ${r.slotsBefore.toLocaleString('ko-KR')}구좌 남음 · S ${r.oddsBefore.S.pct}`}
+        {`뽑기 직전 ${r.slotsBefore.toLocaleString('ko-KR')}구좌 남음 · S등급 ${r.oddsBefore.S.pct}`}
       </p>
       {/* 이 카드가 실재하고 지금 이 가격에 팔린다는 증명 — 크롤 url을 그대로 쓴다.
           배송 리드타임은 가진 데이터가 없으므로 지어내지 않고 한계를 그 자리에 적는다. */}
@@ -340,7 +340,7 @@ export const CardPick = ({ card, picked, onPick, count = 0 }) => (
 /** 교환 고리 — A→B→C→A가 실제로 보여야 한다. */
 export function CycleView({ cycles }) {
   if (!cycles.length) {
-    return <p className="cycle__none">이번 라운드에는 성립한 교환이 없습니다. 서로 원하는 것이 엇갈리지 않았습니다.</p>
+    return <p className="cycle__none">이번 라운드에는 성립한 교환이 없습니다. 서로 원하는 카드가 맞물리지 않았습니다.</p>
   }
   return (
     <div>
@@ -367,7 +367,7 @@ export function TradeTable({ results, me }) {
         <li key={r.memberId} className={`tr ${r.memberId === me ? 'is-mine' : ''}`}>
           <header className="tr__head">
             <span className="tr__who">{`${r.name}${r.memberId === me ? ' (나)' : ''}`}</span>
-            {r.worse ? <Badge>{'나빠짐 — 있으면 안 되는 결과'}</Badge>
+            {r.worse ? <Badge>{'나빠짐 — 시스템 오류'}</Badge>
               : r.improved ? <Badge kind="ai">{`선호 ${r.gain}단계 개선`}</Badge>
                 : <Badge kind="rule">{'그대로'}</Badge>}
           </header>
@@ -479,7 +479,7 @@ export function ChatDock({ open, onToggle, messages, onSend, busy }) {
     setQ('')
     onSend(t)
   }
-  const PRESETS = ['왜 이 문제를 골랐나요?', '확률은 어떻게 정해지나요?', '왜 올웨이즈인가요?', '크롤 데이터는 어디에 쓰이나요?']
+  const PRESETS = ['왜 이 문제를 골랐나요?', '확률은 어떻게 정해지나요?', '왜 올웨이즈인가요?', '수집한 상품 데이터는 어디에 쓰이나요?']
   if (!open) {
     return (
       <button type="button" className="dock dock--closed" onClick={onToggle} aria-expanded="false">
@@ -500,7 +500,7 @@ export function ChatDock({ open, onToggle, messages, onSend, busy }) {
       <div className="dock__list" ref={listRef}>
         {messages.length === 0 && (
           <div className="dock__empty">
-            <p>지원자의 의도·설계 근거를 물어보세요. 답은 저장소 문서 발췌에 근거합니다.</p>
+            <p>지원자의 의도와 설계 근거를 물어보세요.</p>
             <div className="dock__chips">
               {PRESETS.map((t) => (
                 <button key={t} type="button" onClick={() => submit(t)}>{t}</button>

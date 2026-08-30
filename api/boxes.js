@@ -39,7 +39,7 @@ export function buildDeals(now) {
       // 취소선·할인율을 만들지 않는다(만드는 순간 지어낸 수다).
       price: {
         big: won(box.fee), strike: null, discount: null,
-        sub: `받는 것 최소 ${won(cTier.minPrice)} ~ 최대 ${won(sTier.maxPrice)}`,
+        sub: `받는 카드 최소 ${won(cTier.minPrice)} ~ 최대 ${won(sTier.maxPrice)}`,
         bands: box.tiers.slice().reverse().map((t) =>
           `${t.tier} ${won(t.minPrice)}${t.minPrice !== t.maxPrice ? `~${won(t.maxPrice)}` : ''}`).join(' · '),
       },
@@ -62,12 +62,12 @@ export function buildDeals(now) {
     // 지어내면 "확률로 포장한 가격 인상을 피했다"는 논증 전체가 무너진다.
     price: {
       big: won(G.PRICE), strike: null, discount: null,
-      sub: `정가 ${won(G.LIST)} · 웃돈 0원 — 공동구매가가 정가를 넘지 않습니다`,
+      sub: `정가 ${won(G.LIST)} · 웃돈 0원`,
       bands: null,
     },
     oddsLine: `${G.M_MAX}명이 모이면 ${G.milestones([G.M_MAX])[0].freq} 전액 환불`,
     milestones: G.milestones(),
-    ceilLine: `환불 비율 상한 ${G.fmtPct(G.CEIL)} — 참여자당 마진이 재원이기 때문입니다`,
+    ceilLine: `환불 비율은 최대 ${G.fmtPct(G.CEIL)}까지입니다`,
     dir: 'up', dirLine: '사람이 모일수록 환불 인원이 늘어납니다',
     deadlineAt: G.roundDeadline(now), round: gRound,
     cta: `${won(G.PRICE)} 공동구매 참여하기`,
@@ -81,7 +81,7 @@ export function buildDeals(now) {
     price: {
       big: won(D.DEAL), strike: won(D.LIST),
       discount: `-${Math.round((1 - D.DEAL / D.LIST) * 100)}%`,
-      sub: `응모 ${won(D.ENTRY)} · 안 되면 잃는 것 없음`,
+      sub: `응모 ${won(D.ENTRY)} · 당첨되지 않아도 잃는 것 없음`,
       bands: null,
     },
     oddsLine: `특가 ${D.SLOTS}개 · 응모자 수에 따라 확률이 정해집니다`,

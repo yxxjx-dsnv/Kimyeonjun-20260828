@@ -1,5 +1,5 @@
 /**
- * 올박스 — 전 구성 공개 랜덤박스 · 공동구매 · 0원 응모.
+ * 올박스 — 팀 구매 + 확률형 뽑기.
  *
  * ## 화면 구조 (v1의 앱 셸)
  *   왼쪽  BriefRail  무엇을 왜 만들었나 (데스크톱 1180px↑)
@@ -55,7 +55,7 @@ function BriefRail({ box, oripa, crawl }) {
   return (
     <aside className="brief" aria-label="과제 설명">
       <p className="brief__tag">레브잇 올웨이즈 직무 과제</p>
-      <h2 className="brief__h">올박스 — 전 구성 공개 팀 랜덤박스</h2>
+      <h2 className="brief__h">올박스 — 팀 구매 + 확률형 뽑기</h2>
       <p className="brief__lead">
         확률형 상품의 문제는 낮은 확률이 아니라 <b>검증 불가능성</b>입니다.
         구성품과 재고가 비공개면 확률은 판매자의 주장일 뿐입니다.
@@ -321,7 +321,7 @@ function HomeTab({ cards, deals, onGoOlbox }) {
 
       {/* 골드박스 문법의 노란 히어로 — 올박스 목록으로 가는 문 */}
       <button type="button" className="goldhero" onClick={onGoOlbox}>
-        <span className="goldhero__sub">구성품·확률 전체 공개 랜덤박스</span>
+        <span className="goldhero__sub">팀 구매 + 확률형 뽑기</span>
         <span className="goldhero__logo">
           올 <span className="goldhero__gift" aria-hidden="true"><IconBox /></span> 박스
         </span>
@@ -708,7 +708,7 @@ function OrderDoneScreen({ sel, room, deal, onRecruit, onOrders }) {
       <div className="order">
         <div className="order__row"><span>주문번호</span><b>{room.id}</b></div>
         <div className="order__row"><span>결제금액</span><b>{won(box.fee)}</b></div>
-        <div className="order__row"><span>받는 것</span><b>{deal.price.sub.replace('받는 것 ', '')}</b></div>
+        <div className="order__row"><span>받는 카드</span><b>{deal.price.sub.replace('받는 카드 ', '')}</b></div>
         {room.live && (
           <div className="order__row">
             <span>내가 산 시점</span>
@@ -1208,7 +1208,7 @@ export default function App() {
     const r = await api('/api/ask', { question: text, history })
     setDockMsgs((m) => [...m, {
       role: 'assistant',
-      content: r.data?.answer ?? '응답을 받지 못했습니다. 잠시 뒤 다시 시도해 주세요.',
+      content: r.data?.answer ?? '응답을 받지 못했어요. 잠시 뒤 다시 시도해 주세요.',
       source: r.data?.source, refs: r.data?.refs,
     }])
     setDockBusy(false)

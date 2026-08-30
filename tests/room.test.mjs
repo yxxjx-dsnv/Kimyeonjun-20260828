@@ -7,7 +7,7 @@
  */
 import assert from 'node:assert/strict'
 import room from '../api/room.js'
-import ask, { rank, fallbackAnswer } from '../api/ask.js'
+import ask, { rank, fallbackAnswer, trimPraise } from '../api/ask.js'
 import boxes from '../api/boxes.js'
 import { TEAM_MAX, slotsOf } from '../api/_box.js'
 
@@ -211,7 +211,9 @@ t('폴백 — 키 없이도 문서 발췌를 그대로 준다. 지어내지 않�
   const r = fallbackAnswer('교환은 어떻게 동작하나요')
   assert.equal(r.source, 'fallback')
   assert.ok(r.refs.length >= 1, '어느 문서에서 왔는지 표기한다')
-  assert.match(r.answer, /【/, '발췌 원문 형식이어야 한다')
+  assert.match(r.answer, /AI 없이 문서를 그대로/, '요약이 아니라 인용임을 첫 줄에 밝힌다')
+  // 발췌가 실제 문서 본문이어야 한다 — 지어낸 문장이 아니라
+  assert.ok(r.refs.every((ref) => r.answer.includes(ref)), '인용마다 출처 제목이 붙는다')
 })
 
 t('폴백 — 문서에 없는 주제는 없다고 말한다', () => {
@@ -246,6 +248,29 @@ await ta('키가 있으면 ChatGPT 응답 + 근거 섹션 목록 (fetch 모킹)'
     assert.match(sentBody.messages[0].content, /지어내지 않는다/, '시스템 프롬프트가 문서 밖 답변을 금지한다')
     assert.match(sentBody.messages[0].content, /문서 발췌/, '컨텍스트가 실제로 실린다')
   } finally { globalThis.fetch = realFetch; delete process.env.OPENAI_API_KEY }
+})
+
+t('마무리 자평 한 문장을 잘라낸다 — 프롬프트로는 안 막힌다', () => {
+  // gpt-4o-mini는 금지해도 "…중요한 역할을 해요"를 끝에 붙인다. 코드가 보증한다.
+  assert.equal(
+    trimPraise('천장이 없어요. 비복원이 대체해요. 재고가 줄면 확률이 올라요. 이건 중요한 역할을 해요.'),
+    '천장이 없어요. 비복원이 대체해요. 재고가 줄면 확률이 올라요.')
+})
+
+t('자평이 아니면 건드리지 않는다', () => {
+  const keep = '확률은 재고를 구좌로 나눈 값이에요. 팀이면 커져요. K가 1일 때 정확히 n배예요.'
+  assert.equal(trimPraise(keep), keep)
+})
+
+t('사실이 든 문장은 자평 어휘가 있어도 지우지 않는다', () => {
+  // 숫자가 있으면 사실을 담은 문장이다 — 자르면 정보를 잃는다
+  const keep = 'A예요. B예요. 이 값이 3건으로 중요한 역할을 해요.'
+  assert.equal(trimPraise(keep), keep)
+})
+
+t('두 문장 이하는 자르지 않는다 (답이 사라지면 안 된다)', () => {
+  const keep = '오리파는 검증이 안 돼요. 그래서 중요한 역할을 해요.'
+  assert.equal(trimPraise(keep), keep)
 })
 
 await ta('OpenAI 오류 시 폴백으로 내려앉는다', async () => {

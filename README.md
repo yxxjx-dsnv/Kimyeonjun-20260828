@@ -1,4 +1,4 @@
-# 올박스 — 통이 보이는 팀 뽑기
+# 올박스 — 팀 구매 + 확률형 뽑기
 
 🔗 **배포:** https://albox-alwayz.vercel.app
 
@@ -85,9 +85,9 @@ npm run build && node --env-file=.env.local tests/serve.mjs 3111   # 로컬 구�
 npm i -D playwright --no-save && node tests/browser.e2e.mjs https://albox-alwayz.vercel.app
 ```
 
-`api/curate.js`의 ChatGPT 호출에는 `.env.local`의 `OPENAI_API_KEY`가 필요합니다.
-키가 없으면 규칙 기반으로 내려앉고 **화면이 "규칙 기반 (AI 아님)" 배지를 띄웁니다.**
-`npm test`는 키 없이 전부 통과합니다.
+`api/ask.js`의 ChatGPT 호출에는 `.env.local`의 `OPENAI_API_KEY`가 필요합니다.
+키가 없으면 저장소 문서 발췌를 그대로 보여주는 폴백으로 내려앉고 **화면이 "문서 발췌 · AI 미사용"
+배지를 띄웁니다.** `npm test`는 키 없이 전부 통과합니다.
 
 ---
 
@@ -98,29 +98,36 @@ SPEC.md                코드가 증명해야 할 약속의 문장. 불변식 I1
 docs/references.md     수식 유도와 근거 대장. 모든 인용의 유일한 출처
 
 crawler/crawl.js       다나와 크롤 (6축 37개 검색어) + 오리파 확률 표기 실측
+crawler/trend.js       다나와 12개월 월별 시세 시계열 (과제1 "최근 1년" 근거)
+crawler/chart.mjs      시세 지수 → 문서용 SVG + 발표자료용 pgfplots 좌표
+crawler/digest.mjs     저장소 문서 → 챗봇 지식원 (README·SPEC·근거 대장 등 5개)
 crawler/report.mjs     등급 성립 판정 [A/B/C] · 참여비 스캔 (네트워크 불필요)
 data/pool.json         수집 875건 (사람이 읽는 미러)
+data/trend.json        51종 12개월 시세 + 정규화 지수
 data/oripa-audit.json  오리파 표기 실측 결과
 data/conversion.json   교환 전환율 측정값 (화면이 이 값을 그대로 씁니다)
+data/docs-digest.json  문서 122개 섹션 — 챗봇이 여기서만 답합니다
 
 api/_sources.js        다나와 파서 + 상품 판별기 (크롤러·판정기·서버가 공유)
 api/_pool.js           크롤 산출 ES 모듈. 런타임 파일 I/O 0
-api/_box.js            통 구성          ← import 가능한 모듈이면서 실행 가능한 테스트
+api/_box.js            박스 구성 (3종)   ← import 가능한 모듈이면서 실행 가능한 테스트
 api/_draw.js           확률 엔진         ← 같음. self-check 15항목
 api/_trade.js          교환 엔진 (TTC)   ← 같음. self-check 12항목
+api/_group.js          공동구매 (환불 인원 = 재원 ÷ 값)  ← 같음. 16항목
+api/_daily.js          0원 응모 (특가 = 예산 ÷ 차액)     ← 같음. 17항목
 api/_room.js           방 저장소 (KV REST + 메모리 폴백)
-api/boxes.js           GET  통 구성 · 확률표 · 갱신 확률 · 계산 근거
+api/boxes.js           GET  딜 목록 5개 · 박스 3종 구성 · 확률표 · 갱신 확률 · 계산 근거
 api/room.js            POST 방에 관한 모든 동작 — create | join | target | simPrefs |
                        setPrefs | ready | open | trade | state
                        (한 파일인 이유는 아래 "겪은 어려움" ⑬)
-api/curate.js          POST ChatGPT — 선호 순위 생성 · 카드 용어·시세 설명 (상태 없음)
+api/ask.js             POST ChatGPT — 프로젝트 Q&A. 저장소 문서 발췌 안에서만 답합니다 (상태 없음)
 
-src/App.jsx            화면 8개
+src/App.jsx            화면 — 홈 · 딜 목록 · 상세 3형식 · 주문서 · 주문완료 · 참여후 · 주문내역
 src/parts.jsx          표시 전용 조각. 확률을 계산하지도 포맷하지도 않는다
 src/index.css          토큰 + 컴포넌트. CSS 프레임워크 없음
 
-tests/room.test.mjs    서버 27항목   tests/render.test.mjs  화면 29항목
-tests/browser.e2e.mjs  배포본 46단계 (Playwright 애드혹)
+tests/room.test.mjs    서버 32항목   tests/render.test.mjs  화면 35항목
+tests/browser.e2e.mjs  배포본 58단계 (Playwright 애드혹)
 tests/shots/           화면 9장
 ```
 
@@ -132,11 +139,11 @@ tests/shots/           화면 9장
 | 요건 | 구현 |
 |---|---|
 | 프론트엔드 **React + JavaScript** | Vite + React 18. `.ts`/`.tsx` 0건, TypeScript 의존성 0건 |
-| 백엔드 **Node.js + JavaScript** | Vercel 서버리스 함수 3개 (`api/room.js` · `api/boxes.js` · `api/curate.js`) + 공유 모듈 5개 |
-| 대화형 AI에 **ChatGPT API** | [`api/curate.js:55`](api/curate.js) — `api.openai.com/v1/chat/completions`, `gpt-4o-mini`, raw fetch, JSON 모드. **Claude API 사용 0건** |
-| **크롤 데이터 활용 (3중)** | ① 통 구성 [`api/_box.js:64`](api/_box.js) ② TTC 선호 폴백·시세 병기 [`api/_trade.js:185`](api/_trade.js) ③ ChatGPT 프롬프트 입력 [`api/curate.js:102,163`](api/curate.js) |
+| 백엔드 **Node.js + JavaScript** | Vercel 서버리스 함수 3개 (`api/room.js` · `api/boxes.js` · `api/ask.js`) + 공유 모듈 7개 |
+| 대화형 AI에 **ChatGPT API** | [`api/ask.js:106`](api/ask.js) — `api.openai.com/v1/chat/completions`, `gpt-4o-mini`, raw fetch. 화면 하단 **프로젝트 Q&A** 패널. **Claude API 사용 0건** |
+| **크롤 데이터 활용 (4중)** | ① 박스 3종 구성 [`api/_box.js:64`](api/_box.js) ② TTC 선호 폴백·시세 병기 [`api/_trade.js:186`](api/_trade.js) ③ 공동구매·0원 응모 상품과 가격 [`api/_group.js:55`](api/_group.js) · [`api/_daily.js:44`](api/_daily.js) ④ 12개월 시세 추이 [`crawler/trend.js`](crawler/trend.js) → 과제1 근거 |
 | **외부 접속 배포** | https://albox-alwayz.vercel.app |
-| 타깃 문제를 **화면에서 확인 가능** | 화면 8개. 각 절이 SPEC의 어느 절을 증명하는지 화면에 적혀 있고, E2E 41단계가 실제 클릭으로 확인 |
+| 타깃 문제를 **화면에서 확인 가능** | 목록 → 상세 → 결제 → 주문완료 → 모집 → 개봉 → 교환 → 주문내역의 소비자 여정 전체. E2E **58단계**가 배포본에서 실제 클릭으로 확인 |
 
 패키지는 4개입니다: `react`, `react-dom`, `vite`, `@vitejs/plugin-react`.
 Express·OpenAI SDK·CSS 프레임워크·상태관리·테스트 프레임워크·차트 라이브러리를 쓰지 않았습니다.
@@ -194,8 +201,19 @@ $ node crawler/crawl.js oripa
 올웨이즈에는 이미 **0원딜**(고가 제품 무료 증정), **다인딜**(인원이 모이면 파격가),
 **올또**(현금 1억, 꽝 있음)가 있습니다. "공동구매 + 무료 당첨"은 신규성이 없습니다.
 
-**올박스의 신규성은 통 공개와 교환에 있습니다.** 그래서 MVP를 한 형식으로 좁혔습니다.
-데일리 100원·유니폼 공동구매·브랜드 협업을 전부 뺐습니다 — 형식을 늘리면 신규성이 희석됩니다.
+**올박스의 신규성은 형식이 아니라 그 위에 얹는 층에 있습니다** — 구성 전체 공개와 교환입니다.
+그래서 형식은 올웨이즈의 기존 문법(팀 구매·0원딜)을 그대로 빌려 세 가지를 두되,
+**확률 규칙은 하나로 통일했습니다: 확률 = 재고 ÷ 참여.**
+
+| 형식 | 참여가 늘면 | 왜 |
+|---|---|---|
+| ① 팀 뽑기 | 확률이 **오른다** | 한 박스를 함께 뽑는다 — 재고는 그대로, 참여만 는다 |
+| ② 브랜드 공동구매 | 환불 인원이 **는다** | 참여자 마진이 쌓여 전액 환불 재원이 된다 |
+| ③ 0원 응모 | 확률이 **내린다** | 특가 수는 고정이고 응모만 는다 |
+
+**①과 ③이 같은 규칙에서 정반대로 움직입니다.** 이것이 팀 효과가 마케팅 문구가 아니라
+구조라는 증거입니다 — 박스를 나눠 쓰면 오르고, 나눠 가지면 내려갑니다.
+③은 ①의 주장을 검증하는 대비군으로 같은 목록에 세워 뒀습니다.
 
 ## 2. 강조하고 싶은 부분 — 주요 설계 의도
 
@@ -264,7 +282,7 @@ v1은 이 "10배"를 예산으로 만들려고 했습니다. 대량 매입 원�
 - **C2** 공정위 테무 제재 사유가 확률이 아니라 **조건 은닉**이었습니다
   → 팀 효과 고지를 첫 화면에, 초대자 개별 보상 없음
 - **E4** 블라인드박스 문화에는 이미 교환이 있습니다 → 교환은 발명이 아니라 **이미 존재하는 행동**
-- **E7** 올웨이즈는 이미 0원딜·다인딜을 운영합니다 → MVP를 한 형식으로
+- **E7** 올웨이즈는 이미 0원딜·다인딜을 운영합니다 → 형식을 새로 발명하지 않고 **기존 문법을 빌리되**, 신규성은 그 위의 구성 공개·교환 층에 둡니다
 
 ### 인용의 한계 — 우리에게 불리한 것도 적습니다
 
@@ -451,13 +469,14 @@ JSX에 손으로 적혀 있었습니다. 엔진을 고쳐도 화면은 안 바�
 
 **원인**: **Vercel은 라우트마다 별개의 서버리스 함수를 띄웁니다.**
 KV 환경변수가 없을 때 쓰는 메모리 폴백은 **함수 안에서만** 공유됩니다.
-`/api/room`이 만든 방을 `/api/open`은 볼 수 없었습니다. `/api/curate`가 저장한
-AI 선호 순위도 마찬가지로 교환에 도달하지 못하고 있었습니다.
+`/api/room`이 만든 방을 `/api/open`은 볼 수 없었습니다. 당시 별도 라우트였던
+AI 기능이 저장한 선호 순위도 마찬가지로 교환에 도달하지 못하고 있었습니다.
+(그 라우트는 이후 프로젝트 Q&A `api/ask.js`로 대체되면서 상태를 아예 갖지 않게 됐습니다.)
 로컬 서버는 한 프로세스라 전부 같은 메모리를 봤고, 그래서 로컬에서는 안 보였습니다.
 
 **해결**: 방을 바꾸는 동작을 `api/room.js` 한 함수로 모았습니다
 (create/join/target/simPrefs/setPrefs/ready/open/trade/state).
-`api/curate.js`는 방을 건드리지 않고 **순위를 계산해 돌려주기만** 하도록 바꿨고,
+상태를 갖던 보조 라우트는 방을 건드리지 않고 **계산해 돌려주기만** 하도록 바꿨고,
 저장은 클라이언트가 `setPrefs`로 넘기되 **서버가 그 id를 통 안의 것으로 다시 검증**합니다.
 부수효과가 없어져서 테스트하기도 쉬워졌습니다.
 
