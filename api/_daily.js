@@ -60,6 +60,29 @@ export const closesAt = (now) => {
   return Math.floor(kst / 86400_000) * 86400_000 + 86400_000 - 9 * 3600_000
 }
 
+/**
+ * 데모용 실시간 응모자 수. ②와 같은 이유로 **서버가 계산한다**(화면이 분모를 만들면 I1 위반).
+ * 자정에 0으로 리셋되고 오른다. ②와 같은 이유로 **단조 증가**여야 하고,
+ * 눈에 보이도록 데모 구간(DEMO_SPAN) 안에 차오른다.
+ */
+export const DEMO_CYCLE = 60 * 60_000
+export const DEMO_MAX = 1200
+
+export function simEntries(now) {
+  const t = (now % DEMO_CYCLE) / DEMO_CYCLE
+  return Math.max(1, Math.floor(DEMO_MAX * (1 - Math.pow(1 - t, 1.6))))
+}
+
+/** 지금 이 순간의 응모 현황. */
+export function liveOf(now) {
+  const E = simEntries(now)
+  const p = oddsAt(E)
+  return {
+    entries: E, slots: SLOTS, p, pct: fmtPct(p),
+    freq: `${E.toLocaleString('ko-KR')}명 중 ${Math.min(SLOTS, E)}명`,
+  }
+}
+
 export const oddsAt = (entries) => (entries > 0 ? Math.min(1, SLOTS / entries) : 1)
 export const fmtPct = (p) => `${(p * 100).toFixed(2)}%`
 const won = (n) => `${Math.round(n).toLocaleString('ko-KR')}원`
@@ -96,6 +119,16 @@ export function check() {
   ok('특가 상품이 크롤 실측 상품', !!ITEM && pool.items.some((x) => x.id === ITEM.id),
     ITEM ? `${ITEM.name.slice(0, 34)} ${won(ITEM.price)}` : '없음')
   ok('응모가 0원 — 안 돼도 잃는 것이 없다', ENTRY === 0)
+
+  /* 심사자는 제출 며칠~몇 달 뒤에 연다. 그때 "마감됨"이 뜨면 데모가 죽는다.
+     자정 마감은 매일 갱신되므로 **어느 시점에 열어도 미래**여야 한다. */
+  const futures = [0, 1, 7, 100, 365, 3 * 365].map((d) => Date.now() + d * 86400_000)
+  ok('언제 열어도 마감이 미래다', futures.every((t) => closesAt(t) > t),
+    `지금~+3년 ${futures.length}개 시점 확인`)
+  ok('자정 직후에도 하루가 통째로 남는다', (() => {
+    const justAfter = closesAt(Date.now()) + 1000        // 자정 1초 뒤
+    return closesAt(justAfter) - justAfter > 23 * 3600_000
+  })(), '자정을 넘기면 다음 날 자정으로 갱신된다')
   ok('특가 < 정가', DEAL < LIST, `${won(DEAL)} < ${won(LIST)}`)
 
   // 예산이 정하는 것은 재고다. 확률이 아니다.

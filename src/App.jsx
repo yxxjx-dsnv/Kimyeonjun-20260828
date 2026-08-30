@@ -448,7 +448,7 @@ function MeTab({ room, sel, me, onGoOlbox }) {
             </div>
           </div>
         )}
-        <button type="button" className="btn btn--ghost" onClick={onGoOlbox}>이어서 보기</button>
+        <button type="button" className="btn btn--go" onClick={onGoOlbox}>새 올박스 열기</button>
         <p className="dim">데모 방은 일정 시간 후 사라집니다 · 결제·배송은 이 MVP에서 구현하지 않았습니다</p>
       </section>
     </>
@@ -560,11 +560,10 @@ function DealListScreen({ deals, onOpenDeal, sel }) {
     .slice(0, 6)
   return (
     <>
-      {/* 포켓몬 카드 게임 Pocket의 첫 화면 문법 —
-          어두운 무대에 빛이 퍼지고 실제 카드가 흩어져 떠 있다.
-          카드 이미지는 **크롤 실측 상품**이라 장식이 아니라 이 박스의 내용물이다. */}
+      {/* 올웨이즈 올세일 첫 화면 문법 —
+          밝은 파스텔 무대에 오브젝트가 떠 있고, 흰 로고 아래로 혜택이 칩으로 붙는다.
+          떠 있는 것은 3D 일러스트가 아니라 **이 박스의 실제 카드**다. */}
       <section className="hero3">
-        <span className="hero3__rays" aria-hidden="true" />
         <span className="hero3__glow" aria-hidden="true" />
         <div className="hero3__cards" aria-hidden="true">
           {floaters.map((c, i) => (
@@ -573,29 +572,29 @@ function DealListScreen({ deals, onOpenDeal, sel }) {
           ))}
         </div>
         <div className="hero3__brand">
-          <span className="hero3__k">구성을 전부 공개하는 뽑기</span>
+          <span className="hero3__k">· 구성 전부 공개 ·</span>
           <h2 className="hero3__logo">올박스</h2>
-          <span className="hero3__tag">팀 구매 + 확률형 뽑기</span>
+          <span className="hero3__sub">같이 열수록 확률이 올라가는 뽑기</span>
         </div>
-        <p className="hero3__max">
-          {top ? <>최고 <b>{won(top.maxPrice)}</b></> : ''}
-          <em>{`${(sel?.box?.N ?? 1000).toLocaleString('ko-KR')}장 전부 공개`}</em>
-        </p>
-        <p className="hero3__scroll">아래로 내려서 시작 ↓</p>
-      </section>
 
-      <section className="intro">
-        <ul className="intro__pts">
+        <div className="hero3__strip">
+          <b>하나만 열어도</b>
+          <span className="hero3__pill">{top ? `최고 ${won(top.maxPrice)}` : ''}</span>
+          <span className="hero3__pill">{`${(sel?.box?.N ?? 1000).toLocaleString('ko-KR')}장 공개`}</span>
+        </div>
+
+        <ul className="hero3__benefits">
           {[
-            ['전체 확률 100% 공개', '박스에 뭐가 몇 장 들었는지 전부 보여드려요'],
-            ['참여할수록 올라가는 확률', '같이 열면 팀 전원의 확률이 올라갑니다'],
-            ['꽝 없음 · 모두가 당첨', '어떤 카드가 나와도 참여비 이상'],
+            ['확률 100% 공개', '뭐가 몇 장인지 전부'],
+            ['참여할수록 UP', '같이 열면 전원 상승'],
+            ['꽝 없음', '어떤 카드든 참여비 이상'],
           ].map(([t, d], i) => (
-            <li key={t} style={{ animationDelay: `${0.35 + i * 0.12}s` }}>
+            <li key={t} style={{ animationDelay: `${0.3 + i * 0.1}s` }}>
               <b>{t}</b><span>{d}</span>
             </li>
           ))}
         </ul>
+        <p className="hero3__scroll">아래로 내려서 시작 ↓</p>
       </section>
 
       {/* 풀블리드 배너 — ③ 0원 응모. 문구가 전부 참이라 과장 카피가 필요 없는
@@ -861,7 +860,7 @@ function CheckoutScreen({ sel, teamSize, busy, onBack, onPay }) {
    주문번호는 지어내지 않는다 — 서버가 발급한 room.id 그대로다. 이후 조회에도 진짜로 쓰인다.
    "내가 산 시점의 남은 카드"를 박아두면 개봉 결과의 slotsBefore와 이어져
    비복원 서사가 주문서에서부터 시작된다. */
-function OrderDoneScreen({ sel, room, deal, onRecruit, onOrders }) {
+function OrderDoneScreen({ sel, room, deal, onRecruit, onOrders, solo }) {
   const { box } = sel
   return (
     <section className="hsec done">
@@ -885,11 +884,29 @@ function OrderDoneScreen({ sel, room, deal, onRecruit, onOrders }) {
         )}
       </div>
       <div className="cta">
-        <button className="btn btn--go" onClick={onRecruit}>팀 모으러 가기</button>
+        <button className="btn btn--go" onClick={onRecruit}>{solo ? '바로 열기' : '팀 모으러 가기'}</button>
         <button className="btn btn--ghost btn--sm" style={{ width: '100%', marginTop: 8 }} onClick={onOrders}>주문내역 보기</button>
       </div>
     </section>
   )
+}
+
+/** 실시간 현황을 서버에서 다시 받아온다. 화면이 수를 만들면 확률의 분모를
+    화면이 지어내는 것이 되므로(I1), 주기적으로 **서버 값을 다시 읽는다.** */
+function useLive(kind, initial) {
+  const [live, setLive] = useState(initial ?? null)
+  useEffect(() => {
+    let on = true
+    const pull = async () => {
+      const r = await api('/api/boxes')
+      if (!on || !r.ok) return
+      const d = r.data.deals?.find((x) => x.kind === kind)
+      if (d?.live) setLive(d.live)
+    }
+    const t = setInterval(pull, 4000)
+    return () => { on = false; clearInterval(t) }
+  }, [kind])
+  return live
 }
 
 /* ── ② 공동구매 상세 ──────────────────────────────────────────
@@ -897,6 +914,7 @@ function OrderDoneScreen({ sel, room, deal, onRecruit, onOrders }) {
    "확률이 오릅니다" 대신 "환불 인원이 늘어납니다"로 쓴다 — 단조 증가하는 것은 p가 아니라 R이다. */
 function GroupScreen({ deal, onBack }) {
   const [joined, setJoined] = useState(false)
+  const live = useLive('group', deal.live)
   return (
     <>
       <button type="button" className="backrow" onClick={onBack}>‹ 올박스 목록</button>
@@ -914,14 +932,27 @@ function GroupScreen({ deal, onBack }) {
       </section>
 
       <section className="hsec">
-        <header className="shead"><h2>인원이 모이면 무슨 일이 생기나요</h2></header>
-        <p className="lead">
-          참여자 전원이 같은 값에 삽니다. 모인 인원의 마진이 쌓여
-          <b> 일부 인원의 전액 환불 재원</b>이 됩니다. {deal.dirLine}.
-        </p>
+        <header className="shead"><h2>지금 참여 현황</h2></header>
+        {/* 참여자 수는 확률의 분모다. 화면이 만들면 그 순간 확률을 지어내는 것이라
+            서버가 계산해 내려준 값을 렌더만 한다(I1). 시연값이라는 것은 배지로 밝힌다. */}
+        {live && (
+          <div className="livebar">
+            <div className="livebar__row">
+              <span className="livebar__n"><b>{live.members.toLocaleString('ko-KR')}</b>명 참여</span>
+              <span className="livebar__p">당첨 <b>{live.pct}</b></span>
+            </div>
+            <Gauge num={live.members} den={500} label={`${live.freq} · 정원까지 ${(500 - live.members).toLocaleString('ko-KR')}명`} />
+            <p className="livebar__note">
+              {live.toNext > 0
+                ? <>{`${live.toNext}명 더 모이면 당첨 인원이 한 명 늘어납니다`}</>
+                : '당첨 인원이 방금 늘었어요'}
+              {' · '}<SimBadge what="참여 집계" />
+            </p>
+          </div>
+        )}
         <div className="tablewrap">
           <table>
-            <thead><tr><th>모인 인원</th><th>전액 환불</th><th>비율</th></tr></thead>
+            <thead><tr><th>모인 인원</th><th>당첨</th><th>확률</th></tr></thead>
             <tbody>
               {deal.milestones.map((m) => (
                 <tr key={m.M}>
@@ -933,7 +964,7 @@ function GroupScreen({ deal, onBack }) {
             </tbody>
           </table>
         </div>
-        <p className="dim">표의 값은 서버가 계산합니다 — 재원(마진×인원−고정비)을 값으로 나눈 몫이라 세면 맞습니다.</p>
+        <p className="dim">당첨되면 <b>제품을 전액 무료로 드립니다.</b> 결제하신 금액은 그대로 돌려드려요.</p>
       </section>
 
       <div className="cta">
@@ -941,11 +972,11 @@ function GroupScreen({ deal, onBack }) {
           <button className="btn btn--go" onClick={() => setJoined(true)}>{deal.cta}</button>
         ) : (
           <div className="notice">
-            <h3>참여가 접수되었습니다 <SimBadge what="참여 — 집계는 저장되지 않습니다" /></h3>
-            <p>마감 시점의 인원으로 환불 인원이 확정됩니다. 이 데모는 참여 집계를 저장하지 않습니다.</p>
+            <h3>참여가 접수되었습니다 <SimBadge what="참여 집계" /></h3>
+            <p>마감 시점의 인원으로 당첨자가 확정됩니다. 당첨되면 제품을 무료로 받으세요.</p>
           </div>
         )}
-        <p className="cta__note">공동구매가는 정가를 넘지 않습니다 — 이 조건은 코드 self-check가 검사합니다</p>
+        <p className="cta__note">당첨되면 전액 무료 · 공동구매가는 정가를 넘지 않습니다</p>
       </div>
     </>
   )
@@ -956,6 +987,7 @@ function GroupScreen({ deal, onBack }) {
    초대 문구를 쓰지 않는다 — 이 형식에서 초대는 서로의 확률을 낮춘다. 하락 고지만 남긴다. */
 function DailyScreen({ deal, onBack }) {
   const [entered, setEntered] = useState(false)
+  const live = useLive('daily', deal.live)
   return (
     <>
       <button type="button" className="backrow" onClick={onBack}>‹ 올박스 목록</button>
@@ -976,12 +1008,19 @@ function DailyScreen({ deal, onBack }) {
       </section>
 
       <section className="hsec">
-        <header className="shead"><h2>응모자가 늘면 어떻게 되나요</h2></header>
-        <p className="lead">
-          특가 수는 <b>{deal.oddsLine.split(' · ')[0]}</b>로 정해져 있습니다.
-          {' '}{deal.dirLine} — 팀 뽑기와 <b>반대 방향</b>입니다.
-          같은 규칙(재고 ÷ 참여)에서 재고를 공유하면 오르고, 나누면 내려갑니다.
-        </p>
+        <header className="shead"><h2>지금 응모 현황</h2></header>
+        {live && (
+          <div className="livebar">
+            <div className="livebar__row">
+              <span className="livebar__n"><b>{live.entries.toLocaleString('ko-KR')}</b>명 응모</span>
+              <span className="livebar__p">당첨 <b>{live.pct}</b></span>
+            </div>
+            <Gauge num={live.slots} den={live.slots} label={`특가 ${live.slots}개 · ${live.freq}`} />
+            <p className="livebar__note">
+              특가 수는 고정이라 응모가 늘면 확률이 내려갑니다 · <SimBadge what="응모 집계" />
+            </p>
+          </div>
+        )}
         <div className="tablewrap">
           <table>
             <thead><tr><th>응모자</th><th>당첨</th><th>확률</th></tr></thead>
@@ -1016,7 +1055,7 @@ function DailyScreen({ deal, onBack }) {
 
 /* ── ① 참여 후 — 모집 → 준비 → 개봉 → 교환 ─────────────────── */
 function TeamFlow(p) {
-  const { sel, room, me, teamSize, busy, gateMsg, onMyReady, onTrade, onSheet, oripa } = p
+  const { sel, room, me, teamSize, busy, gateMsg, onMyReady, onSheet, oripa } = p
   const [vs, setVs] = useState(false)
   const { box, odds } = sel
   const live = room?.live
@@ -1026,16 +1065,21 @@ function TeamFlow(p) {
   const members = room ? room.members.map((m) => ({ ...m, sim: m.id !== me })) : []
   const iAmReady = !!room?.members.find((m) => m.id === me)?.ready
   const inbox = (room?.requests ?? []).filter((q) => q.to === me)
+  /* 혼자 열기에는 모을 팀도, 바꿀 상대도 없다. 그 화면들을 보여주면
+     "왜 나 혼자인데 준비를 누르지?"가 된다. */
+  const solo = teamSize === 1
   const joining = (room?.members.length ?? 0) < teamSize
 
   return (
     <>
       <button type="button" className="backrow" onClick={p.onBackToList}>‹ 올박스 목록</button>
       <section className="hsec">
-        <header className="shead"><h2>{room?.opened ? '개봉 완료' : '팀 모으는 중'}</h2></header>
-        <MemberRail members={members} teamMax={teamSize}
-          readyCount={room?.readyCount ?? 0} phase={room?.opened ? 'join' : 'ready'} />
-        {!room?.opened && (
+        <header className="shead">
+          <h2>{room?.opened ? '개봉 완료' : solo ? '여는 중' : '팀 모으는 중'}</h2>
+        </header>
+        {!solo && <MemberRail members={members} teamMax={teamSize}
+          readyCount={room?.readyCount ?? 0} phase={room?.opened ? 'join' : 'ready'} />}
+        {!room?.opened && !solo && (
           <p className="dim">
             {joining
               ? `${members.length} / ${teamSize}명 · 시뮬 팀원이 차례로 들어옵니다`
@@ -1052,7 +1096,7 @@ function TeamFlow(p) {
             : `아직 아무도 뽑지 않은 박스 · 남은 카드 ${left.toLocaleString('ko-KR')} / ${box.N.toLocaleString('ko-KR')}`} />
       </section>
 
-      {!room?.opened && (
+      {!room?.opened && !solo && (
         <>
           <section className="hsec" id="sec-pick">
             <header className="shead"><h2>원하는 카드를 고르세요</h2></header>
@@ -1105,10 +1149,9 @@ function TeamFlow(p) {
             </div>
           </section>
 
-          <section className="hsec" id="sec-trade">
-            {/* 교환 요청은 위 결과 카드에서 바로 한다. 여기는 **받은 요청**과
-                1:1로 못 푸는 고리를 정리하는 '한 번에 맞추기'만 남긴다. */}
-            {!room.trade ? (
+          {!solo && <section className="hsec" id="sec-trade">
+            {/* 교환 요청은 위 결과 카드에서 바로 한다. 여기는 **받은 요청**만 처리한다. */}
+            {(
               <>
                 {inbox.length > 0 && (
                   <>
@@ -1139,32 +1182,12 @@ function TeamFlow(p) {
                   </>
                 )}
                 {p.swapMsg && <p className="swapmsg">{p.swapMsg}</p>}
-                <div className="cta">
-                  <button className="btn btn--go" onClick={onTrade} disabled={busy === 'trade'}>
-                    {busy === 'trade' ? '맞추는 중…' : '한 번에 맞추기'}
-                  </button>
-                  <p className="cta__note">
-                    {`성사된 직접 교환 ${room.swaps?.length ?? 0}건 · 서로 엇갈려 1:1로 안 풀리는 것은 고리로 풀어드려요`}
-                  </p>
-                </div>
-              </>
-            ) : (
-              <>
-                <header className="shead"><h2>교환 결과</h2></header>
-                <h3 className="sub">성립한 교환 고리</h3>
-                <CycleView cycles={room.trade.cycles} />
-                <TradeTable results={room.trade.results} me={me} />
-                <div className="notice">
-                  <h3>아무도 손해 보지 않아요</h3>
-                  <p>
-                    {`이번에 ${room.trade.improvedCount}명이 원하던 쪽으로 갔고, 손해 본 사람은 ${room.trade.noneWorse ? '없습니다' : '있습니다'}.`}
-                    <b> 바꾸기 전보다 나빠지는 일은 구조상 생기지 않습니다.</b>{' '}
-                    <button type="button" className="linklike" onClick={onSheet}>왜 그런가요?</button>
-                  </p>
-                </div>
+                {(room.swaps?.length ?? 0) > 0 && (
+                  <p className="dim">{`성사된 교환 ${room.swaps.length}건`}</p>
+                )}
               </>
             )}
-          </section>
+          </section>}
 
           {/* 오리파 대조는 **검증하고 싶은 사람**을 위한 정보다.
               구매 흐름에 늘 펼쳐 두면 소비자에게는 논쟁으로 읽힌다.
@@ -1213,6 +1236,12 @@ function TeamFlow(p) {
               </>
             )}
             <p className="seed">{`추첨 시드 ${room.id}|${room.boxId}|${me}|${room.round}`}{room.trade && ` · 교환 시드 ${room.trade.seed}`}</p>
+
+            {/* 채점자는 여러 번 열어본다. 끝난 주문으로 계속 돌아오면 다시 뽑을 수가 없다. */}
+            <div className="cta">
+              <button className="btn btn--go" onClick={p.onRestart}>한 번 더 열기</button>
+              <p className="cta__note">이번 결과는 <b>내 정보 › 주문 내역</b>에 남아 있어요</p>
+            </div>
           </section>
         </>
       )}
@@ -1239,7 +1268,7 @@ function OlboxTab(p) {
       onBack={() => p.setPhase(p.teamSize > 1 ? 'team' : 'detail')} onPay={p.onPay} />
   }
   if (phase === 'ordered') {
-    return <OrderDoneScreen sel={sel} room={p.room} deal={deal}
+    return <OrderDoneScreen sel={sel} room={p.room} deal={deal} solo={p.teamSize === 1}
       onRecruit={p.onRecruit} onOrders={p.onOrders} />
   }
   return <TeamFlow {...p} />
@@ -1276,11 +1305,13 @@ export default function App() {
   const [q, setQ] = useState('')
   const [searchResult, setSearchResult] = useState(null)
   const [searchBusy, setSearchBusy] = useState(false)
+  const [aiSearch, setAiSearch] = useState(true)
   const [recent, setRecent] = useState(() => loadRecent())
   const [swapMsg, setSwapMsg] = useState(null)
   const countTimer = useRef(null)
   const timer = useRef(null)
   const opening = useRef(false)
+  const pendingRoom = useRef(null)
   const prefsDone = useRef(false)
   const [, setReveal] = useState(null)
 
@@ -1290,11 +1321,13 @@ export default function App() {
     const saved = loadOrder()
     if (saved?.roomId) {
       api('/api/room', { action: 'state', roomId: saved.roomId }).then((r) => {
-        if (r.ok && r.data?.id) {
-          setRoom(r.data); setMe(saved.me)
-          setDealId(r.data.boxId); setPhase('flow')
-          if (r.data.opened) opening.current = true
-        } else clearOrder()   // memory 폴백·TTL로 방이 사라졌을 수 있다 — 조용히 새 시작
+        if (!(r.ok && r.data?.id)) { clearOrder(); return }  // TTL·인스턴스 분리로 사라졌을 수 있다
+        setRoom(r.data); setMe(saved.me); setDealId(r.data.boxId)
+        /* 이미 개봉이 끝난 주문이면 **그 화면으로 되돌리지 않는다.**
+           채점자는 새로고침하고 다시 뽑아볼 텐데, 끝난 결과가 계속 떠서 막혔다.
+           결과는 '내 정보 › 주문 내역'에 남고, 올박스 탭은 목록에서 시작한다. */
+        if (r.data.opened) setPhase('list')   // opening 플래그를 세우면 **다음 구매의 자동 개봉이 막힌다**
+        else setPhase('flow')
       })
     }
     return () => { clearInterval(timer.current); clearInterval(countTimer.current) }
@@ -1327,6 +1360,9 @@ export default function App() {
   /** 결제 → 방(주문) 생성. 주문번호는 서버가 발급한다. */
   const onPay = useCallback(async () => {
     setBusy('pay')
+    // 새 주문은 새 흐름이다. 이전 주문의 플래그가 남아 자동 개봉이 막힌 적이 있다.
+    opening.current = false; prefsDone.current = false; pendingRoom.current = null
+    setScene(null)
     const c = await api('/api/room', { action: 'create', name: '나', boxId: dealId })
     if (!c.ok) { setErr('방을 만들지 못했습니다.'); setBusy(''); return }
     setMe(c.data.you)
@@ -1345,6 +1381,14 @@ export default function App() {
    */
   useEffect(() => {
     if (phase !== 'flow' || !room || room.opened || opening.current) return undefined
+    /* 혼자 열기는 모을 팀이 없다. 준비 버튼을 누르게 하는 것도, 교환 화면을 보여주는
+       것도 말이 안 된다 — 결제하면 바로 열린다. */
+    if (teamSize === 1) {
+      const me0 = room.members.find((m) => m.id === me)
+      if (me0 && !me0.ready) { act({ action: 'ready', roomId: room.id, memberId: me, ready: true }); return undefined }
+      if (room.allReady) { opening.current = true; onOpen() }
+      return undefined
+    }
     if (room.members.length < teamSize) {
       const t = setTimeout(() => act({ action: 'join', roomId: room.id, name: nickOf(room.id, room.members.length) }), 1200)
       return () => clearTimeout(t)
@@ -1403,9 +1447,11 @@ export default function App() {
     const mine = data.openResults.find((x) => x.memberId === me)
     const total = data.openResults.length
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-    if (reduce) { setRoom(data); setReveal(total); setScene(mine); return }
+    if (reduce) { pendingRoom.current = data; setScene(mine); return }
 
-    // 3 · 2 · 1 → 개봉. 결과를 바로 띄우지 않는다 — 기다리는 순간이 이 제품의 절정이다.
+    /* 3 · 2 · 1 → **내 카드 극장** → 탭 → 전체 결과.
+       순서가 중요하다. 전체 결과를 먼저 렌더하면 극장이 뜨기 전에 목록이 1초간
+       보여 스포가 된다 — 실제로 그랬다. 방 상태는 극장을 닫을 때 적용한다. */
     setCount(3)
     let c = 3
     countTimer.current = setInterval(() => {
@@ -1415,13 +1461,8 @@ export default function App() {
       clearInterval(countTimer.current)
       setTimeout(() => {
         setCount(null)
-        setRoom(data)
-        setReveal(0)
-        let k = 0
-        timer.current = setInterval(() => {
-          k += 1; setReveal(k)
-          if (k >= total) { clearInterval(timer.current); setScene(mine) }
-        }, 200)
+        pendingRoom.current = data          // 아직 목록에 반영하지 않는다
+        setScene(mine)
       }, 620)
     }, 800)
   }
@@ -1430,16 +1471,12 @@ export default function App() {
     setSearchBusy(true); setSearchResult(null)
     const next = [text, ...recent.filter((t) => t !== text)].slice(0, 8)
     setRecent(next); saveRecent(next)
-    const r = await api(`/api/search?q=${encodeURIComponent(text)}`)
+    const r = await api(`/api/search?q=${encodeURIComponent(text)}${aiSearch ? '&ai=1' : ''}`)
     setSearchResult(r.ok ? r.data : { q: text, count: 0, total: 875, items: [] })
     setSearchBusy(false)
   }
 
-  const onTrade = async () => {
-    setBusy('trade')
-    await act({ action: 'trade', roomId: room.id })
-    setBusy('')
-  }
+
 
   const onSwapRequest = async (targetId) => {
     setBusy('swap')
@@ -1494,10 +1531,17 @@ export default function App() {
     room, me, teamSize, setTeamSize, cards, cardById, myTarget,
     busy, gateMsg, swapMsg, oripa: boxes.oripa,
     onOpenDeal: (d) => {
-      // 진행 중인 내 주문(같은 통)이 있으면 그 흐름으로 돌아간다 — 주문이 사라지지 않게
       setDealId(d.id)
-      if (room && room.boxId === d.id) setPhase('flow')
+      /* 이미 개봉이 끝난 방으로 돌려보내면 **다시 뽑을 수가 없다.**
+         채점자는 여러 번 열어볼 텐데 새로고침해도 옛 결과만 나왔다.
+         끝난 주문은 '내 정보'에 남겨두고, 목록에서 들어오면 새로 시작한다. */
+      if (room && room.boxId === d.id && !room.opened) setPhase('flow')
       else setPhase('detail')
+    },
+    onRestart: () => {
+      clearOrder(); setRoom(null); setMe(null); setScene(null)
+      opening.current = false; prefsDone.current = false; pendingRoom.current = null
+      setPhase('list')
     },
     onBackToList: () => setPhase('list'),
     onBuy: (how) => {
@@ -1510,7 +1554,7 @@ export default function App() {
     onPay,
     onRecruit: () => setPhase('flow'),
     onOrders: () => setTab('me'),
-    onPick, onMyReady, onTrade, onSwapRequest, onSwapRespond, onCheer, cardById,
+    onPick, onMyReady, onSwapRequest, onSwapRespond, onCheer, cardById,
     onSheet: () => setSheet(true),
   }
 
@@ -1522,14 +1566,30 @@ export default function App() {
         overlay={
           /* 폰 프레임 **안에** 뜨는 것들. 밖에 두면 오버레이가 뷰포트 전체를 덮는다. */
           count !== null ? <CountDown n={count} />
-            : scene ? <RevealScene r={scene} fee={sel.box.fee} onClose={() => setScene(null)} />
+            : scene ? (
+              <RevealScene r={scene} fee={sel.box.fee} onClose={() => {
+                setScene(null)
+                // 극장을 닫는 순간 전체 결과를 채운다 — 그 전에는 스포가 된다
+                if (pendingRoom.current) {
+                  const d = pendingRoom.current
+                  pendingRoom.current = null
+                  setRoom(d)
+                  setReveal(0)
+                  let k = 0
+                  timer.current = setInterval(() => {
+                    k += 1; setReveal(k)
+                    if (k >= d.openResults.length) clearInterval(timer.current)
+                  }, 200)
+                }
+              }} />
+            )
               : search ? (
                 <SearchScreen
                   onClose={() => setSearch(false)} onSearch={onSearch}
                   suggest={boxes.suggest ?? []} recent={recent}
                   onClearRecent={() => { setRecent([]); saveRecent([]) }}
                   result={searchResult} busy={searchBusy} q={q} setQ={setQ}
-                  picks={homeCards.slice(0, 6)} />
+                  picks={homeCards.slice(0, 6)} ai={aiSearch} setAi={setAiSearch} />
               ) : null
         }>
         {tab === 'home' && <HomeTab cards={homeCards} deals={boxes.deals} onGoOlbox={() => setTab('olbox')}

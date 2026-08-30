@@ -140,7 +140,6 @@ export function TierShowcase({ tier, pct, freq, hero }) {
           <div className="tshow__heroinfo">
             <p className="tshow__heronm">{shown[0]?.name}</p>
             <p className="tshow__heropr">{won(shown[0]?.price ?? 0)}</p>
-            {shown[0]?.auth !== 'official' && <span className="kc">정품 미확인</span>}
           </div>
         </div>
       ) : (
@@ -306,10 +305,9 @@ export function OddsTable({ odds, n }) {
                 <td className="n hi">
                   {t.pct}
                   <span className="freq">{t.freq}</span>
-                  <span className="omul">
-                    {t.mul}
-                    <em>{o.exactlyLinear ? '재고가 1장이라 정확히 n배' : '재고가 여러 장이라 n배보다 작다'}</em>
-                  </span>
+                  {/* "재고가 여러 장이라 n배보다 작다" 같은 설명은 개발자 언어였다.
+                      배수만 두고, 왜 그런지는 표 아래 한 줄이 이미 말한다. */}
+                  <span className="omul">{t.mul}</span>
                 </td>
               </tr>
             )
@@ -461,6 +459,8 @@ export function Gauge({ num, den, label }) {
    여기서 %를 만들어 그리는 순간 지어낸 수가 된다(I4). */
 export function DealCard({ deal, onOpen }) {
   const KIND = { team: '팀 뽑기', group: '공동구매', daily: '0원 응모' }
+  // 응모형은 '지금 내는 돈'과 '당첨 시 사는 값'이 다르다. 카드에는 앞의 것을 크게.
+  const price = deal.entry ?? deal.price
   return (
     /* 올웨이즈 상품 그리드 문법 — 2열, 정사각 썸네일, 배지, 취소선 위 / 할인율+최종가 아래.
        할인율만 빨강이고 금액은 잉크색이다(실제 올웨이즈 표기). */
@@ -468,20 +468,23 @@ export function DealCard({ deal, onOpen }) {
       <span className="deal__media">
         {deal.image ? <img src={deal.image} alt="" loading="lazy" /> : <span className="deal__ph" />}
         <span className="deal__kind">{KIND[deal.kind]}</span>
+        {/* 마감은 상품 위에서 읽혀야 한다 — 본문으로 내리면 스크롤해야 보인다.
+            배경에 묻히지 않도록 검정 칩에 흰 숫자로 올린다(올웨이즈 딜 카드 문법). */}
+        {deal.deadlineAt && (
+          <span className="deal__due">
+            <DeadlineTicker deadlineAt={deal.deadlineAt} label="" />
+          </span>
+        )}
       </span>
       <span className="deal__body">
         <span className="deal__title">{deal.title}</span>
-        {deal.price.strike && <s className="deal__was">{deal.price.strike}</s>}
+        {price.strike && <s className="deal__was">{price.strike}</s>}
         <span className="deal__price">
-          {deal.price.discount && <b className="deal__disc">{deal.price.discount}</b>}
-          <b className="deal__big">{deal.price.big}</b>
+          {price.discount && <b className="deal__disc">{price.discount}</b>}
+          <b className="deal__big">{price.big}</b>
         </span>
-        <span className="deal__note">{deal.price.sub}</span>
+        <span className="deal__note">{price.sub}</span>
         <span className="deal__odds">{deal.oddsLine}</span>
-        <span className={`deal__dir deal__dir--${deal.dir}`}>
-          {deal.dir === 'up' ? '↑ ' : '↓ '}{deal.dirLine}
-        </span>
-        {deal.deadlineAt && <DeadlineTicker deadlineAt={deal.deadlineAt} label="마감" />}
       </span>
     </button>
   )
@@ -604,7 +607,7 @@ export function Marquee({ items, pxPerSec = 26 }) {
 /* ── 검색 화면 — 올웨이즈 검색 문법 ─────────────────────────
    최근 검색어(이 기기에만 저장) · 추천 검색어(크롤 데이터에서 유도) · 결과.
    눌리는데 아무 일도 안 일어나는 검색창이 가장 나쁜 상태다. */
-export function SearchScreen({ onClose, onSearch, suggest, recent, onClearRecent, result, busy, q, setQ, picks = [] }) {
+export function SearchScreen({ onClose, onSearch, suggest, recent, onClearRecent, result, busy, q, setQ, picks = [], ai, setAi }) {
   const inputRef = useRef(null)
   useEffect(() => { inputRef.current?.focus() }, [])
   const submit = (text) => {
@@ -620,10 +623,18 @@ export function SearchScreen({ onClose, onSearch, suggest, recent, onClearRecent
         <span className="srch__field">
           <IconSearch />
           <input ref={inputRef} value={q} onChange={(e) => setQ(e.target.value)}
-            placeholder="올웨이즈에서 상품 검색하기" aria-label="상품 검색" maxLength={40} />
+            placeholder={ai ? '예: 5만원 이하 피카츄 카드' : '올웨이즈에서 상품 검색하기'}
+            aria-label="상품 검색" maxLength={80} />
           {q && <button type="button" className="srch__x" onClick={() => setQ('')} aria-label="지우기">✕</button>}
         </span>
       </form>
+
+      {/* 서술형으로 찾기 — 낱말이 아니라 조건을 말한다.
+          AI는 질의를 해석하는 자리에만 있고, 상품은 크롤 데이터에서 고른다. */}
+      <div className="srch__mode">
+        <button type="button" className={ai ? '' : 'is-on'} onClick={() => setAi(false)}>낱말로 찾기</button>
+        <button type="button" className={ai ? 'is-on' : ''} onClick={() => setAi(true)}>말로 찾기 ✨</button>
+      </div>
 
       {result ? (
         <section className="srch__sec">
@@ -631,6 +642,15 @@ export function SearchScreen({ onClose, onSearch, suggest, recent, onClearRecent
             <b>{`'${result.q}' 검색 결과`}</b>
             <span>{`${result.count}건${result.count >= 24 ? ' 이상' : ''}`}</span>
           </header>
+          {result.parsed && (
+            <p className="srch__read">
+              <b>이렇게 이해했어요</b>
+              {result.parsed.terms?.length > 0 && <span>{result.parsed.terms.join(' · ')}</span>}
+              {result.parsed.minPrice != null && <span>{`${result.parsed.minPrice.toLocaleString('ko-KR')}원 이상`}</span>}
+              {result.parsed.maxPrice != null && <span>{`${result.parsed.maxPrice.toLocaleString('ko-KR')}원 이하`}</span>}
+              {result.parsed.source === 'rule' && <SimBadge what="AI 없이 규칙으로 해석" />}
+            </p>
+          )}
           {result.count === 0 ? (
             <p className="srch__empty">{`수집한 ${result.total.toLocaleString('ko-KR')}건에서 찾지 못했어요. 다른 낱말로 찾아보세요.`}</p>
           ) : (

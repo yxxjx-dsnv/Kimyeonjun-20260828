@@ -443,7 +443,14 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
 .simtag { font-size: var(--fs-micro); font-weight: 700; color: var(--muted); background: var(--band); padding: 1px 5px; border-radius: 4px; }
 
 .rvlist { display: grid; grid-template-columns: minmax(0, 1fr); gap: 9px; }
-.rv { border: 1px solid var(--hair); border-radius: var(--r); padding: 11px 13px; animation: rise 0.4s both cubic-bezier(.22,1,.36,1); }
+.rv {
+  border: 1px solid var(--hair); border-radius: var(--r); padding: 11px 13px;
+  /* 내용이 길어도 프레임을 넘지 않게 못 박는다 — 넘치면 가로 스크롤이 생겨
+     오른쪽 끝(교환·응원 버튼)이 안 보였다. */
+  min-width: 0; overflow: hidden;
+  animation: rise 0.4s both cubic-bezier(.22,1,.36,1);
+}
+.rv__list { min-width: 0; }
 .rv.is-mine { border-color: var(--brand); }
 @keyframes rise { from { transform: translateY(10px); opacity: 0; } to { transform: none; opacity: 1; } }
 .rv__head { display: flex; align-items: center; gap: 6px; }
@@ -1322,84 +1329,78 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
   font-size: var(--fs-label); font-weight: 700;
 }
 
-/* ── 올박스 첫 화면 — 포켓몬 카드 게임 Pocket 문법 ──
-   어두운 무대 + 방사형 빛 + 흩어져 떠 있는 실제 카드.
-   설명을 읽히기 전에 "여기 뭔가 있다"를 먼저 느끼게 한다. */
+/* ── 올박스 첫 화면 — 올웨이즈 올세일 문법 ──
+   밝은 파스텔 무대 + 떠 있는 오브젝트 + 흰 로고 + 혜택 칩.
+   어두운 무대는 게임 스플래시이지 커머스 첫 화면이 아니다. */
 .hero3 {
   position: relative; overflow: hidden;
-  margin: 0 calc(-1 * var(--s4)); padding: var(--s6) var(--s4) var(--s5);
-  min-height: 430px; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; text-align: center;
-  /* 반복 conic 광선은 전형적인 생성물 룩이다. 무대 조명 하나로 바꾼다. */
-  background:
-    radial-gradient(ellipse 120% 70% at 50% 34%, rgba(255,255,255,0.16), transparent 62%),
-    linear-gradient(180deg, #C6303A 0%, #9E2029 52%, #6E1119 100%);
+  margin: 0 calc(-1 * var(--s4)); padding: var(--s5) var(--s4) var(--s4);
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  background: linear-gradient(180deg, #FFDDE1 0%, #FFECEE 55%, #FFF7F7 100%);
   isolation: isolate;
 }
-/* 바닥에 깔린 그림자 — 카드가 무대 위에 놓인 느낌을 만든다 */
-.hero3__rays {
-  position: absolute; left: 50%; bottom: 8%; width: 260px; height: 34px;
-  margin-left: -130px; z-index: 0; border-radius: 50%;
-  background: radial-gradient(ellipse, rgba(0,0,0,0.45), transparent 70%);
-}
 .hero3__glow {
-  position: absolute; left: 50%; top: 36%; width: 300px; height: 300px;
+  position: absolute; left: 50%; top: 26%; width: 300px; height: 300px;
   margin: -150px 0 0 -150px; border-radius: 50%; z-index: 0;
-  background: radial-gradient(circle, rgba(255,255,255,0.22), transparent 68%);
+  background: radial-gradient(circle, rgba(255,255,255,0.9), transparent 66%);
   animation: heroGlow 5s ease-in-out infinite;
 }
-@keyframes heroGlow { 0%,100% { opacity: 0.5 } 50% { opacity: 0.85 } }
+@keyframes heroGlow { 0%,100% { opacity: 0.6 } 50% { opacity: 1 } }
 
-.hero3__cards { position: absolute; inset: 0; z-index: 1; }
+.hero3__cards { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
 .hero3__c {
-  position: absolute; width: 62px; border-radius: 6px;
-  box-shadow: 0 8px 22px rgba(0,0,0,0.5);
+  position: absolute; width: 58px; border-radius: 7px;
+  box-shadow: 0 8px 18px rgba(180, 60, 70, 0.28);
   animation: cardFloat 6s ease-in-out infinite;
 }
-.hero3__c--1 { left: 6%;  top: 12%; transform: rotate(-13deg); animation-delay: 0s }
-.hero3__c--2 { right: 8%; top: 9%;  transform: rotate(11deg);  animation-delay: .5s }
-.hero3__c--3 { left: 2%;  bottom: 20%; transform: rotate(9deg); animation-delay: 1s; width: 54px }
-.hero3__c--4 { right: 3%; bottom: 17%; transform: rotate(-8deg); animation-delay: 1.5s; width: 56px }
-.hero3__c--5 { left: 24%; bottom: 6%;  transform: rotate(-5deg); animation-delay: 2s; width: 50px }
-.hero3__c--6 { right: 26%; bottom: 4%; transform: rotate(7deg);  animation-delay: 2.5s; width: 50px }
-@keyframes cardFloat { 0%,100% { translate: 0 0 } 50% { translate: 0 -11px } }
+.hero3__c--1 { left: 4%;  top: 8%;  rotate: -14deg; animation-delay: 0s }
+.hero3__c--2 { right: 5%; top: 5%;  rotate: 12deg;  animation-delay: .5s }
+.hero3__c--3 { left: 1%;  top: 40%; rotate: 8deg;   animation-delay: 1s; width: 50px }
+.hero3__c--4 { right: 2%; top: 37%; rotate: -9deg;  animation-delay: 1.5s; width: 52px }
+.hero3__c--5 { left: 12%; top: 66%; rotate: -5deg;  animation-delay: 2s; width: 44px }
+.hero3__c--6 { right: 12%; top: 68%; rotate: 7deg;  animation-delay: 2.5s; width: 44px }
+@keyframes cardFloat { 0%,100% { translate: 0 0 } 50% { translate: 0 -10px } }
 
 .hero3__brand { position: relative; z-index: 2; }
-.hero3__k {
-  display: inline-block; padding: 3px 10px; border-radius: 999px;
-  background: rgba(0,0,0,0.28); color: #fff;
-  font-size: var(--fs-micro); font-weight: 800; letter-spacing: 0.02em;
-}
+.hero3__k { display: block; font-size: var(--fs-micro); font-weight: 800; color: var(--brand-dk); letter-spacing: 0.06em; }
+/* 흰 로고를 파스텔 위에 올리려면 외곽선이 있어야 읽힌다 (올세일과 같은 처리) */
 .hero3__logo {
-  margin: 6px 0 4px; font-size: 58px; font-weight: 900; letter-spacing: -0.045em;
+  margin: 4px 0 3px; font-size: 54px; font-weight: 900; letter-spacing: -0.045em;
   color: #fff; line-height: 1;
-  text-shadow: 0 3px 0 rgba(0,0,0,0.22), 0 8px 18px rgba(0,0,0,0.35);
+  text-shadow:
+    -2px -2px 0 #E4525C, 2px -2px 0 #E4525C, -2px 2px 0 #E4525C, 2px 2px 0 #E4525C,
+    0 6px 0 rgba(196, 60, 70, 0.35), 0 12px 22px rgba(196, 60, 70, 0.3);
 }
-.hero3__tag {
-  display: inline-block; padding: 4px 14px; border-radius: 999px;
-  background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.25);
-  color: #fff; font-size: var(--fs-label); font-weight: 800;
+.hero3__sub { font-size: var(--fs-label); font-weight: 700; color: var(--brand-dk); }
+
+.hero3__strip {
+  position: relative; z-index: 2; display: flex; align-items: center; gap: 6px;
+  margin-top: var(--s4); padding: 8px 14px; border-radius: 999px;
+  background: rgba(255,255,255,0.92); box-shadow: 0 3px 10px rgba(196,60,70,0.14);
+  font-size: var(--fs-label);
 }
-.hero3__max {
-  position: relative; z-index: 2; margin-top: var(--s4);
-  color: #fff; font-size: var(--fs-lead); font-weight: 700;
+.hero3__strip b { font-weight: 800; }
+.hero3__pill {
+  padding: 3px 9px; border-radius: 6px; background: var(--brand-weak);
+  color: var(--brand-dk); font-size: var(--fs-micro); font-weight: 800;
 }
-.hero3__max b { color: #FFD84D; font-weight: 900; }
-.hero3__max em { display: block; margin-top: 2px; font-style: normal; font-size: var(--fs-micro); color: rgba(255,255,255,0.72); }
+
+.hero3__benefits {
+  position: relative; z-index: 2; display: flex; gap: 6px; width: 100%;
+  margin-top: var(--s3);
+}
+.hero3__benefits li {
+  flex: 1; display: flex; flex-direction: column; gap: 1px;
+  padding: 10px 8px; border-radius: 10px; background: #fff;
+  box-shadow: 0 2px 8px rgba(196,60,70,0.12);
+}
+.hero3__benefits b { font-size: var(--fs-micro); font-weight: 800; color: var(--ink); }
+.hero3__benefits span { font-size: 10px; color: var(--muted); line-height: 1.3; }
 .hero3__scroll {
-  position: relative; z-index: 2; margin-top: var(--s5);
-  color: rgba(255,255,255,0.85); font-size: var(--fs-label); font-weight: 700;
+  position: relative; z-index: 2; margin-top: var(--s3);
+  color: var(--brand-dk); font-size: var(--fs-micro); font-weight: 700;
   animation: introNudge 1.9s ease-in-out infinite;
 }
-.intro { padding: var(--s4) 0 0; }
-.intro__pts { display: flex; flex-direction: column; gap: var(--s2); }
-.intro__pts li {
-  display: flex; flex-direction: column; gap: 1px;
-  padding: 12px var(--s3); border-radius: 10px; background: var(--paper);
-  border: 1px solid var(--line);
-}
-.intro__pts b { font-size: var(--fs-label); }
-.intro__pts span { font-size: var(--fs-micro); color: var(--muted); }
 
 /* ── 인트로 등장 연출 — 시선을 헤드라인 → 상품 → 근거 → 아래로 유도한다 ── */
 @keyframes introUp { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
@@ -1409,24 +1410,32 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
 @keyframes introNudge { 0%, 100% { transform: translateY(0); opacity: 0.75 } 50% { transform: translateY(5px); opacity: 1 } }
 
 .hero3__brand { animation: introUp 0.55s cubic-bezier(.2,.7,.3,1) both; }
-.hero3__max { animation: introUp 0.5s cubic-bezier(.2,.7,.3,1) 0.18s both; }
-.hero3__c { opacity: 0; animation: cardIn 0.6s cubic-bezier(.2,.9,.3,1.15) both, cardFloat 6s ease-in-out infinite; }
-@keyframes cardIn { from { opacity: 0; scale: 0.7 } to { opacity: 1; scale: 1 } }
-.intro__pts li { animation: introUp 0.45s cubic-bezier(.2,.7,.3,1) both; }
+.hero3__strip { animation: introUp 0.5s cubic-bezier(.2,.7,.3,1) 0.18s both; }
+.hero3__benefits li { animation: introUp 0.45s cubic-bezier(.2,.7,.3,1) both; }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero3__rays, .hero3__glow, .hero3__c, .hero3__brand, .hero3__max,
-  .hero3__scroll, .intro__pts li { animation: none; opacity: 1; }
+  .hero3__glow, .hero3__c, .hero3__brand, .hero3__strip,
+  .hero3__benefits li, .hero3__scroll { animation: none; opacity: 1; }
 }
 
 /* ── 개봉 결과 카드 — 카드가 주인공 ── */
-.rv__main { display: flex; gap: var(--s3); align-items: flex-start; }
+.rv__main { display: flex; gap: var(--s3); align-items: flex-start; min-width: 0; }
 .rv__thumb { position: relative; flex: none; }
 .rv__thumb img, .rv__thumb .tstrip__ph {
   width: 84px; height: 84px; object-fit: cover; border-radius: 10px;
   background: #f3f4f6; border: 1px solid var(--line);
 }
-.rv__tier { position: absolute; left: -4px; top: -6px; }
+/* 등급이 이 화면의 결론인데 썸네일 모서리의 작은 글자로는 안 읽혔다. */
+.rv__tier {
+  position: absolute; left: 4px; top: 4px; z-index: 2;
+  min-width: 26px; height: 26px; padding: 0 7px;
+  display: grid; place-items: center; border-radius: 8px;
+  font-size: var(--fs-lead); font-weight: 900; line-height: 1;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+/* 썸네일이 배지를 덮지 않게 쌓임 순서를 만든다 */
+.rv__thumb { isolation: isolate; }
+.rv__thumb img, .rv__thumb .tstrip__ph { position: relative; z-index: 1; }
 .rv__info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .rv__who { display: flex; align-items: center; gap: 5px; font-size: var(--fs-micro); color: var(--muted); font-weight: 700; }
 .rv__nm {
@@ -1435,9 +1444,9 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
 }
 .rv__pr { font-size: var(--fs-lead); font-weight: 900; font-variant-numeric: tabular-nums; }
 .rv__before { font-size: var(--fs-micro); color: var(--muted); }
-.rv__acts { flex: none; display: flex; flex-direction: column; gap: var(--s2); align-items: stretch; }
+.rv__acts { flex: none; width: 76px; display: flex; flex-direction: column; gap: var(--s2); align-items: stretch; }
 .rv__heart {
-  display: grid; place-items: center; width: 36px; height: 36px; margin-left: auto;
+  display: grid; place-items: center; width: 100%; height: 34px;
   border: 1px solid var(--line); border-radius: 10px; background: var(--paper); cursor: pointer;
 }
 .rv__heart svg { width: 19px; height: 19px; fill: none; stroke: var(--muted); stroke-width: 1.9; }
@@ -1445,8 +1454,8 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
 .rv__heart.is-on { border-color: var(--brand); background: var(--brand-weak); }
 .rv__heart.is-on svg { fill: var(--brand); stroke: var(--brand); }
 .rv__swap {
-  padding: 8px 12px; border: 0; border-radius: 10px; cursor: pointer;
-  background: var(--brand); color: #fff; font-size: var(--fs-micro); font-weight: 800; white-space: nowrap;
+  padding: 8px 6px; border: 0; border-radius: 10px; cursor: pointer;
+  background: var(--brand); color: #fff; font-size: var(--fs-micro); font-weight: 800; white-space: nowrap; width: 100%;
 }
 .rv__swap:hover { background: var(--brand-dk); }
 .rv__swap.is-sent, .rv__swap:disabled { background: var(--band); color: var(--muted); cursor: default; }
@@ -1577,3 +1586,64 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
 
 /* 할인 상품의 취소선 배치 — 할인율이 앞에 온다 */
 .pricebox--sale .pricebox__strike em { order: -1; }
+
+/* ── 딜 카드의 마감 칩 — 상품 이미지 좌상단 ──
+   본문으로 내리면 스크롤해야 보인다. 배경에 묻히지 않게 검정 칩에 흰 숫자. */
+.deal__due { position: absolute; left: 6px; top: 6px; right: 6px; }
+.deal__due .tk {
+  max-width: 100%; padding: 4px 8px; border-radius: 6px;
+  background: rgba(0, 0, 0, 0.74); backdrop-filter: blur(2px);
+}
+.deal__due .tk__v { color: #fff; font-size: var(--fs-micro); }
+.deal__due .tk__s { font-size: 10px; }
+.deal__due .tk__s { color: rgba(255, 255, 255, 0.8); }
+/* 마감 칩이 좌상단을 쓰므로 형식 배지는 우상단으로 비켜준다 */
+.deal--group .deal__kind, .deal--daily .deal__kind { top: auto; bottom: 6px; }
+
+/* ── 검색 모드 (낱말 / 말로 찾기) ── */
+.srch__mode { display: flex; gap: var(--s2); padding: var(--s3) var(--s4) 0; }
+.srch__mode button {
+  flex: 1; padding: 9px 0; border: 1px solid var(--line); border-radius: 999px;
+  background: var(--paper); font-size: var(--fs-label); font-weight: 700;
+  color: var(--muted); cursor: pointer;
+}
+.srch__mode button.is-on { border-color: var(--brand); background: var(--brand-weak); color: var(--brand-dk); }
+.srch__read {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+  margin: 0 0 var(--s3); padding: 10px var(--s3);
+  border-radius: 10px; background: var(--band); font-size: var(--fs-micro);
+}
+.srch__read b { color: var(--muted); font-weight: 700; }
+.srch__read > span {
+  padding: 3px 9px; border-radius: 6px; background: var(--paper);
+  border: 1px solid var(--line); font-weight: 700;
+}
+
+/* ── 등급 배지 ──
+   기본 스타일이 없어 흰 카드 위 흰 글씨로 안 읽혔다. 등급은 이 제품의 결론이므로
+   어디에 놓여도 읽혀야 한다 — 등급마다 색을 주고 대비를 확보한다. */
+.tier {
+  display: inline-grid; place-items: center;
+  min-width: 22px; height: 22px; padding: 0 6px; border-radius: 7px;
+  font-size: var(--fs-label); font-weight: 900; line-height: 1;
+  color: #fff; background: #6b7280;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+}
+.tier--S { background: linear-gradient(135deg, #B8860B, #E8B923); color: #2b1d00; }
+.tier--A { background: linear-gradient(135deg, #7C3AED, #A855F7); }
+.tier--B { background: linear-gradient(135deg, #1D4ED8, #3B82F6); }
+.tier--C { background: #5B6472; }
+/* 카드 그리드 위에 얹히는 배지는 테두리로 한 겹 더 띄운다 */
+.rv__tier, .kcard .tier, .tshow .tier { box-shadow: 0 0 0 2px #fff, 0 2px 8px rgba(0,0,0,0.28); }
+
+/* ── 실시간 참여 현황판 (공동구매 · 0원 응모) ── */
+.livebar {
+  padding: var(--s4); border: 1px solid var(--line); border-radius: 12px;
+  background: var(--paper); margin-top: var(--s2);
+}
+.livebar__row { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s3); }
+.livebar__n { font-size: var(--fs-body); color: var(--ink-2); }
+.livebar__n b { font-size: var(--fs-title); font-weight: 900; color: var(--ink); font-variant-numeric: tabular-nums; margin-right: 2px; }
+.livebar__p { font-size: var(--fs-label); color: var(--muted); }
+.livebar__p b { font-size: var(--fs-strong); font-weight: 900; color: var(--brand); font-variant-numeric: tabular-nums; }
+.livebar__note { margin-top: var(--s2); font-size: var(--fs-micro); color: var(--muted); }

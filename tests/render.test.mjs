@@ -80,8 +80,12 @@ t('K=1 등급만 "정확히 n배"라고 적는다 (반올림 금지, I16)', () =
   assert.equal(exact[0].team[N - 1].mul, `${N}.00배`)
   const nearly = ODDS.find((o) => !o.exactlyLinear && o.K > 1)
   assert.notEqual(nearly.team[N - 1].mul, `${N}.00배`, 'K>1인데 정확히 n배로 표시되면 안 된다')
-  assert.ok(oddsHtml.includes('재고가 1장이라 정확히 n배'))
-  assert.ok(oddsHtml.includes('재고가 여러 장이라 n배보다 작다'))
+  /* 설명 문구는 개발자 언어라 화면에서 걷어냈다. 보장은 **값**으로 확인한다 —
+     K=1은 정확히 n배, K>1은 그보다 작고, 화면이 그 차이를 반올림하지 않는다. */
+  assert.ok(oddsHtml.includes(exact[0].team[N - 1].mul), 'K=1 배수가 렌더된다')
+  assert.ok(oddsHtml.includes(nearly.team[N - 1].mul), 'K>1 배수가 렌더된다')
+  assert.notEqual(exact[0].team[N - 1].mul, nearly.team[N - 1].mul,
+    '두 등급의 배수가 화면에서 구분된다 (반올림하면 같아진다)')
 })
 
 t('성립 불가능한 갱신 상태는 —로 표시된다 (I17)', () => {

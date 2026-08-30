@@ -82,6 +82,52 @@ export const roundOf = (now) => Math.floor((now - EPOCH) / (DEADLINE_DAYS * 8640
 export const roundDeadline = (now) => EPOCH + roundOf(now) * DEADLINE_DAYS * 86400_000
 
 /** 환불 인원. 재고다 — 확률이 아니다. 화면에서 셀 수 있다. */
+/**
+ * 데모용 실시간 참여자 수.
+ *
+ * 실제 집계는 저장하지 않는다(KV 없이는 인스턴스마다 갈린다). 그렇다고 화면이
+ * 숫자를 만들면 **확률의 분모를 화면이 지어내는 것**이 되어 I1이 깨진다.
+ * 그래서 서버가 시각의 함수로 계산해 내려주고, 화면은 렌더만 한다.
+ * 값이 시뮬레이션이라는 사실은 화면에 배지로 밝힌다(I13).
+ *
+ * **단조 증가여야 한다.** 잡음을 더했더니 130 → 129로 되돌아갔다 — 참여자 수가
+ * 줄어드는 화면은 그 자체로 거짓이다. 그래서 시각의 단조 함수만 쓴다.
+ *
+ * 회차 전체(5일)에 걸쳐 채우면 분당 0.07명이라 눈에 안 보인다. 데모에서는
+ * **DEMO_SPAN 동안 정원까지 차고 그 뒤로는 정원에 머문다.** 시연용 속도라는 것을
+ * 화면이 시뮬 배지로 밝힌다.
+ */
+/* 회차 전체(5일)로 채우면 14분에 한 명이라 시연 중에는 멈춰 보이고,
+   회차 시작이 지나 있으면 아예 정원에 붙어 움직이지 않는다.
+   그래서 **시연 주기**를 따로 둔다 — 한 시간에 걸쳐 1명에서 정원까지 오른다.
+   실제 서비스라면 이 자리에 진짜 집계가 들어간다(화면은 그대로 렌더만 한다). */
+export const DEMO_CYCLE = 60 * 60_000
+
+export function simMembers(now) {
+  const t = (now % DEMO_CYCLE) / DEMO_CYCLE      // 시연 주기 안의 진행도
+  const curve = 1 - Math.pow(1 - t, 1.7)          // 초반이 빠른, 실제 공동구매의 모양
+  return Math.max(1, Math.min(M_MAX, Math.floor(M_MAX * curve)))
+}
+
+/** 지금 이 순간의 참여 현황 — 확률까지 서버가 문자열로 만든다. */
+export function liveOf(now) {
+  const M = simMembers(now)
+  const R = refundSlots(M)
+  const p = oddsAt(M)
+  return {
+    members: M, refunds: R, p, pct: fmtPct(p),
+    freq: `${M.toLocaleString('ko-KR')}명 중 ${R.toLocaleString('ko-KR')}명 당첨`,
+    toNext: Math.max(0, nextRefundAt(M) - M),
+  }
+}
+
+/** 환불 인원이 한 명 더 늘어나는 참여 인원. "몇 명 더 모이면"을 말할 수 있게. */
+export function nextRefundAt(M) {
+  const target = refundSlots(M) + 1
+  for (let m = M + 1; m <= M_MAX; m++) if (refundSlots(m) >= target) return m
+  return M_MAX
+}
+
 export const refundSlots = (M) => Math.max(0, Math.floor((MARGIN * M - FIXED) / PRICE))
 /** 개인 확률 = 재고 ÷ 전체 장수 */
 export const oddsAt = (M) => (M > 0 ? refundSlots(M) / M : 0)
@@ -95,7 +141,7 @@ const won = (n) => `${Math.round(n).toLocaleString('ko-KR')}원`
 export const milestones = (ms = [50, 100, 200, 300, 500]) =>
   ms.filter((m) => m <= M_MAX).map((M) => ({
     M, R: refundSlots(M), p: oddsAt(M), pct: fmtPct(oddsAt(M)),
-    freq: `${M.toLocaleString('ko-KR')}명 중 ${refundSlots(M)}명`,
+    freq: `${M.toLocaleString('ko-KR')}명 중 ${refundSlots(M)}명 당첨`,
   }))
 
 // ─────────────────────────── self-check ───────────────────────────
@@ -163,6 +209,9 @@ export function check() {
   ok('회차 안에서 마감이 같다', roundDeadline(mid) === roundDeadline(mid + 3600_000))
   ok('마감이 항상 미래다', roundDeadline(mid) > mid && roundDeadline(EPOCH + 99 * 86400_000) > EPOCH + 99 * 86400_000)
   ok('회차 경계에서 다음 회차로', roundOf(EPOCH + DEADLINE_DAYS * 86400_000) === roundOf(EPOCH) + 1)
+  const far = [0, 1, 30, 365, 3 * 365].map((d) => Date.now() + d * 86400_000)
+  ok('언제 열어도 회차 마감이 미래다', far.every((t) => roundDeadline(t) > t),
+    `지금~+3년 ${far.length}개 시점 확인`)
 
   ok('결정성 — 2회 계산이 동일', JSON.stringify(milestones()) === JSON.stringify(milestones()))
 

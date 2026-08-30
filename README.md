@@ -85,9 +85,9 @@ npm run build && node --env-file=.env.local tests/serve.mjs 3111   # 로컬 구�
 npm i -D playwright --no-save && node tests/browser.e2e.mjs https://albox-alwayz.vercel.app
 ```
 
-`api/ask.js`의 ChatGPT 호출에는 `.env.local`의 `OPENAI_API_KEY`가 필요합니다.
-키가 없으면 저장소 문서 발췌를 그대로 보여주는 폴백으로 내려앉고 **화면이 "문서 발췌 · AI 미사용"
-배지를 띄웁니다.** `npm test`는 키 없이 전부 통과합니다.
+`api/search.js`의 ChatGPT 호출에는 `.env.local`의 `OPENAI_API_KEY`가 필요합니다.
+키가 없으면 규칙 기반 해석으로 내려앉고 **화면이 "AI 없이 규칙으로 해석" 배지를 띄웁니다.**
+`npm test`는 키 없이 전부 통과합니다.
 
 ---
 
@@ -120,7 +120,8 @@ api/boxes.js           GET  딜 목록 5개 · 박스 3종 구성 · 확률표 �
 api/room.js            POST 방에 관한 모든 동작 — create | join | target | simPrefs |
                        setPrefs | ready | open | trade | state
                        (한 파일인 이유는 아래 "겪은 어려움" ⑬)
-api/ask.js             POST ChatGPT — 프로젝트 Q&A. 저장소 문서 발췌 안에서만 답합니다 (상태 없음)
+api/search.js          GET  크롤 875건 검색 + **ChatGPT 서술형 해석** (상태 없음)
+api/_econ.js           단위 경제 — 손익분기 매입률 유도  ← 실행 가능한 테스트
 
 src/App.jsx            화면 — 홈 · 딜 목록 · 상세 3형식 · 주문서 · 주문완료 · 참여후 · 주문내역
 src/parts.jsx          표시 전용 조각. 확률을 계산하지도 포맷하지도 않는다
@@ -139,8 +140,8 @@ tests/shots/           화면 9장
 | 요건 | 구현 |
 |---|---|
 | 프론트엔드 **React + JavaScript** | Vite + React 18. `.ts`/`.tsx` 0건, TypeScript 의존성 0건 |
-| 백엔드 **Node.js + JavaScript** | Vercel 서버리스 함수 3개 (`api/room.js` · `api/boxes.js` · `api/ask.js`) + 공유 모듈 7개 |
-| 대화형 AI에 **ChatGPT API** | [`api/ask.js:106`](api/ask.js) — `api.openai.com/v1/chat/completions`, `gpt-4o-mini`, raw fetch. 화면 하단 **프로젝트 Q&A** 패널. **Claude API 사용 0건** |
+| 백엔드 **Node.js + JavaScript** | Vercel 서버리스 함수 3개 (`api/room.js` · `api/boxes.js` · `api/search.js`) + 공유 모듈 8개 |
+| 대화형 AI에 **ChatGPT API** | [`api/search.js`](api/search.js) — `api.openai.com/v1/chat/completions`, `gpt-4o-mini`, raw fetch, JSON 모드. **서술형 상품 검색**("5만원 이하 피카츄 카드" → `{terms:['피카츄'], maxPrice:50000}`). AI는 **질의를 해석하는 자리에만** 있고 상품은 크롤 데이터에서 고른다 — 모델이 이상한 값을 줘도 가드가 막는다. 키가 없으면 규칙 기반으로 내려앉고 화면에 표기한다. **Claude API 사용 0건** |
 | **크롤 데이터 활용 (4중)** | ① 박스 3종 구성 [`api/_box.js:64`](api/_box.js) ② TTC 선호 폴백·시세 병기 [`api/_trade.js:186`](api/_trade.js) ③ 공동구매·0원 응모 상품과 가격 [`api/_group.js:55`](api/_group.js) · [`api/_daily.js:44`](api/_daily.js) ④ 12개월 시세 추이 [`crawler/trend.js`](crawler/trend.js) → 과제1 근거 |
 | **외부 접속 배포** | https://albox-alwayz.vercel.app |
 | 타깃 문제를 **화면에서 확인 가능** | 목록 → 상세 → 결제 → 주문완료 → 모집 → 개봉 → 교환 → 주문내역의 소비자 여정 전체. E2E **58단계**가 배포본에서 실제 클릭으로 확인 |

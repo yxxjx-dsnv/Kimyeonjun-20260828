@@ -56,7 +56,7 @@ export function buildDeals(now) {
   const gRound = G.roundOf(now)
   const gDeal = {
     kind: 'group', id: 'group',
-    title: '브랜드 공동구매', subtitle: `${gRound}회차 · 인원이 모이면 일부가 전액 환불`,
+    title: '브랜드 공동구매', subtitle: `${gRound}회차 · 당첨되면 제품을 무료로 드려요`,
     image: G.ITEM?.image ?? null,
     topCard: { name: G.ITEM?.name ?? '', priceLine: `정가 ${won(G.LIST)}` },
     // 공동구매가 = 정가. 할인율 0%이므로 취소선을 만들지 않는다 — 여기서 -x%를
@@ -66,10 +66,11 @@ export function buildDeals(now) {
       sub: `정가 ${won(G.LIST)} · 웃돈 0원`,
       bands: null,
     },
-    oddsLine: `${G.M_MAX}명이 모이면 ${G.milestones([G.M_MAX])[0].freq} 전액 환불`,
+    oddsLine: `${G.M_MAX}명이 모이면 ${G.milestones([G.M_MAX])[0].freq} · 전액 무료`,
     milestones: G.milestones(),
-    ceilLine: `환불 비율은 최대 ${G.fmtPct(G.CEIL)}까지입니다`,
-    dir: 'up', dirLine: '사람이 모일수록 환불 인원이 늘어납니다',
+    ceilLine: `당첨 확률은 최대 ${G.fmtPct(G.CEIL)}까지 올라갑니다`,
+    live: G.liveOf(now),
+    dir: 'up', dirLine: '사람이 모일수록 당첨 인원이 늘어납니다',
     deadlineAt: G.roundDeadline(now), round: gRound,
     cta: `${won(G.PRICE)} 공동구매 참여하기`,
   }
@@ -87,8 +88,17 @@ export function buildDeals(now) {
       sub: `당첨되면 이 가격에 구매합니다 · 응모는 무료입니다`,
       bands: null,
     },
+    /* 목록 카드에서 가장 큰 활자는 **지금 내는 돈**이어야 한다.
+       1,000원은 당첨됐을 때 사는 값이라 카드에 크게 박으면 "응모비"로 오독된다.
+       배너는 맥락(오늘의 0원 응모)이 있어 price를 그대로 쓴다. */
+    entry: {
+      big: '무료 응모', strike: null, discount: null,
+      sub: `당첨되면 ${won(D.LIST)} → ${won(D.DEAL)} (${`-${Math.round((1 - D.DEAL / D.LIST) * 100)}%`})`,
+      bands: null,
+    },
     oddsLine: `특가 ${D.SLOTS}개 · 응모자 수에 따라 확률이 정해집니다`,
     table: D.table(),
+    live: D.liveOf(now),
     dir: 'down', dirLine: '응모가 많을수록 확률이 내려갑니다',
     deadlineAt: D.closesAt(now),
     cta: `0원으로 응모하기`,

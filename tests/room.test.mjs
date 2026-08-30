@@ -6,6 +6,7 @@
  */
 import assert from 'node:assert/strict'
 import room from '../api/room.js'
+import { parseRule, applyFilter, interpret } from '../api/search.js'
 import boxes from '../api/boxes.js'
 import { TEAM_MAX, slotsOf } from '../api/_box.js'
 
@@ -188,6 +189,52 @@ await ta('trade 2회 호출 → 동일 결과 (멱등)', async () => {
 await ta('개봉된 방에 join → 409', async () => {
   const r = await call(room, { action: 'join', roomId: R, name: '늦은사람' })
   assert.equal(r.code, 409)
+})
+
+console.log('\n─────── 서술형 검색 (AI 해석) ───────')
+
+t('가격 조건을 숫자로 뽑는다', () => {
+  assert.equal(parseRule('5만원 이하 피카츄').maxPrice, 50000)
+  assert.equal(parseRule('10만원 넘는 리자몽').minPrice, 100000)
+  assert.equal(parseRule('피카츄 카드').maxPrice, null)
+})
+
+t('형용사는 검색어에서 걸러낸다', () => {
+  const p = parseRule('저렴한 슬리브 좀 보여줘')
+  assert.ok(p.terms.includes('슬리브'))
+  assert.ok(!p.terms.includes('저렴한'), '형용사는 상품명에 없다')
+})
+
+t('해석 결과가 실제 크롤 상품으로만 채워진다', () => {
+  const items = applyFilter({ terms: ['피카츄'], maxPrice: 50000 })
+  assert.ok(items.length > 0)
+  assert.ok(items.every((x) => x.price <= 50000), '가격 조건이 실제로 걸린다')
+  assert.ok(items.every((x) => x.id && x.name), '지어낸 상품이 아니라 실측 상품이다')
+})
+
+t('AI가 이상한 값을 줘도 가드가 막는다', () => {
+  // 음수·문자열·거대값이 와도 필터가 무해해야 한다
+  const items = applyFilter({ terms: ['피카츄'], maxPrice: null, minPrice: null })
+  assert.ok(items.length > 0)
+  assert.deepEqual(applyFilter({ terms: ['존재하지않는단어zzz'] }), [])
+})
+
+await ta('키가 없으면 규칙 기반으로 해석하고 그 사실을 표기한다', async () => {
+  delete process.env.OPENAI_API_KEY
+  const p = await interpret('5만원 이하 피카츄')
+  assert.equal(p.source, 'rule')
+  assert.equal(p.maxPrice, 50000)
+})
+
+await ta('AI가 빈 해석을 주면 규칙 기반으로 내려앉는다 (fetch 모킹)', async () => {
+  process.env.OPENAI_API_KEY = 'test-key'
+  const realFetch = globalThis.fetch
+  globalThis.fetch = async () => ({ ok: true, json: async () => ({ choices: [{ message: { content: '{"terms":[],"maxPrice":null,"minPrice":null}' } }] }) })
+  try {
+    const p = await interpret('5만원 이하 피카츄')
+    assert.equal(p.source, 'rule', '빈 해석보다 규칙 기반이 낫다')
+    assert.equal(p.maxPrice, 50000)
+  } finally { globalThis.fetch = realFetch; delete process.env.OPENAI_API_KEY }
 })
 
 console.log('\n─────── 직접 교환 요청 ───────')
