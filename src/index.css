@@ -409,9 +409,9 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
 .draws em { width: 100%; font-style: normal; font-size: var(--fs-label); color: var(--muted); }
 .gatenote { margin-top: 8px; font-size: var(--fs-label); color: var(--muted); text-align: center; }
 
-.count { text-align: center; padding: 22px 0; }
-.count span { font-size: var(--fs-mega); font-weight: 800; color: var(--brand); line-height: 1; display: block; animation: tick 0.8s ease; }
-.count p { margin-top: 6px; color: var(--ink-2); font-size: var(--fs-body); }
+/* v1의 인라인 카운트다운 규칙이 여기 있었다. 지금은 폰 전체를 덮는 오버레이
+   방식(.count__n)을 쓰고, `.count span`이 `.count__n`보다 우선순위가 높아
+   흰 글씨를 브랜드 레드로 덮고 있었다. 쓰는 곳이 없어져 제거한다. */
 @keyframes tick { from { transform: scale(1.5); opacity: 0.2; } to { transform: scale(1); opacity: 1; } }
 
 /* ── 등급별 상품 ───────────────────────────────────────────── */
@@ -1058,3 +1058,24 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
 .verify__go { font-size: var(--fs-lead); color: var(--muted); }
 .sheet__verify { margin: var(--s4) 0; }
 .sheet__verify h4 { margin-bottom: var(--s2); }
+
+/* ── 개봉 카운트다운 — 기다리는 순간 ─────────────────────────
+   v1이 갖고 있던 연출. 결과를 바로 띄우지 않고 3·2·1을 센다.
+   개봉 극장과 같은 무대를 쓰되, 숫자 하나만 남긴다. */
+.count {
+  position: absolute; inset: 0; z-index: 45;
+  display: grid; place-content: center; justify-items: center; gap: var(--s3);
+  background: radial-gradient(120% 120% at 50% 40%, var(--stage-2), #140f16 74%);
+  animation: sceneIn 0.25s ease;
+}
+.count__n {
+  font-size: 96px; font-weight: 900; line-height: 1; color: #fff;
+  font-variant-numeric: tabular-nums; letter-spacing: -0.04em;
+  animation: countPop 0.8s ease;
+  text-shadow: 0 0 40px rgba(246, 193, 92, 0.55);
+}
+.count__t { font-size: var(--fs-body); color: rgba(255, 255, 255, 0.62); }
+@keyframes countPop { 0% { transform: scale(1.55); opacity: 0 } 30% { transform: scale(1); opacity: 1 } 100% { opacity: 1 } }
+
+/* 고정 CTA의 보조 문구 */
+.cta__note { margin-top: var(--s2); font-size: var(--fs-micro); color: var(--muted); text-align: center; }

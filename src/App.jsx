@@ -421,265 +421,248 @@ const STEPS = [
 
 function OlboxTab(p) {
   const {
-    boxes, room, me, teamSize, setTeamSize, cards, cardById, myTarget,
-    busy, gateMsg, ai, reveal, onMakeTeam, onPick, onSimPrefs, onAsk,
-    onReadyAll, onOpen, onTrade, onSheet,
+    boxes, room, me, teamSize, setTeamSize, cards, myTarget,
+    busy, gateMsg, ai, reveal, phase,
+    onJoinBox, onPick, onSimPrefs, onAsk, onReadyAll, onOpen, onTrade, onSheet,
   } = p
-  const { box, odds, slotTiers, oripa } = boxes
+  const { box, odds, oripa } = boxes
   const live = room?.live
   const left = live ? live.left : box.N
   const myResult = room?.openResults?.find((x) => x.memberId === me)
   const myTrade = room?.trade?.results.find((x) => x.memberId === me)
-  const jump = (id) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  const members = room ? room.members.map((m) => ({ ...m, sim: m.id !== me })) : []
 
-  return (
-    <>
-      {/* 상단 히어로 — 카운트다운 없이 사실만 */}
-      <section className="hero">
-        {/* 배너의 주인공은 최고 등급 상품 실물이다. v1의 구조를 그대로 쓴다 —
-            bcard__prize는 사진이고, bcard__body가 그 자리를 비워 둔다. */}
-        <button type="button" className="bcard" onClick={() => jump('sec-box')}>
-          <span className="bcard__glow" aria-hidden="true" />
-          {box.tiers[0].cards[0]?.image && (
-            <img className="bcard__prize" src={box.tiers[0].cards[0].image} alt="" loading="lazy" />
-          )}
-          <span className="bcard__shine" aria-hidden="true" />
-          <span className="bcard__body">
-            <span className="bcard__name">포켓몬 카드 올박스</span>
-            <span className="bcard__blurb">
-              {`${box.N.toLocaleString('ko-KR')}구좌를 전부 보여드립니다`}
+  /* ── 구매 전 — 무엇을 사는지 보여주고, 하단에 고정 CTA ────────
+     v1은 목록 → 상세 → 참여 → 모집 → 개봉 → 결과의 단계 기계였다.
+     v2가 한 스크롤로 합치면서 **사는 순간과 기다리는 순간**이 사라졌고,
+     그게 이 제품에서 가장 만족스러웠던 부분이었다. 되살린다. */
+  if (phase === 'detail') {
+    return (
+      <>
+        <section className="hero">
+          <div className="bcard">
+            <span className="bcard__glow" aria-hidden="true" />
+            {box.tiers[0].cards[0]?.image && (
+              <img className="bcard__prize" src={box.tiers[0].cards[0].image} alt="" loading="lazy" />
+            )}
+            <span className="bcard__shine" aria-hidden="true" />
+            <span className="bcard__body">
+              <span className="bcard__name">포켓몬 카드 올박스</span>
+              <span className="bcard__blurb">{`${box.N.toLocaleString('ko-KR')}구좌를 전부 보여드립니다`}</span>
+              <span className="bcard__odds">
+                {'최고 '}<b>{(box.tiers[0].cards[0]?.name ?? '').replace(/^\[[^\]]*\]\s*/, '').slice(0, 20)}</b>
+                {` · 시가 ${won(box.tiers[0].maxPrice)}`}
+                <em>{`${teamSize}명이면 ${odds[0].team[teamSize - 1].pct} · ${odds[0].team[teamSize - 1].mul}`}</em>
+              </span>
+              <span className="bcard__gems">
+                {box.tiers.map((t) => (
+                  <span key={t.tier} className={`gem ${t.tier === 'S' ? 'gem--S' : ''}`}>
+                    {`${t.tier} ${t.K.toLocaleString('ko-KR')}`}
+                  </span>
+                ))}
+              </span>
             </span>
-            <span className="bcard__odds">
-              {'최고 '}<b>{(box.tiers[0].cards[0]?.name ?? TIER_LABEL.S).replace(/^\[[^\]]*\]\s*/, '').slice(0, 20)}</b>
-              {` · 시가 ${won(box.tiers[0].maxPrice)}`}
-              <em>{`팀 ${box.teamMax}명이면 ${odds[0].team[box.teamMax - 1].pct} · ${odds[0].team[box.teamMax - 1].mul}`}</em>
-            </span>
-            <span className="bcard__gems">
-              {box.tiers.map((t) => (
-                <span key={t.tier} className={`gem ${t.tier === 'S' ? 'gem--S' : ''}`}>
-                  {`${t.tier} ${t.K.toLocaleString('ko-KR')}`}
-                </span>
-              ))}
-            </span>
-          </span>
-          <span className="bcard__entry">{won(box.fee)}</span>
-        </button>
-        <button type="button" className="btn btn--ghost btn--sm" onClick={onSheet}>확률 근거 보기</button>
-      </section>
+          </div>
+        </section>
 
-      <div className="fchips">
-        {STEPS.map(([id, label]) => (
-          <button key={id} type="button" className="fchips__b" onClick={() => jump(id)}>{label}</button>
-        ))}
-      </div>
+        <section className="hsec">
+          <header className="shead"><h2>이번 통에 뭐가 들어있나요</h2></header>
+          <p className="lead"><b>전부 공개합니다.</b> 어떤 카드가 몇 장 들었는지, 시세가 얼마인지 다 보여드려요.</p>
+          {box.tiers.map((t, i) => (
+            <TierShowcase key={t.tier} tier={t} hero={t.tier === 'S'}
+              pct={odds[i].soloPct} freq={odds[i].soloFreq} />
+          ))}
+          <button type="button" className="verify" onClick={onSheet}>
+            <span className="verify__n">{`${box.N.toLocaleString('ko-KR')}구좌`}</span>
+            <span className="verify__t">전부 그려서 보여드립니다 · 직접 세어보기</span>
+            <span className="verify__go" aria-hidden="true">›</span>
+          </button>
+        </section>
 
-      {/* ── 통 보기 — 소비자에게는 실물 카드로, 검증은 시트에서 ── */}
-      <section className="hsec" id="sec-box">
-        <header className="shead"><h2>이번 통에 뭐가 들어있나요</h2></header>
-        <p className="lead">
-          <b>전부 공개합니다.</b> 어떤 카드가 몇 장 들었는지, 시세가 얼마인지 다 보여드려요.
-        </p>
+        <section className="hsec">
+          <header className="shead"><h2>친구랑 열수록 확률 UP</h2></header>
+          <div className="notice">
+            <h3>친구를 부르면 뭐가 달라지나요</h3>
+            <p>
+              같은 통에서 각자 한 구좌씩 뽑아요. 사람이 많을수록 <b>팀 안에 좋은 카드가 나올 확률</b>이 올라갑니다.
+              팀에 나온 걸 내가 갖는 건 <b>교환</b>으로 정해요.
+              <b> 초대한 사람이 더 받는 건 없어요. 팀 전원이 똑같은 확률입니다.</b>
+            </p>
+          </div>
+          <div className="slider">
+            <div className="slider__read"><b>{teamSize}</b><span>명</span></div>
+            <input type="range" min="1" max={box.teamMax} value={teamSize}
+              onChange={(e) => setTeamSize(Number(e.target.value))} aria-label="팀 인원" />
+          </div>
+          <OddsTable odds={odds} n={teamSize} />
+          <p className="dim">
+            <b>{`${teamSize}명이면 ${odds[0].tier}등급이 ${odds[0].team[teamSize - 1].mul}, ${odds[1].tier}등급이 ${odds[1].team[teamSize - 1].mul}예요.`}</b>
+            {' 저희가 정한 숫자가 아니라 통에서 그냥 나오는 값이라, 반올림하지 않고 그대로 적었어요.'}
+          </p>
+        </section>
 
-        {box.tiers.map((t, i) => (
-          <TierShowcase key={t.tier} tier={t} hero={t.tier === 'S'}
-            pct={live ? live.tiers[i].pct : odds[i].soloPct}
-            freq={live ? live.tiers[i].freq : odds[i].soloFreq} />
-        ))}
-
-        {/* 1,000칸 그리드는 여기 있으면 970개 회색 네모가 화면을 덮는다.
-            검증하고 싶은 사람만 눌러서 보게 한다. */}
-        <button type="button" className="verify" onClick={onSheet}>
-          <span className="verify__n">{`${box.N.toLocaleString('ko-KR')}구좌`}</span>
-          <span className="verify__t">전부 그려서 보여드립니다 · 직접 세어보기</span>
-          <span className="verify__go" aria-hidden="true">›</span>
-        </button>
-        <p className="dim">{`남은 구좌 ${left.toLocaleString('ko-KR')} / ${box.N.toLocaleString('ko-KR')}`}</p>
-      </section>
-
-      {/* ── 팀 모으기 ── */}
-      <section className="hsec" id="sec-team">
-        <header className="shead"><h2>친구랑 열수록 확률 UP</h2></header>
-
-        {/* I11 — 팀 인원이 늘면 무엇이 달라지는지를 툴팁이 아니라 본문에 크게 */}
-        <div className="notice">
-          <h3>친구를 부르면 뭐가 달라지나요</h3>
-          <p>
-            같은 통에서 각자 한 구좌씩 뽑아요. 사람이 많을수록 <b>팀 안에 좋은 카드가 나올 확률</b>이 올라갑니다.
-            팀에 나온 걸 내가 갖는 건 <b>교환</b>으로 정해요.
-            <b> 초대한 사람이 더 받는 건 없어요. 팀 전원이 똑같은 확률입니다.</b>
+        {/* 고정 CTA — 사는 순간. v1이 갖고 있던 것. */}
+        <div className="cta">
+          <button className="btn btn--go" onClick={onJoinBox} disabled={busy === 'team'}>
+            {busy === 'team' ? '참여하는 중…' : `${won(box.fee)} · ${teamSize}명으로 참여하기`}
+          </button>
+          <p className="cta__note">
+            {`꽝 없음 · 어떤 카드가 나와도 ${won(box.fee)} 이상입니다`}
+            {teamSize > 1 && <> · <SimBadge what={`팀원 ${teamSize - 1}명 자동 참여`} /></>}
           </p>
         </div>
+      </>
+    )
+  }
 
-        <div className="slider">
-          <div className="slider__read"><b>{teamSize}</b><span>명</span></div>
-          <input type="range" min="1" max={box.teamMax} value={teamSize} disabled={!!room}
-            onChange={(e) => setTeamSize(Number(e.target.value))} aria-label="팀 인원" />
-          <p className="dim">{room ? '방을 만든 뒤에는 인원을 바꿀 수 없습니다.' : '움직이면 아래 표가 바뀝니다.'}</p>
-        </div>
-
-        <OddsTable odds={odds} n={teamSize} />
-
+  /* ── 참여 후 — 모집 → 준비 → 개봉 → 교환 ───────────────────── */
+  return (
+    <>
+      <section className="hsec">
+        <header className="shead"><h2>{room?.opened ? '개봉 완료' : '팀 모으는 중'}</h2></header>
+        <MemberRail members={members} teamMax={room?.members.length ?? teamSize}
+          readyCount={room?.readyCount ?? 0} phase={room?.opened ? 'join' : 'ready'} />
         <p className="dim">
-          <b>{`${teamSize}명이면 ${odds[0].tier}등급이 ${odds[0].team[teamSize - 1].mul}, ${odds[1].tier}등급이 ${odds[1].team[teamSize - 1].mul}예요.`}</b>
-          {' 저희가 정한 숫자가 아니라 통에서 그냥 나오는 값이라, 반올림하지 않고 그대로 적었어요.'}
+          {`남은 구좌 ${left.toLocaleString('ko-KR')} / ${box.N.toLocaleString('ko-KR')}`}
+          {' · '}<SimBadge what="나 외 팀원" />
         </p>
-
-        {!room && (
-          <div className="row">
-            <button className="btn" onClick={onMakeTeam} disabled={busy === 'team'}>
-              {busy === 'team' ? '방 만드는 중…' : `${teamSize}명으로 팀 만들기`}
-            </button>
-            <SimBadge what={`팀원 ${teamSize - 1}명 자동 참여`} />
-          </div>
-        )}
-        {room && <MemberRail members={room.members.map((m) => ({ ...m, sim: m.id !== me }))}
-          teamMax={room.members.length} readyCount={room.readyCount} phase="join" />}
       </section>
 
-      {room && (
+      {!room?.opened && (
         <>
-          {/* ── 지목 + ChatGPT ── */}
           <section className="hsec" id="sec-pick">
             <header className="shead"><h2>원하는 카드를 고르세요</h2></header>
             <p className="lead">
-              갖고 싶은 카드를 찍어두세요. <b>교환할 때 1순위</b>가 됩니다.
-              찍는다고 뽑힐 확률이 오르진 않아요.
+              갖고 싶은 카드를 찍어두세요. <b>교환할 때 1순위</b>가 됩니다. 찍는다고 뽑힐 확률이 오르진 않아요.
             </p>
             <div className="cardlist">
               {cards.slice(0, 12).map((c) => (
                 <CardPick key={c.id} card={c} picked={myTarget === c.id}
-                  onPick={onPick} count={room.targets?.[c.id] ?? 0} />
+                  onPick={onPick} count={room?.targets?.[c.id] ?? 0} />
               ))}
             </div>
             <div className="row">
-              <button className="btn btn--ghost btn--sm" onClick={onSimPrefs} disabled={busy === 'sim' || room.opened}>
+              <button className="btn btn--ghost btn--sm" onClick={onSimPrefs} disabled={busy === 'sim'}>
                 {busy === 'sim' ? '정하는 중…' : '팀원들 취향 정하기'}
               </button>
               <SimBadge what="팀원 취향" />
             </div>
             <p className="dim">서로 다른 걸 원해야 바꿀 게 생겨요.</p>
-
-            <header className="shead" style={{ marginTop: 18 }}><h2>모르는 건 물어보세요</h2></header>
-            <TasteChat onSubmit={onAsk} result={ai} busy={busy === 'ai'} disabled={room.opened} />
+            <h3 className="sub">모르는 건 물어보세요</h3>
+            <TasteChat onSubmit={onAsk} result={ai} busy={busy === 'ai'} />
           </section>
 
-          {/* ── 전원 개봉 ── */}
-          <section className="hsec" id="sec-open">
-            <header className="shead"><h2>한 명이라도 안 누르면 안 열립니다</h2></header>
-            <p className="lead">팀 전원이 준비를 눌러야 통이 열려요.</p>
-            <MemberRail members={room.members.map((m) => ({ ...m, sim: m.id !== me }))}
-              teamMax={room.members.length} readyCount={room.readyCount} phase="ready" />
-            <div className="row">
-              <button className="btn" onClick={onOpen} disabled={busy === 'open' || room.opened}>
-                {room.opened ? '개봉 완료' : busy === 'open' ? '여는 중…' : '통 열기'}
-              </button>
-              {!room.allReady && !room.opened && (
-                <button className="btn btn--ghost btn--sm" onClick={onReadyAll} disabled={busy === 'ready'}>
-                  전원 준비시키기
-                </button>
-              )}
-            </div>
-            {gateMsg && (
-              <div className="notice notice--warn">
-                <h3>{`서버 응답 ${gateMsg.status}`}</h3>
-                <p>{gateMsg.error}{gateMsg.waiting?.length ? ` — 아직 안 누른 사람: ${gateMsg.waiting.join(', ')}` : ''}</p>
-              </div>
+          <div className="cta">
+            <button className="btn btn--go" onClick={onOpen} disabled={busy === 'open'}>
+              {busy === 'open' ? '여는 중…' : '통 열기'}
+            </button>
+            {!room?.allReady && (
+              <button className="btn btn--ghost btn--sm" style={{ width: '100%', marginTop: 8 }}
+                onClick={onReadyAll} disabled={busy === 'ready'}>전원 준비시키기</button>
             )}
+            <p className="cta__note">{`준비 ${room?.readyCount ?? 0} / ${room?.members.length ?? 0}명 · 전원이 눌러야 열려요`}</p>
+          </div>
+          {gateMsg && (
+            <div className="notice notice--warn">
+              <h3>{`서버 응답 ${gateMsg.status}`}</h3>
+              <p>{gateMsg.error}{gateMsg.waiting?.length ? ` — 아직 안 누른 사람: ${gateMsg.waiting.join(', ')}` : ''}</p>
+            </div>
+          )}
+        </>
+      )}
 
-            {room.opened && (
+      {room?.opened && (
+        <>
+          <section className="hsec" id="sec-open">
+            <ul className="rv__list">
+              {room.openResults.map((r, i) => (
+                <RevealCard key={r.memberId} r={r} mine={r.memberId === me} fee={box.fee} delay={i * 60} />
+              ))}
+            </ul>
+            <div className="notice">
+              <h3>뽑힌 카드는 통에서 빠져요</h3>
+              <p>
+                {`한 명씩 뽑을 때마다 남은 구좌가 줄고 확률이 올라갑니다. 지금 ${left.toLocaleString('ko-KR')}구좌 남았어요. `}
+                <b>안 나올수록 다음 사람 확률이 실제로 높아집니다.</b>
+              </p>
+            </div>
+          </section>
+
+          <section className="hsec" id="sec-trade">
+            <header className="shead"><h2>안 나온 것은 팀 안에서 바꿉니다</h2></header>
+            <p className="lead">팀에 나온 카드를 서로 바꿉니다. 원하는 사람에게 가도록 자동으로 맞춰드려요.</p>
+            {!room.trade ? (
+              <button className="btn btn--go" onClick={onTrade} disabled={busy === 'trade'}>
+                {busy === 'trade' ? '교환 계산 중…' : '교환 실행'}
+              </button>
+            ) : (
               <>
-                <ul className="rv__list">
-                  {room.openResults.map((r, i) => (
-                    <RevealCard key={r.memberId} r={r} mine={r.memberId === me} fee={box.fee} delay={i * 60} />
-                  ))}
-                </ul>
+                <h3 className="sub">성립한 교환 고리</h3>
+                <CycleView cycles={room.trade.cycles} />
+                <TradeTable results={room.trade.results} me={me} />
                 <div className="notice">
-                  <h3>뽑힌 카드는 통에서 빠져요</h3>
+                  <h3>아무도 손해 보지 않아요</h3>
                   <p>
-                    {`한 명씩 뽑을 때마다 남은 구좌가 줄고 확률이 올라갑니다. 지금 ${left.toLocaleString('ko-KR')}구좌 남았어요. `}
-                    <b>안 나올수록 다음 사람 확률이 실제로 높아집니다.</b>
+                    {`이번에 ${room.trade.improvedCount}명이 원하던 쪽으로 갔고, 손해 본 사람은 ${room.trade.noneWorse ? '없습니다' : '있습니다'}.`}
+                    <b> 바꾸기 전보다 나빠지는 일은 구조상 생기지 않습니다.</b>{' '}
+                    <button type="button" className="linklike" onClick={onSheet}>왜 그런가요?</button>
                   </p>
                 </div>
               </>
             )}
           </section>
 
-          {/* ── 교환 ── */}
-          {room.opened && (
-            <section className="hsec" id="sec-trade">
-              <header className="shead"><h2>안 나온 것은 팀 안에서 바꿉니다</h2></header>
-              <p className="lead">
-                팀에 나온 카드를 서로 바꿉니다. 원하는 사람에게 가도록 자동으로 맞춰드려요.
+          <section className="hsec" id="sec-vs">
+            <header className="shead"><h2>오리파와 뭐가 다른가요</h2></header>
+            <div className="tablewrap compare">
+              <table>
+                <thead>
+                  <tr><th> </th><th>오리파</th><th>혼자</th><th>{`팀 ${room.members.length}명`}</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>통 공개</td><td className="unknown">✗</td><td>✓</td><td>✓</td></tr>
+                  <tr>
+                    <td>공시 확률</td><td className="unknown">?</td>
+                    <td className="n">{odds[0].soloPct}</td>
+                    <td className="n hi">{odds[0].team[room.members.length - 1].pct}</td>
+                  </tr>
+                  <tr>
+                    <td>받은 것</td><td className="unknown">?</td>
+                    <td className="n">{myResult ? `${myResult.tier} · ${won(myResult.price)}` : '—'}</td>
+                    <td className="n">{myTrade?.after ? `${myTrade.after.tier} · ${won(myTrade.after.price)}` : (myResult ? `${myResult.tier} · ${won(myResult.price)}` : '—')}</td>
+                  </tr>
+                  <tr>
+                    <td>교환</td><td className="unknown">불가</td><td>불가</td>
+                    <td className="n">{room.trade ? `${room.trade.improvedCount}명 개선` : '아직'}</td>
+                  </tr>
+                  <tr><td>꽝</td><td className="unknown">?</td><td>없음</td><td>없음</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div className="notice">
+              <h3>물음표는 채울 수가 없어요</h3>
+              <p>
+                {`오리파는 확률을 공개하지 않습니다. 저희가 직접 ${oripa.total}건을 확인했는데 확률을 적어 둔 건 ${oripa.probNum}건이었어요. `}
+                <b>모르는 칸을 그럴듯한 숫자로 채우지 않았습니다.</b>
               </p>
-              {!room.trade ? (
-                <button className="btn" onClick={onTrade} disabled={busy === 'trade'}>
-                  {busy === 'trade' ? '교환 계산 중…' : '교환 실행'}
-                </button>
-              ) : (
-                <>
-                  <h3 className="sub">성립한 교환 고리</h3>
-                  <CycleView cycles={room.trade.cycles} />
-                  <TradeTable results={room.trade.results} me={me} />
-                  <div className="notice">
-                    <h3>아무도 손해 보지 않아요</h3>
-                    <p>
-                      {`이번에 ${room.trade.improvedCount}명이 원하던 쪽으로 갔고, 손해 본 사람은 ${room.trade.noneWorse ? '없습니다' : '있습니다'}.`}
-                      <b> 바꾸기 전보다 나빠지는 일은 구조상 생기지 않습니다.</b>
-                      {' '}
-                      <button type="button" className="linklike" onClick={onSheet}>왜 그런가요?</button>
-                    </p>
-                  </div>
-                </>
-              )}
-            </section>
-          )}
-
-          {/* ── 대조 뷰 ── */}
-          {room.opened && (
-            <section className="hsec" id="sec-vs">
-              <header className="shead"><h2>오리파와 뭐가 다른가요</h2></header>
-              <div className="tablewrap compare">
-                <table>
-                  <thead>
-                    <tr><th> </th><th>오리파</th><th>혼자</th><th>{`팀 ${room.members.length}명`}</th></tr>
-                  </thead>
-                  <tbody>
-                    <tr><td>통 공개</td><td className="unknown">✗</td><td>✓</td><td>✓</td></tr>
-                    <tr>
-                      <td>공시 확률</td><td className="unknown">?</td>
-                      <td className="n">{odds[0].soloPct}</td>
-                      <td className="n hi">{odds[0].team[room.members.length - 1].pct}</td>
-                    </tr>
-                    <tr>
-                      <td>받은 것</td><td className="unknown">?</td>
-                      <td className="n">{myResult ? `${myResult.tier} · ${won(myResult.price)}` : '—'}</td>
-                      <td className="n">{myTrade?.after ? `${myTrade.after.tier} · ${won(myTrade.after.price)}` : (myResult ? `${myResult.tier} · ${won(myResult.price)}` : '—')}</td>
-                    </tr>
-                    <tr>
-                      <td>교환</td><td className="unknown">불가</td><td>불가</td>
-                      <td className="n">{room.trade ? `${room.trade.improvedCount}명 개선` : '아직'}</td>
-                    </tr>
-                    <tr><td>꽝</td><td className="unknown">?</td><td>없음</td><td>없음</td></tr>
-                  </tbody>
-                </table>
-              </div>
-              <div className="notice">
-                <h3>물음표는 채울 수가 없어요</h3>
-                <p>
-                  {`오리파는 확률을 공개하지 않습니다. 저희가 직접 ${oripa.total}건을 확인했는데 확률을 적어 둔 건 ${oripa.probNum}건이었어요. `}
-                  <b>모르는 칸을 그럴듯한 숫자로 채우지 않았습니다.</b>
-                </p>
-              </div>
-              <p className="seed">{`추첨 시드 ${room.id}|${room.boxId}|${me}|${room.round}`}{room.trade && ` · 교환 시드 ${room.trade.seed}`}</p>
-            </section>
-          )}
+            </div>
+            <p className="seed">{`추첨 시드 ${room.id}|${room.boxId}|${me}|${room.round}`}{room.trade && ` · 교환 시드 ${room.trade.seed}`}</p>
+          </section>
         </>
       )}
-
-      <p className="hfoot">
-        {`통 ${box.N.toLocaleString('ko-KR')}구좌 · 참여비 ${won(box.fee)} · 크롤 ${box.crawledAt?.slice(0, 10)} · 다나와`}
-      </p>
     </>
+  )
+}
+
+/* ── 개봉 카운트다운 — 기다리는 순간 ────────────────────────────
+   v1이 갖고 있던 연출. 결과를 바로 띄우지 않고 3·2·1을 센다.
+   이것이 "구매하고 당첨되기까지"에서 가장 만족스러웠던 구간이다. */
+function CountDown({ n }) {
+  return (
+    <div className="count" role="status" aria-live="polite">
+      <span className="count__n">{n > 0 ? n : '개봉'}</span>
+      <span className="count__t">{n > 0 ? '통을 여는 중' : ''}</span>
+    </div>
   )
 }
 
@@ -696,12 +679,15 @@ export default function App() {
   const [ai, setAi] = useState(null)
   const [reveal, setReveal] = useState(null)
   const [scene, setScene] = useState(null)
+  const [phase, setPhase] = useState('detail')   // detail → flow
+  const [count, setCount] = useState(null)       // 3 · 2 · 1 · 0
+  const countTimer = useRef(null)
   const [sheet, setSheet] = useState(false)
   const timer = useRef(null)
 
   useEffect(() => {
     api('/api/boxes').then(({ ok, data }) => (ok ? setBoxes(data) : setErr('통을 불러오지 못했습니다.')))
-    return () => clearInterval(timer.current)
+    return () => { clearInterval(timer.current); clearInterval(countTimer.current) }
   }, [])
 
   const cards = useMemo(
@@ -717,7 +703,8 @@ export default function App() {
     return r
   }, [])
 
-  const onMakeTeam = useCallback(async () => {
+  /** 참여 = 구매. 이 순간이 v2에 없어서 "사고 기다리는" 감각이 사라져 있었다. */
+  const onJoinBox = useCallback(async () => {
     setBusy('team')
     const c = await api('/api/room', { action: 'create', name: '나' })
     if (!c.ok) { setErr('방을 만들지 못했습니다.'); setBusy(''); return }
@@ -727,7 +714,7 @@ export default function App() {
       const j = await api('/api/room', { action: 'join', roomId: c.data.id, name: SIM_NAMES[i] })
       if (j.ok) st = j.data
     }
-    setRoom(st); setBusy('')
+    setRoom(st); setBusy(''); setPhase('flow')
   }, [teamSize])
 
   const onPick = (cardId) => act({ action: 'target', roomId: room.id, memberId: me, cardId })
@@ -766,19 +753,31 @@ export default function App() {
       setGateMsg({ status: 409, error: r.data.error, waiting: r.data.waiting })
       if (r.data.id) setRoom(r.data)
     } else if (r.ok) {
-      setRoom(r.data)
-      const mine = r.data.openResults.find((x) => x.memberId === me)
-      const total = r.data.openResults.length
+      const data = r.data
+      const mine = data.openResults.find((x) => x.memberId === me)
+      const total = data.openResults.length
       const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-      if (reduce) { setReveal(total); setScene(mine) }
-      else {
-        setReveal(0)
-        let k = 0
-        timer.current = setInterval(() => {
-          k += 1; setReveal(k)
-          if (k >= total) { clearInterval(timer.current); setScene(mine) }
-        }, 220)
-      }
+      if (reduce) { setRoom(data); setReveal(total); setScene(mine); setBusy(''); return }
+
+      // 3 · 2 · 1 → 개봉. 결과를 바로 띄우지 않는다 — 기다리는 순간이 이 제품의 절정이다.
+      setCount(3)
+      let c = 3
+      countTimer.current = setInterval(() => {
+        c -= 1
+        setCount(c)
+        if (c > 0) return
+        clearInterval(countTimer.current)
+        setTimeout(() => {
+          setCount(null)
+          setRoom(data)
+          setReveal(0)
+          let k = 0
+          timer.current = setInterval(() => {
+            k += 1; setReveal(k)
+            if (k >= total) { clearInterval(timer.current); setScene(mine) }
+          }, 200)
+        }, 620)
+      }, 800)
     }
     setBusy('')
   }
@@ -795,7 +794,7 @@ export default function App() {
   const olboxProps = {
     boxes, room, me, teamSize, setTeamSize, cards, cardById, myTarget,
     busy, gateMsg, ai, reveal,
-    onMakeTeam, onPick, onSimPrefs, onAsk, onReadyAll, onOpen, onTrade,
+    phase, onJoinBox, onPick, onSimPrefs, onAsk, onReadyAll, onOpen, onTrade,
     onSheet: () => setSheet(true),
   }
 
@@ -804,7 +803,11 @@ export default function App() {
       <Shell tab={tab} setTab={setTab}
         brief={<BriefRail box={boxes.box} oripa={boxes.oripa} crawl={875} />}
         ops={<OpsRail boxes={boxes} room={room} teamSize={teamSize} />}
-        overlay={scene && <RevealScene r={scene} fee={boxes.box.fee} onClose={() => setScene(null)} />}>
+        overlay={
+          count !== null ? <CountDown n={count} />
+            : scene ? <RevealScene r={scene} fee={boxes.box.fee} onClose={() => setScene(null)} />
+              : null
+        }>
         {tab === 'home' && <HomeTab cards={cards} box={boxes.box} onGoOlbox={() => setTab('olbox')} />}
         {tab === 'olbox' && <OlboxTab {...olboxProps} />}
         {tab === 'content' && <StubTab title="콘텐츠" body="이 과제에서는 구현하지 않았습니다." />}
