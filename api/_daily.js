@@ -50,6 +50,16 @@ export const BUDGET = 300000
 /** 특가 수량 = 재고. 예산이 정하는 것은 재고이지 확률이 아니다. */
 export const SLOTS = Math.max(1, Math.floor(BUDGET / Math.max(1, LIST - DEAL)))
 
+/**
+ * 마감. 응모는 그날 자정(KST)에 닫히고 추첨한다. 마감이 실재하므로 카운트다운을 쓴다.
+ * 다음 날은 새 회차이지 같은 타이머의 리셋이 아니다 — 재고도 응모자도 새로 시작한다.
+ */
+export const dayKeyOf = (now) => new Date(now + 9 * 3600_000).toISOString().slice(0, 10)
+export const closesAt = (now) => {
+  const kst = now + 9 * 3600_000
+  return Math.floor(kst / 86400_000) * 86400_000 + 86400_000 - 9 * 3600_000
+}
+
 export const oddsAt = (entries) => (entries > 0 ? Math.min(1, SLOTS / entries) : 1)
 export const fmtPct = (p) => `${(p * 100).toFixed(2)}%`
 const won = (n) => `${Math.round(n).toLocaleString('ko-KR')}원`
@@ -99,6 +109,11 @@ export function check() {
   ok('응모자 ≤ 수량이면 전원 당첨', oddsAt(Math.max(1, SLOTS - 1)) === 1)
   ok('확률이 [0, 1] 안', Array.from({ length: 3000 }, (_, i) => oddsAt(i + 1)).every((p) => p >= 0 && p <= 1))
 
+  // 예산(BUDGET)이 정한 것이 재고인지 확률인지를 가르는 검사.
+  let identity = true
+  for (let E = SLOTS; E <= 5000; E++) if (Math.abs(oddsAt(E) * E - SLOTS) > 1e-9) identity = false
+  ok('확률 × 구좌 = 재고 (예산이 확률을 만지지 않았다)', identity, `응모자 ${SLOTS}..5000`)
+
   // 추첨 — 비복원, 결정적
   const ids = Array.from({ length: 400 }, (_, i) => `u${i}`)
   const d1 = draw('2026-08-30', ids)
@@ -106,6 +121,15 @@ export function check() {
   ok('당첨자 수 = min(수량, 응모자)', d1.winners.length === Math.min(SLOTS, ids.length), `${d1.winners.length}명`)
   ok('비복원 — 당첨자 중복 없음', new Set(d1.winners).size === d1.winners.length)
   ok('당첨 + 탈락 = 전체 응모자', d1.winners.length + d1.losers.length === ids.length)
+  // 마감이 실재하는지
+  const noon = Date.UTC(2026, 7, 30, 3, 0, 0)   // KST 정오
+  ok('마감이 그날 자정(KST)', new Date(closesAt(noon) + 9 * 3600_000).toISOString().slice(11, 16) === '00:00',
+    new Date(closesAt(noon) + 9 * 3600_000).toISOString().slice(0, 16))
+  ok('마감이 미래이고 24시간 이내', closesAt(noon) > noon && closesAt(noon) - noon <= 86400_000,
+    `${((closesAt(noon) - noon) / 3600_000).toFixed(1)}시간 남음`)
+  ok('다음 날은 새 회차 (같은 타이머의 리셋이 아니다)',
+    dayKeyOf(noon) !== dayKeyOf(noon + 86400_000))
+
   ok('결정성 — 같은 날 같은 응모자면 같은 결과 (I7)', JSON.stringify(d1) === JSON.stringify(d2))
   ok('다른 날은 다른 결과', JSON.stringify(draw('2026-08-31', ids).winners) !== JSON.stringify(d1.winners))
 

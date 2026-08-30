@@ -10,7 +10,7 @@ import { readFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createElement as h } from 'react'
-import { render, OddsTable, UpdateTable, TradeTable, CycleView, BoxGrid, GridLegend, SimBadge } from '../dist-ssr/ssr.js'
+import { render, OddsTable, UpdateTable, TradeTable, CycleView, BoxGrid, GridLegend, SimBadge, TierShowcase } from '../dist-ssr/ssr.js'
 import { BOX, TIERS, slotsOf } from '../api/_box.js'
 import { allOdds, updateTable } from '../api/_draw.js'
 import { ttc, completePrefs } from '../api/_trade.js'
@@ -19,6 +19,16 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const src = (f) => readFileSync(join(ROOT, f), 'utf8')
 const APP = src('src/App.jsx')
 const PARTS = src('src/parts.jsx')
+
+/**
+ * 주석을 벗긴 소스. "금지 문구가 없다"류 검사는 반드시 이것으로 한다.
+ * 코드에는 "v1의 카운트다운을 왜 뺐는지"가 주석으로 적혀 있고, 원본을 그대로 훑으면
+ * 그 설명이 위반으로 잡힌다. 재려는 것은 "화면에 그 문구가 나오는가"이지
+ * "소스 어딘가에 그 단어가 적혀 있는가"가 아니다.
+ */
+const strip = (t) => t.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/(^|[^:])\/\/.*$/gm, '$1')
+const APP_CODE = strip(APP)
+const PARTS_CODE = strip(PARTS)
 
 let pass = 0
 const fails = []
@@ -167,52 +177,66 @@ t('뽑힌 구좌는 꺼진 상태로 그려진다 (비복원 시각화, I3)', ()
 
 console.log('\n─────── I10 희소성 압박 금지 ───────')
 
+/**
+ * I10′ — 금지되는 것은 **감정 유도**이지 마감 표시 자체가 아니다.
+ * 공동구매는 주문을 모아 발주하므로 마감이 실재하고, 그 시각을 숨기면 조건 은닉이 된다
+ * (공정위가 테무를 제재한 사유가 조건 은닉이었다 — C2).
+ * 그래서 "3일 12:04:33 남음" 같은 사실 표시는 허용하고, 아래 문구만 막는다.
+ */
 const FORBIDDEN = [
   '얼마 안 남', '서두르', '마감 임박', '곧 마감', '지금 바로', '놓치지', '품절 임박',
-  '단 하루', '오늘만', '카운트다운', '남았습니다!', '마지막 기회', '한정 특가',
+  '단 하루', '오늘만', '남았습니다!', '마지막 기회', '한정 특가', '서둘러',
 ]
 t('희소성 압박 문구가 없다', () => {
   for (const w of FORBIDDEN) {
-    assert.ok(!APP.includes(w), `App.jsx에 금지 문구 "${w}"`)
-    assert.ok(!PARTS.includes(w), `parts.jsx에 금지 문구 "${w}"`)
+    assert.ok(!APP_CODE.includes(w), `App.jsx에 금지 문구 "${w}"`)
+    assert.ok(!PARTS_CODE.includes(w), `parts.jsx에 금지 문구 "${w}"`)
   }
 })
 
 t('카운트다운 타이머가 없다', () => {
-  assert.ok(!/setInterval[\s\S]{0,200}(남은|초|분|시간)/.test(APP), '카운트다운으로 보이는 타이머')
-  assert.ok(!APP.includes('Date.now() +'), '만료 시각 계산이 없어야 한다')
+  assert.ok(!/setInterval[\s\S]{0,200}(남은|초|분|시간)/.test(APP_CODE), '카운트다운으로 보이는 타이머')
+  assert.ok(!APP_CODE.includes('Date.now() +'), '만료 시각 계산이 없어야 한다')
 })
 
 t('재고 표시는 사실 표시로만 쓴다', () => {
   assert.ok(APP.includes('남은 구좌'), '재고 개수의 사실 표시는 허용된다')
-  assert.ok(!/남은 구좌[^`'"]{0,20}!/.test(APP), '재고 표시에 감정 유도 부호가 붙으면 안 된다')
+  // 마감이 없는 형식(① 팀 뽑기)에 타이머를 붙이지 않았는가.
+  // ①은 전원이 준비하면 즉시 열리므로 가리킬 마감이 없다.
+  const teamSec = APP_CODE.slice(APP_CODE.indexOf('sec-team'), APP_CODE.indexOf('sec-pick'))
+  assert.ok(!/남음|카운트|타이머/.test(teamSec), '팀 뽑기에는 마감이 없으므로 카운트다운도 없다')
+  assert.ok(!/남은 구좌[^`'"]{0,20}!/.test(APP_CODE), '재고 표시에 감정 유도 부호가 붙으면 안 된다')
 })
 
 console.log('\n─────── I11 · I12 고지 ───────')
 
 t('팀 인원이 늘면 무엇이 달라지는지가 본문에 있다 (툴팁·더보기 아님)', () => {
-  assert.ok(APP.includes('팀 인원이 늘면 무엇이 어떻게 달라지는지'))
+  assert.ok(APP.includes('친구를 부르면 뭐가 달라지나요'), '고지 제목이 본문에 있다')
   assert.ok(APP.includes('notice'), '고지가 전용 블록으로 렌더된다')
-  assert.ok(!/title=\{?['"`][^'"`]*팀 인원/.test(APP), 'title 속성(툴팁)에 숨기면 안 된다')
-  assert.ok(!/<details[\s\S]{0,400}팀 인원이 늘면/.test(APP), 'details(더보기)에 숨기면 안 된다')
+  assert.ok(!/title=\{?['"`][^'"`]*친구를 부르면/.test(APP), 'title 속성(툴팁)에 숨기면 안 된다')
+  assert.ok(!/<details[\s\S]{0,400}친구를 부르면/.test(APP), 'details(더보기)에 숨기면 안 된다')
 })
 
 t('초대자 추가 보상이 없다는 것을 명시한다 (I12)', () => {
-  assert.ok(APP.includes('초대한 사람에게 추가 보상은 없습니다'))
+  assert.ok(APP.includes('초대한 사람이 더 받는 건 없어요'), '초대자 개별 보상 없음이 본문에')
 })
 
-t('첫 화면에 문제 제시와 타깃이 있다', () => {
-  const hero = APP.slice(APP.indexOf('className="wrap hero"'), APP.indexOf('확인 1'))
-  assert.ok(hero.includes('통이 안 보입니다'))
-  assert.ok(hero.includes('30~40대 부모'))
-  assert.ok(hero.includes('boxes.oripa'), '실측 수치를 서버에서 받아 쓴다')
+t('문제 제시와 타깃이 브리프 레일에 있다', () => {
+  // 앱 셸 복원 후 구조가 바뀌었다 — 폰 안은 유저 화면, 문제 정의는 좌 레일이 맡는다.
+  const brief = APP.slice(APP.indexOf('function BriefRail'), APP.indexOf('function OpsRail'))
+  assert.ok(brief.includes('통이 안 보이는 것'), '문제 한 줄')
+  assert.ok(brief.includes('30~40대 부모'), '타깃')
+  assert.ok(brief.includes('oripa.probNum'), '실측 수치를 서버에서 받아 쓴다')
+  assert.ok(brief.includes('왜 올웨이즈인가'), '정착 논거')
 })
 
 console.log('\n─────── 하드코딩 탐지 ───────')
 
 t('화면 소스에 확률·배수 리터럴이 없다', () => {
-  for (const [f, s] of [['App.jsx', APP], ['parts.jsx', PARTS]]) {
-    const hits = s.match(/['"`][^'"`]*\d+\.\d+\s*(%|배)[^'"`]*['"`]/g) || []
+  for (const [f, src2] of [['App.jsx', APP], ['parts.jsx', PARTS]]) {
+    // 주석은 제외한다 — v1에서 무엇을 왜 뺐는지 적어 둔 곳에 숫자가 나온다.
+    const code = src2.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/(^|[^:])\/\/.*$/gm, '$1')
+    const hits = code.match(/['"`][^'"`]*\d+\.\d+\s*(%|배)[^'"`]*['"`]/g) || []
     assert.equal(hits.length, 0, `${f}에 하드코딩: ${hits.join(', ')}`)
   }
 })
@@ -240,8 +264,8 @@ t('대조 뷰의 오리파 칸은 물음표로 남는다 (추정치로 채우지
 })
 
 t('교환 전환율 표가 측정 파일에서 온다', () => {
-  assert.ok(APP.includes('boxes.conversion.models.heterogeneous.rows'))
-  assert.ok(APP.includes('boxes.conversion.models.homogeneous.rows'))
+  assert.ok(APP.includes('conversion.models.heterogeneous.rows'))
+  assert.ok(APP.includes('conversion.models.homogeneous.rows'))
 })
 
 console.log('\n─────── I13 시뮬 배지 · E2E 셀렉터 ───────')
@@ -251,7 +275,8 @@ t('시뮬레이션인 것에 배지가 붙는다', () => {
   assert.ok(render(h(SimBadge, { what: 'x' })).includes('시뮬'))
 })
 
-const SELECTORS = ['.boxgrid', '.cell', '.compare', '.notice', '.proves', '.cycle', '.measure', '.badge.sim', '.strip']
+const SELECTORS = ['.phone', '.tabbar', '.brief', '.ops', '.boxgrid', '.cell', '.compare',
+  '.notice', '.cycle', '.tshow', '.scene', '.sheet', '.verify', '.simtag']
 t(`E2E 셀렉터 ${SELECTORS.length}개가 실제로 존재한다`, () => {
   const css = src('src/index.css')
   for (const s of SELECTORS) {
@@ -263,18 +288,20 @@ t(`E2E 셀렉터 ${SELECTORS.length}개가 실제로 존재한다`, () => {
 
 console.log('\n─────── CSS 캐스케이드 함정 ───────')
 
-t('.wrap과 겹치는 클래스가 좌우 패딩을 덮어쓰지 않는다', () => {
+t('데스크톱 폰 프레임이 실제 기기 비율로 고정된다', () => {
   const css = src('src/index.css')
-  // `.wrap`이 좌우 패딩을 주고, 같은 요소에 함께 붙는 클래스(.section/.hero/.foot)가
-  // `padding: X 0` 단축을 쓰면 그것을 0으로 덮는다. 모바일에서 본문이 화면 끝에 붙었다.
-  // v1의 "캐스케이드를 변수로 이긴다"와 같은 종류의 버그다.
-  const companions = ['.section', '.hero', '.foot']
-  for (const c of companions) {
-    const m = css.match(new RegExp(`\\${c}\\s*\\{[^}]*\\}`))
-    assert.ok(m, `${c} 규칙이 있어야 한다`)
-    assert.ok(!/[^-]padding\s*:/.test(m[0]),
-      `${c}가 padding 단축을 쓰면 .wrap의 좌우 패딩을 덮는다. padding-block을 쓸 것`)
-  }
+  // 어느 탭을 눌러도 같은 크기여야 한다. grid 중간 트랙이 auto면 내용이 짧은 탭에서
+  // 267px로 쪼그라들었다. 실제로 그렇게 깨져 있었다.
+  assert.ok(/grid-template-columns:\s*320px\s+390px\s+340px/.test(css), 'grid 중간 트랙이 폰 폭으로 고정')
+  assert.ok(/aspect-ratio:\s*390\s*\/\s*844/.test(css), '실제 기기 비율(iPhone 14/15)')
+  assert.ok(/\.phone\s*\{[^}]*width:\s*390px/s.test(css) || /width:\s*390px/.test(css), '폰 폭 고정')
+})
+
+t('좌우 레일은 데스크톱에서만 뜬다', () => {
+  const css = src('src/index.css')
+  assert.ok(/\.brief\s*\{\s*display:\s*none/.test(css), '.brief 기본 숨김')
+  assert.ok(/\.ops\s*\{\s*display:\s*none/.test(css), '.ops 기본 숨김')
+  assert.ok(css.includes('min-width: 1180px'), '1180px 이상에서만 3단')
 })
 
 console.log(`\n  ${pass}개 통과${fails.length ? ` · ${fails.length}건 실패: ${fails.join(', ')}` : ''}`)

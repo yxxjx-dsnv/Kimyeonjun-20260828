@@ -6,8 +6,8 @@
  * `+<!-- -->1,300원`으로 쪼개져 문구 매칭이 깨진 것도 렌더해야만 보이는 문제였다.
  */
 import { renderToStaticMarkup } from 'react-dom/server'
-import { OddsTable, UpdateTable, TradeTable, CycleView, BoxGrid, GridLegend, CardPick, Badge, SimBadge } from './parts.jsx'
+import { OddsTable, UpdateTable, TradeTable, CycleView, BoxGrid, GridLegend, CardPick, Badge, SimBadge, TierShowcase } from './parts.jsx'
 
 export const render = (el) => renderToStaticMarkup(el)
-export { OddsTable, UpdateTable, TradeTable, CycleView, BoxGrid, GridLegend, CardPick, Badge, SimBadge }
+export { OddsTable, UpdateTable, TradeTable, CycleView, BoxGrid, GridLegend, CardPick, Badge, SimBadge, TierShowcase }
 export const h = (C, props) => <C {...props} />

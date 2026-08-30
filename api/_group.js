@@ -60,6 +60,16 @@ export const MARGIN = Math.round(LIST * 0.06)      // 참여자당 기여 마진
 export const FIXED = LIST                          // 캠페인 고정비 (설계 선택. 대략 상품 1개 값)
 export const M_MAX = 500                           // 정원
 
+/**
+ * 마감. 공동구매는 주문을 모아 한 번에 발주하므로 **마감이 실재한다.**
+ * 마감 시각을 숨기면 조건 은닉이 된다 — 공정위가 테무를 제재한 사유가 그것이었다(C2).
+ * 그래서 카운트다운을 쓴다. 대신 없는 마감을 만들지 않고, 리셋되는 가짜 타이머를
+ * 쓰지 않고, "얼마 안 남았어요" 같은 감정 유도 문구를 붙이지 않는다 (I10′).
+ * 시각은 서버가 정하고 화면은 표시만 한다.
+ */
+export const DEADLINE_DAYS = 5
+export const deadlineFrom = (startedAt) => startedAt + DEADLINE_DAYS * 86400_000
+
 /** 환불 인원. 재고다 — 확률이 아니다. 화면에서 셀 수 있다. */
 export const refundSlots = (M) => Math.max(0, Math.floor((MARGIN * M - FIXED) / PRICE))
 /** 개인 확률 = 재고 ÷ 구좌 */
@@ -126,6 +136,18 @@ export function check() {
   ok(`확률이 상한 ${fmtPct(CEIL)}을 넘지 않음`, underCeil)
 
   ok('확률이 [0, 1] 안', Array.from({ length: M_MAX }, (_, i) => oddsAt(i + 1)).every((p) => p >= 0 && p <= 1))
+  // 예산(MARGIN·FIXED)이 정한 것이 재고인지 확률인지를 가르는 검사.
+  // 확률에 손을 댔다면 이 항등식이 깨진다. v1은 여기서 배수를 곱해 깨뜨렸다.
+  let identity = true
+  for (let M = 1; M <= M_MAX; M++) if (Math.abs(oddsAt(M) * M - refundSlots(M)) > 1e-9) identity = false
+  ok('확률 × 구좌 = 재고 (예산이 확률을 만지지 않았다)', identity, `M=1..${M_MAX}`)
+
+  // 마감이 실재하는지 — 없는 마감을 만들지 않는다는 것의 최소 검사
+  const t0 = 1_800_000_000_000
+  ok('마감이 시작 시각에서 결정된다', deadlineFrom(t0) === t0 + DEADLINE_DAYS * 86400_000,
+    `시작 + ${DEADLINE_DAYS}일`)
+  ok('마감이 고정이다 (리셋되지 않는다)', deadlineFrom(t0) === deadlineFrom(t0))
+
   ok('결정성 — 2회 계산이 동일', JSON.stringify(milestones()) === JSON.stringify(milestones()))
 
   return { fails, count }

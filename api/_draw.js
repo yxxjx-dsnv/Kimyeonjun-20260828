@@ -302,14 +302,20 @@ export function check() {
   //     "그 단어가 어디 적혀 있는가"가 아니라 "그 이름으로 파라미터가 선언돼 있는가"다.
   //     선언 형태로 검사하면 언급과 사용이 갈린다.
   const FORBIDDEN = /\b(?:const|let|var|function)\s+(costRatio|cacRecovered|CR_MIN|CR_MAX|CAC|CAC_CAP|VIRAL_MAX|N0|FIXED_COST_RATIO|PRICE_RATIO|MARGIN|SPLIT|logistic)\b/
+  //
+  //     검사 범위는 **확률 경로**다. _group.js·_daily.js는 예산 파라미터(고정비·마진·
+  //     마케팅 예산)를 선언하지만, 그것이 정하는 것은 **재고**이지 확률이 아니다.
+  //     확률은 거기서도 재고 ÷ 구좌이고, 그 항등식을 각 파일의 self-check가 직접 검사한다.
+  //     범위를 안 나누면 이 검사가 "예산을 쓰면 안 된다"는 다른 주장이 되어 버린다.
   const apiDir = dirname(fileURLToPath(import.meta.url))
-  const scanned = readdirSync(apiDir).filter((f) => f.endsWith('.js') && f !== '_pool.js')
+  const ODDS_PATH = ['_box.js', '_draw.js', '_trade.js']
+  const scanned = readdirSync(apiDir).filter((f) => ODDS_PATH.includes(f))
   const offenders = scanned.filter((f) => {
     const src = readFileSync(join(apiDir, f), 'utf8')
       .replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/(^|[^:])\/\/.*$/gm, '$1')
     return FORBIDDEN.test(src)
   })
-  ok('api/ 전체에 예산·곡선 파라미터 선언 없음 (확률 경로에 손잡이가 없다)',
+  ok('확률 경로(_box·_draw·_trade)에 예산·곡선 파라미터 선언 없음',
     offenders.length === 0, offenders.length ? offenders.join(', ') : `${scanned.length}개 파일 검사: ${scanned.join(', ')}`)
 
   return { fails, count }
